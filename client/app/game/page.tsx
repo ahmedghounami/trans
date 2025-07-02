@@ -61,13 +61,17 @@ export default function Game()
                 
                 if(((newpositions.bally >= newpositions.p2 - 10 && newpositions.bally <= newpositions.p2 + 10) && newpositions.ballx >= 96))
                         {
-                        const diff = (newpositions.bally - newpositions.p2) / 10;
+                        let diff = (newpositions.bally - newpositions.p2) / 10;
+                        if(!diff)
+                            diff++;
                         newpositions.direction = -1;
                         newpositions.angle = diff *(-75)
                         }
                 else if(((newpositions.bally >= newpositions.p1 - 10 && newpositions.bally <= newpositions.p1 + 10) && newpositions.ballx  <= 4) && newpositions.direction == -1)
                     {
-                        const diff = (newpositions.bally - newpositions.p1) / 10;
+                        let diff = (newpositions.bally - newpositions.p1) / 10;
+                        if(!diff)
+                            diff++;
                         newpositions.direction = 1;
                         newpositions.angle = diff *(75)
                     }
