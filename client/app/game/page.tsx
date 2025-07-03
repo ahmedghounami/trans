@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 
 export default function Game()
 {
-    const [Positions, setPositions] = useState({p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, direction:1, directionchanged:false})
+    const [Positions, setPositions] = useState({p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, direction:1, directionchanged:false, speed:1})
     const positionsRef = useRef(Positions);
+    const bootrange = 80;
     // const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
     const keysPressed = useRef({})
     useEffect(()=>{
@@ -31,8 +32,8 @@ export default function Game()
             
             // console.log(keysPressed);
             let newpositions = positionsRef.current;
-            let vx = Math.cos(newpositions.angle * (Math.PI / 180)) * 0.60;
-            let vy = Math.sin(newpositions.angle * (Math.PI / 180)) * 0.60;
+            let vx = Math.cos(newpositions.angle * (Math.PI / 180)) * newpositions.speed;
+            let vy = Math.sin(newpositions.angle * (Math.PI / 180)) * newpositions.speed;
             vx *= newpositions.direction;
             vy *= newpositions.direction;
             // console.log("dir", Positions);
@@ -43,44 +44,51 @@ export default function Game()
                 newpositions.p1=newpositions.p1-2.5
             if(keysPressed.current["s"] &&  (10 + newpositions.p1) + 2.5 <= 100 )
                 newpositions.p1=newpositions.p1+2.5
-            if(keysPressed.current["ArrowUp"] && newpositions.p2 - 2.5 - 10 >= 0)
-                newpositions.p2=newpositions.p2-2.5
-            if(keysPressed.current["ArrowDown"] && (10 + newpositions.p2) + 2.5 <= 100 )
+            // if(keysPressed.current["ArrowUp"] && newpositions.p2 - 2.5 - 10 >= 0)
+            //     newpositions.p2=newpositions.p2-2.5
+            // if(keysPressed.current["ArrowDown"] && (10 + newpositions.p2) + 2.5 <= 100 )
+            //     newpositions.p2=newpositions.p2+2.5
+            if(newpositions.bally > newpositions.p2 +5 && newpositions.ballx > bootrange   && (10 + newpositions.p2) + 2.5 <= 100 )
                 newpositions.p2=newpositions.p2+2.5
-            if( newpositions.ballx + vx <= 100 && newpositions.ballx + vx >= 0 )
+            else if(newpositions.bally < newpositions.p2 -5 && newpositions.ballx > bootrange  && ( newpositions.p2 - 10) - 2.5 >= 0 )
+                newpositions.p2=newpositions.p2-2.5
+            if( newpositions.ballx <= 100  && newpositions.ballx + vx >= 0 )
             {
-                if((newpositions.bally <= 2 || newpositions.bally >= 98) && !newpositions.directionchanged)
-                    {
-                        if(!newpositions.angle)
-                            newpositions.angle -= 5;
-                        newpositions.angle *= -1 ;
-                        newpositions.directionchanged = true;
-                    }
-                else if((newpositions.bally >  2 && newpositions.bally < 98)) 
-                    newpositions.directionchanged = false;
                 
-                if(((newpositions.bally >= newpositions.p2 - 10 && newpositions.bally <= newpositions.p2 + 10) && newpositions.ballx >= 96))
+                if(((newpositions.bally >= newpositions.p2 - 10 && newpositions.bally <= newpositions.p2 + 10) && newpositions.ballx + vx > 96))
                         {
                         let diff = (newpositions.bally - newpositions.p2) / 10;
                         if(!diff)
-                            diff++;
+                            diff = 0.02
                         newpositions.direction = -1;
-                        newpositions.angle = diff *(-75)
+                        newpositions.angle = diff *(-75);
+                        if(newpositions.speed < 3)
+                            newpositions.speed += 0.05;
                         }
-                else if(((newpositions.bally >= newpositions.p1 - 10 && newpositions.bally <= newpositions.p1 + 10) && newpositions.ballx  <= 4) && newpositions.direction == -1)
+                else if(((newpositions.bally >= newpositions.p1 - 10 && newpositions.bally <= newpositions.p1 + 10) && newpositions.ballx + vx  < 4) && newpositions.direction == -1)
                     {
                         let diff = (newpositions.bally - newpositions.p1) / 10;
                         if(!diff)
                             diff++;
                         newpositions.direction = 1;
                         newpositions.angle = diff *(75)
+                        if(newpositions.speed < 3)
+                            newpositions.speed += 0.05;
                     }
+                if((newpositions.bally + vy  <= 2 || newpositions.bally + vy >= 98) && !newpositions.directionchanged)
+                    {
+                        if(!newpositions.angle)
+                            newpositions.angle -= 5;
+                        newpositions.angle *= -1 ;
+                        newpositions.directionchanged = true;
+                    }
+                else if((newpositions.bally + vy >  2 && newpositions.bally + vy < 98)) 
+                    newpositions.directionchanged = false;
                 newpositions = {...newpositions, ballx:(newpositions.ballx+vx), bally:(newpositions.bally+vy)}
-                console.log(newpositions)
                 
             }
             else{
-                newpositions = {...newpositions, ballx:50, bally:50}
+                newpositions = {...newpositions, ballx:50, bally:50, angle:0, speed:1}
             }
             setPositions(newpositions)
             // if(Positions.ballx == 100)
