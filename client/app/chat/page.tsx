@@ -26,12 +26,7 @@ const conversations = [
             { senderId: 1, content: "Hey, how are you?", timestamp: "10:30 AM" },
             { senderId: 2, content: "I'm good, thanks! You?", timestamp: "10:31 AM" },
             { senderId: 1, content: "Doing well! Just working on some projects.", timestamp: "10:32 AM" },
-            { senderId: 2, content: "Sounds great! Let's catch up later.", timestamp: "10:33 AM" },
-            { senderId: 2, content: "Sounds great! Let's catch up later.", timestamp: "10:34 AM" },
-            { senderId: 2, content: "Sounds great! Let's catch up later.", timestamp: "10:35 AM" },
-            { senderId: 1, content: "Sure! Talk to you later.", timestamp: "10:36 AM" },
-            { senderId: 1, content: "Sure! Talk to you later.", timestamp: "10:37 AM" },
-            { senderId: 1, content: "Sure! Talk to you later.Sure! Talk to you later.Sure! Talk to you later.Sure! Talk to you later.Sure! Talk to you later.Sure! Talk to you later.Sure! Talk to you later.", timestamp: "10:38 AM" },
+            { senderId: 2, content: "Sounds great! Let's catch up later.", timestamp: "10:33 AM" }
         ]
     },
     {
@@ -108,6 +103,16 @@ const me = {
 export default function Chat() {
     const [selected, setSelected] = useState(0);
     const [value, setValue] = useState("");
+
+    function sendmessage(conversations: any[]) {
+        console.log("Message sent:", value);
+        setValue(""); // Clear input after sending
+        conversations.find(conversation => conversation.participants.includes(selected))?.messages.push({
+            senderId: me.id,
+            content: value,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+    }
     return (
         <div className="flex flex-row h-full">
             <div className="flex flex-col flex-2/7 border-r-[1] border-[#a0a0a0] ">
@@ -155,11 +160,11 @@ export default function Chat() {
                                 ?.messages.map((message, index) => (
                                     <div
                                         key={index}
-                                        className={`flex ${message.senderId === selected ? "justify-end" : "justify-start"
+                                        className={`flex ${message.senderId === me.id ? "justify-end" : "justify-start"
                                             }`}
                                     >
                                         <div
-                                            className={`max-w-[70%] p-2 rounded-lg ${message.senderId === selected
+                                            className={`max-w-[70%] p-2 rounded-lg ${message.senderId === me.id
                                                 ? "bg-[#0808f098] text-white"
                                                 : "bg-[#707ff754] text-white border-[#313038] border-[1]"
                                                 } shadow-md`}
@@ -181,16 +186,15 @@ export default function Chat() {
                                 onChange={(e) => setValue(e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
-                                        console.log("Message sent:", value);
-                                        setValue(""); // Clear input after sending
+                                        sendmessage(conversations);
+                                        
                                     }
                                 }}
                             />
                             <button
                                 className="bg-blue-500 text-white px-4 py-2 mx-1 rounded-lg hover:bg-blue-600 transition-colors"
                                 onClick={() => {
-                                    console.log("Message sent:", value);
-                                    setValue(""); // Clear input after sending
+                                    sendmessage(conversations);
                                 }}
                             >
                                 Send
@@ -199,7 +203,6 @@ export default function Chat() {
 
                     </div>
                 )}
-
             </div>
             <div className=" flex-1/4">
                 hello
