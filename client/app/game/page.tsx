@@ -4,9 +4,35 @@ import { useEffect, useRef, useState } from "react";
 
 export default function Game()
 {
-    const [Positions, setPositions] = useState({p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, direction:1, directionchanged:false, speed:1})
+    const [Positions, setPositions] = useState({})
     const positionsRef = useRef(Positions);
     const bootrange = 80;
+    useEffect(()=>{
+const socket = new WebSocket('ws://localhost:9090');
+    socket.addEventListener('open', ()=>{
+        socket.send('getpositions')
+    })
+    socket.onmessage = (event)=>{
+        const data = JSON.parse(event.data)
+        console.log(data);
+        setPositions(data)
+    }},[])
+    // useEffect(()=>{
+    // async function start()
+    // {
+    //     fetch("http://localhost:8080/game")
+    //     .then(async(datajson) => {
+    //         const data = await datajson.json()
+    //         setPositions(data)
+            
+    //     })
+    //     .catch((err)=>console.log(err))
+
+    // }
+    // start();
+
+    // },[])
+    
     // const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
     const keysPressed = useRef({})
     useEffect(()=>{
@@ -36,7 +62,6 @@ export default function Game()
             let vy = Math.sin(newpositions.angle * (Math.PI / 180)) * newpositions.speed;
             vx *= newpositions.direction;
             vy *= newpositions.direction;
-            // console.log("dir", Positions);
             
 
 
@@ -48,9 +73,9 @@ export default function Game()
             //     newpositions.p2=newpositions.p2-2.5
             // if(keysPressed.current["ArrowDown"] && (10 + newpositions.p2) + 2.5 <= 100 )
             //     newpositions.p2=newpositions.p2+2.5
-            if(newpositions.bally > newpositions.p2 +5 && newpositions.ballx > bootrange   && (10 + newpositions.p2) + 2.5 <= 100 )
+            if(newpositions.bally > newpositions.p2 +5 && newpositions.ballx > newpositions.bootrange   && (10 + newpositions.p2) + 2.5 <= 100 )
                 newpositions.p2=newpositions.p2+2.5
-            else if(newpositions.bally < newpositions.p2 -5 && newpositions.ballx > bootrange  && ( newpositions.p2 - 10) - 2.5 >= 0 )
+            else if(newpositions.bally < newpositions.p2 -5 && newpositions.ballx > newpositions.bootrange  && ( newpositions.p2 - 10) - 2.5 >= 0 )
                 newpositions.p2=newpositions.p2-2.5
             if( newpositions.ballx <= 100  && newpositions.ballx + vx >= 0 )
             {
