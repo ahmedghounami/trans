@@ -1,14 +1,14 @@
-export default function UserInfo({ user, setSelected }: {
+export default function UserInfo({ user, setSelected , selected}: {
     user: {
         id: number;
         name: string;
-        lastMessage: string;
         time: string;
         imageprofile: string;
         messagenotseen: number;
     };
     isSelected: boolean;
     setSelected: (id: number) => void;
+    selected: number;
 }
 
 ) {
@@ -29,7 +29,7 @@ export default function UserInfo({ user, setSelected }: {
 
     };
     return (
-        <div key={user.id} className=" flex p-1 items-center hover:bg-[#a9a8a847] rounded-lg transition-colors duration-200 cursor-pointer"
+        <div key={user.id} className={` flex p-1 items-center hover:bg-[#a9a8a847] rounded-lg transition-colors duration-200 cursor-pointer ${selected === user.id ? 'bg-[#a9a8a847]' : ''}`}
             onClick={() => selectedhandler(user, setSelected)}
         >
             <img
