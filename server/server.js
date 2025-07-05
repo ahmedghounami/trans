@@ -23,7 +23,8 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    picture TEXT
+    picture TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
     db.run(`
@@ -41,19 +42,23 @@ db.serialize(() => {
 
 // insert a user into the users table
 fastify.post('/users', async (request, reply) => {
-    const { name } = request.body;
-    return new Promise((resolve, reject) => {
-        db.run(`INSERT INTO  users (name) VALUES (?)`, [name], function (err) {
-            if (err) {
-                console.error('Error inserting user', err);
-                reply.status(500).send({ error: 'Database error' });
-                reject(err);
-            } else {
-                resolve({ id: this.lastID, name });
-            }
-        }
-        );
-    })
+  const { name, picture } = request.body;
+  if (!name || !picture) {
+    reply.status(400).send({ error: 'Name and picture are required' });
+    return;
+  }
+
+  return new Promise((resolve, reject) => {
+    db.run(`INSERT INTO users (name, picture) VALUES (?, ?)`, [name, picture], function (err) { // manually insert in bash: sqlite3 sqlite.db "INSERT INTO users (name, picture) VALUES ('John Doe', 'https://example.com/johndoe.jpg');"
+      if (err) {
+        console.error('Error inserting user:', err.message);
+        reply.status(500).send({ error: 'Database error' });
+        reject(err);
+      } else {
+        resolve({ id: this.lastID, name });
+      }
+    });
+  });
 });
 
 // get all users from the users table
