@@ -1,11 +1,17 @@
-let positions = {p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, direction:1, directionchanged:false, speed:1, bootrange:70}
-// wsServer.js
-const WebSocket = require('ws');
 
+const WebSocket = require('ws');
+let players = []
+let playercount = 1;
 const ws = new WebSocket.Server({ port:  9090});
-const keysPressed = {};
 ws.on('connection', (ws) => {
-  console.log('Client connected');
+const keysPressed = {};
+
+let positions = {p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, direction:1, directionchanged:false, speed:1, bootrange:70} ;
+console.log('Client connected');
+players = [...players, {id:playercount, positions}];
+const CurentID = playercount;
+playercount++;
+console.log(players);
 
   ws.on('message', (msg) => {
     const data = JSON.parse(msg);
@@ -23,7 +29,7 @@ ws.on('connection', (ws) => {
     
 
   });
-  setInterval(()=>{
+  const intervalId = setInterval(()=>{
   let vx = Math.cos(positions.angle * (Math.PI / 180)) * positions.speed;
   let vy = Math.sin(positions.angle * (Math.PI / 180)) * positions.speed;
   vx *= positions.direction;
@@ -77,10 +83,17 @@ ws.on('connection', (ws) => {
       
   }
   else{
-      positions = {...positions, ballx:50, bally:50, angle:0, speed:1}
+      positions  = {...positions,p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
+
   }
   ws.send(JSON.stringify(positions))
   }, 20)
+ws.on('close', () => {
+  console.log('Client disconnected');
+  intervalId.close()
+  players = players.filter(player => player.id != CurentID);
+  
+});
 
   ws.send(JSON.stringify({ type: 'welcome', message: 'Welcome to the game' }));
 });
