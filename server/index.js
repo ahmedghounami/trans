@@ -1,24 +1,17 @@
 "use strict";
-const wss   = require('./game');
-const fastify = require('fastify');
-const cors = require('@fastify/cors');
-
-const server = fastify();
-
-// Register CORS
-server.register(cors, {
-  origin: 'http://localhost:3000',
-});
-
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const fastify_1 = __importDefault(require("fastify"));
+const server = (0, fastify_1.default)();
 server.get('/ping', async (request, reply) => {
-  return 'pong\n';
+    return 'pong\n';
 });
-
-
 server.listen({ port: 8080 }, (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`Server listening at ${address}`);
+    if (err) {
+        console.error(err);
+        process.exit(1);
+    }
+    console.log(`Server listening at ${address}`);
 });

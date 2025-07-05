@@ -85,4 +85,4 @@ ws.on('connection', (ws) => {
   ws.send(JSON.stringify({ type: 'welcome', message: 'Welcome to the game' }));
 });
 
-module.exports = wss;
+// module.exports = wss;
