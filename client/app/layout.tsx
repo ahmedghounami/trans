@@ -44,7 +44,7 @@ export default function RootLayout({
           src="/back.webp"
           alt="Logo"
           className="absolute w-full h-full object-cover -z-10"
-          style={{ filter: "brightness(0.5) blur(8px)" }}
+          style={{ filter: "brightness(0.5) blur(10px)" }}
         />
         {/* Ensure children is rendered */}
         <LayoutComp>{children}</LayoutComp>

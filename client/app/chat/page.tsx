@@ -1,24 +1,24 @@
 "use client";
 import { IoChatboxEllipses } from "react-icons/io5";
 import { CiSearch } from "react-icons/ci";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import UserInfo from "./userinfo";
 
 const users = [
-    { id: 2, name: "Jane Smith", imageprofile: "/profile.jpg", },
-    { id: 3, name: "Alice Johnson", imageprofile: "/profile.jpg", },
-    { id: 4, name: "Bob Brown", imageprofile: "/profile.jpg", },
-    { id: 5, name: "Charlie White", imageprofile: "/profile.jpg", },
-    { id: 6, name: "David Green", imageprofile: "/profile.jpg", },
-    { id: 7, name: "Eve Black", imageprofile: "/profile.jpg", },
-    { id: 8, name: "Frank Blue", imageprofile: "/profile.jpg", },
-    { id: 9, name: "Grace Yellow", imageprofile: "/profile.jpg", },
-    { id: 10, name: "Hank Purple", imageprofile: "/profile.jpg", },
+    { id: 2, name: "Jane Smith", imageprofile: "/back", },
+    { id: 3, name: "Alice Johnson", imageprofile: "/back", },
+    { id: 4, name: "Bob Brown", imageprofile: "/back", },
+    { id: 5, name: "Charlie White", imageprofile: "/back", },
+    { id: 6, name: "David Green", imageprofile: "/back", },
+    { id: 7, name: "Eve Black", imageprofile: "/back", },
+    { id: 8, name: "Frank Blue", imageprofile: "/back", },
+    { id: 9, name: "Grace Yellow", imageprofile: "/back", },
+    { id: 10, name: "Hank Purple", imageprofile: "/back", },
 ];
 
 const userstalkingwith = [
-    { id: 2, name: "Jane Smith", lastMessage: "Let's meet tomorrow!", time: "11:15 AM", imageprofile: "/profile.jpg", messagenotseen: 2 },
-    { id: 3, name: "Alice Johnson", lastMessage: "See you at the party!", time: "11:10 AM", imageprofile: "/profile.jpg", messagenotseen: 1 },
+    { id: 2, name: "Jane Smith", lastMessage: "Let's meet tomorrow!", time: "11:15 AM", imageprofile: "/back.webp", messagenotseen: 2 },
+    { id: 3, name: "Alice Johnson", lastMessage: "See you at the party!", time: "11:10 AM", imageprofile: "/back.webp", messagenotseen: 1 },
 ];
 const conversations = [
     {
@@ -96,11 +96,35 @@ const me = {
     name: "You",
     lastMessage: "Hello, how are you?",
     time: "11:20 AM",
-    imageprofile: "/profile.jpg",
+    imageprofile: "/back",
     messagenotseen: 0
 };
 
 export default function Chat() {
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const usersResponse = await fetch('http://localhost:4000/users', {
+                    method: 'GET',
+                    credentials: 'include', // ✅ required if you send/receive cookies
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                  });
+                  
+
+                const usersData = await usersResponse.json();
+                // Assuming you want to use the fetched users
+                console.log(usersData);
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        }
+        fetchData();
+    }
+        , []);
+
     const [selected, setSelected] = useState(0);
     const [value, setValue] = useState("");
 
@@ -187,7 +211,7 @@ export default function Chat() {
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         sendmessage(conversations);
-                                        
+
                                     }
                                 }}
                             />

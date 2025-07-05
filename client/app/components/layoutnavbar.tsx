@@ -4,17 +4,17 @@ import { usePathname } from "next/navigation";
 import Leftheader from "./leftheader";
 import Topheader from "./topheader";
 
-const LayoutComp = ({ children }: { children: React.ReactNode }) => {
+export const LayoutComp = ({ children }: { children: React.ReactNode }) => {
     const path = usePathname();
 
     return (
-        <div>
+        <div className="bg-[#00000070]">
             {path != '/' ? (
-                <div className="flex h-screen z-0 relative">
+                <div className="flex h-screen z-0 relative ">
                     <Leftheader />
                     <div className="flex flex-1 flex-col z-10">
                         <Topheader />
-                        <main className="flex-1 border-l-[0.5px] border-[#9c9c9c] border-t-[0.1px] rounded-tl-xl">
+                        <main className="flex-1 border-l-[0.5px] border-[#9c9c9c] border-t-[0.1px] rounded-tl-xl ">
                             {children}
                         </main>
                     </div>
@@ -31,4 +31,3 @@ const LayoutComp = ({ children }: { children: React.ReactNode }) => {
     )
 }
 
-export { LayoutComp }
