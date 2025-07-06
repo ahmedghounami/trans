@@ -7,7 +7,7 @@ export default function Game()
     const [Positions, setPositions] = useState({})
     useEffect(()=>
     {
-        const socket = new WebSocket('ws://localhost:9090');
+        const socket = new WebSocket('ws://localhost:9090?gametype=online');
         socket.addEventListener('open', ()=>{
             socket.send(JSON.stringify({type:'getpositions'}))
         })
@@ -45,7 +45,7 @@ export default function Game()
                 </div>
             </div>
             {/* transform -scale-x-100 add this to table to mirror rotation */}
-            <div id="table" className=" relative   bg-[#A7C7CB] flex justify-center  border-4 rounded-2xl w-full aspect-[9/5]">
+            <div id="table" className={` relative ${Positions.host && `transform -scale-x-100 add this to table to mirror rotation`}  bg-[#A7C7CB] flex justify-center  border-4 rounded-2xl w-full aspect-[9/5]`}>
                 <div className=" border border-dashed h-full "></div>
                 <div id="padle1" className={`h-1/5 -translate-y-1/2  aspect-[1/6] rounded-full bg-red-700 absolute left-1`}
                  style={{ top: `${Positions.p1}%` }}></div>
