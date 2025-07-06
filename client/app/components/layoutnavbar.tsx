@@ -8,9 +8,9 @@ export const LayoutComp = ({ children }: { children: React.ReactNode }) => {
     const path = usePathname();
 
     return (
-        <div className="bg-[#00000070]">
-            {path != '/' ? (
-                <div className="flex h-screen z-0 relative ">
+        <div className="h-screen">
+            {path != '/' && path != '/login' ? (
+                <div className="flex z-0 relative bg-[#00000070] ">
                     <Leftheader />
                     <div className="flex flex-1 flex-col z-10">
                         <Topheader />
