@@ -82,8 +82,8 @@ if(Curentplayer.startgame)
     {
         if(Curentplayer.p1 == 1){
         Curentplayer.positions.p1 = Curentplayer.oponent.positions.p1;
-        Curentplayer.oponent.positions.ballx = Curentplayer.positions.ballx;
-        Curentplayer.oponent.positions.bally = Curentplayer.positions.bally;
+        Curentplayer.positions.ballx = Curentplayer.oponent.positions.ballx;
+        Curentplayer.positions.bally = Curentplayer.oponent.positions.bally;
         }
         else{
         Curentplayer.positions.p2 = Curentplayer.oponent.positions.p2;
@@ -92,7 +92,7 @@ if(Curentplayer.startgame)
     }
   if( Curentplayer.positions.ballx <= 100  && Curentplayer.positions.ballx + vx >= 0 )
   {
-    if(Curentplayer.p1 == 1 ){
+    if(Curentplayer.p1 == 0 ){
       
       if(((Curentplayer.positions.bally >= Curentplayer.positions.p2 - 10 && Curentplayer.positions.bally <= Curentplayer.positions.p2 + 10) && Curentplayer.positions.ballx + vx > 96))
               {
@@ -140,7 +140,7 @@ ws.on('close', () => {
   console.log('Client disconnected');
   intervalId.close()
   players = players.filter(player =>{
-    if(player.id == Curentplayer.id)
+    if(player.id == Curentplayer.id && player.oponent)
     {
         player.oponent.oponent = null;
         player.oponent.p1 = 0;

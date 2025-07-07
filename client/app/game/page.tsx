@@ -1,13 +1,18 @@
 'use client';
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Game()
 {
+    const serchParams = useSearchParams()
+    const gametype = serchParams.get('gametype')
+    console.log(gametype);
+    
     const [Positions, setPositions] = useState({})
     useEffect(()=>
     {
-        const socket = new WebSocket('ws://localhost:9090?gametype=online');
+        const socket = new WebSocket(`ws://localhost:9090?gametype=${gametype}`);
         socket.addEventListener('open', ()=>{
             socket.send(JSON.stringify({type:'getpositions'}))
         })
