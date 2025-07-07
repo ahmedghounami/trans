@@ -8,15 +8,14 @@ ws.on('connection', (ws, request) => {
 const keysPressed = {};
 const query = url.parse(request.url, true).query
 const gametype = query.gametype;
-let startgame = 0;
-if(gametype == "local" || gametype == "localvsboot"){
-    startgame = 1
-}
 let positions = {p1:50, p2:50,host:0, ballx:50, bally:50, angle:0, vx:0, vy:0, direction:1, directionchanged:false, speed:1, bootrange:70} ;
 console.log('Client connected');
-players = [...players, {id:playercount, positions, gametype, oponent:null, p1:0}];
+players = [...players, {id:playercount, startgame:0, positions, gametype, oponent:null, p1:0}];
 const Curentplayer = players.find(p=>p.id == playercount);
     
+if(gametype == "local" || gametype == "localvsboot"){
+    Curentplayer.startgame = 1
+}
 playercount++;
 
   ws.on('message', (msg) => {
@@ -36,22 +35,22 @@ playercount++;
   const intervalId = setInterval(()=>{
     const player = players.find(p=>{
         
-       return p.id != Curentplayer.id
+       return (p.id != Curentplayer.id && p.startgame == 0)
     });
-    if(player && startgame == 0 && !Curentplayer.oponent)
+    if(player && Curentplayer.startgame == 0 && !Curentplayer.oponent)
     {
         
         player.oponent = Curentplayer;
         Curentplayer.oponent = player;
         Curentplayer.p1 = 1;
         Curentplayer.oponent.positions.host = 1;
-        startgame = 1;
+        Curentplayer.startgame = 1;
     }
     else if(Curentplayer.oponent)
     {
-        startgame = 1;
+        Curentplayer.startgame = 1;
     }
-if(startgame)
+if(Curentplayer.startgame)
 {
   let vx = Math.cos(Curentplayer.positions.angle * (Math.PI / 180)) * Curentplayer.positions.speed;
   let vy = Math.sin(Curentplayer.positions.angle * (Math.PI / 180)) * Curentplayer.positions.speed;
@@ -129,6 +128,9 @@ if(startgame)
   }
   else{
       Curentplayer.positions  = {...Curentplayer.positions,p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
+      if(Curentplayer.oponent)
+        Curentplayer.oponent.positions  = {...Curentplayer.oponent.positions,p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
+
 
   }
 }
@@ -137,7 +139,16 @@ if(startgame)
 ws.on('close', () => {
   console.log('Client disconnected');
   intervalId.close()
-  players = players.filter(player => player.id != Curentplayer.id);
+  players = players.filter(player =>{
+    if(player.id == Curentplayer.id)
+    {
+        player.oponent.oponent = null;
+        player.oponent.p1 = 0;
+        player.oponent.startgame = 0;
+        player.oponent.positions  = {...player.oponent.positions,p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
+    }
+     return player.id != Curentplayer.id
+    });
   
 });
 
