@@ -8,7 +8,7 @@ ws.on('connection', (ws, request) => {
 const keysPressed = {};
 const query = url.parse(request.url, true).query
 const gametype = query.gametype;
-let positions = {p1:50, p2:50,host:0, ballx:50, bally:50, angle:0, vx:0, vy:0, direction:1, directionchanged:false, speed:1, bootrange:70} ;
+let positions = {p1:50, p2:50,host:0, ballx:50,score:{p1:11, p2:11}, bally:50, angle:0, vx:0, vy:0, direction:1, directionchanged:false, speed:1, bootrange:70} ;
 console.log('Client connected');
 players = [...players, {id:playercount, startgame:0, positions, gametype, oponent:null, p1:0}];
 const Curentplayer = players.find(p=>p.id == playercount);
@@ -127,11 +127,21 @@ if(Curentplayer.startgame)
         }
   }
   else{
-      Curentplayer.positions  = {...Curentplayer.positions,p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
-      if(Curentplayer.oponent)
-        Curentplayer.oponent.positions  = {...Curentplayer.oponent.positions,p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
-
-
+      Curentplayer.positions.direction == 1 ? Curentplayer.positions.score.p2++ : Curentplayer.positions.score.p1++;
+    if((Curentplayer.positions.score.p2 > 11 && Curentplayer.positions.score.p1 + 2 <= Curentplayer.positions.score.p2 )
+        || (Curentplayer.positions.score.p1 > 11 && Curentplayer.positions.score.p2 + 2 <= Curentplayer.positions.score.p1)
+    ){
+        console.log("WIN");
+        
+        Curentplayer.positions.win = 1;
+        Curentplayer.startgame = 0;
+        if(Curentplayer.oponent){
+        player.oponent.oponent = null;
+        player.oponent.p1 = 0;
+        player.oponent.startgame = 0;}}
+    Curentplayer.positions  = {...Curentplayer.positions,p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
+    if(Curentplayer.oponent)
+        Curentplayer.oponent.positions  = {...Curentplayer.oponent.positions,p1:50,score:Curentplayer.positions.score, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
   }
 }
   ws.send(JSON.stringify(Curentplayer.positions))

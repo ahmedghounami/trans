@@ -31,6 +31,7 @@ export default function Game()
         document.addEventListener('keydown', keydown)
         document.addEventListener('keyup', keyup)
     },[])
+    console.log(Positions);
     
     return<div className="bg-gray-400/30 flex justify-center items-center z-50 backdrop-blur-sm absolute top-0 bottom-0 left-0 right-0   ">
         <div className="flex  flex-col gap-5 w-2/3">
@@ -39,11 +40,11 @@ export default function Game()
                     <div className="rounded-full w-14 overflow-hidden h-14 border  ">
                     <Image className="w-full h-full object-cover object-center " src="/profile.jpg" width={60} height={60} alt="profile"></Image>
                     </div>
-                    <p>player 1</p>
-                </div>
-                <div>0 - 0</div>
-                <div className="flex items-center gap-5">
                     <p>player 2</p>
+                </div>
+                <div>{`${Positions.score?.p2} - ${Positions.score?.p1}`}</div>
+                <div className="flex items-center gap-5">
+                    <p>player 1</p>
                     <div className="rounded-full w-14 overflow-hidden h-14 border  ">
                     <Image className="w-full h-full object-cover object-center " src="/profile.jpg" width={60} height={60} alt="profile"></Image>
                     </div>
