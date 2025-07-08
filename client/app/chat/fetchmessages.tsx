@@ -1,42 +1,85 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from 'react';
 
 export default function FetchMessages({
-    selected, me }: {
+    selected,
+    me,
+    setMessages,
+    messages,
+}: {
     selected: number;
     me: number;
+    setMessages: (messages: any[]) => void;
+    messages: any[];
 }) {
-    const [messages, setMessages] = useState([]);
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const response = await fetch(`http://localhost:4000/messages/${selected}/${me}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                console.log("Fetching messages for conversation ID:", selected);
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-                const data = await response.json();
-                console.log("Fetched messages:", data);
-                setMessages(data);
-                return data;
-            } catch (error) {
-                console.error("Error fetching messages:", error);
-            }
+    const wsRef = useRef<WebSocket | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for the end of the messages container
+
+    const fetchMessages = async () => {
+        try {
+            const res = await fetch(`http://localhost:4000/messages/${selected}/${me}`);
+            if (!res.ok) throw new Error('Failed to fetch messages');
+            const data = await res.json();
+            setMessages(data);
+        } catch (err) {
+            console.error('❗ Fetch error:', err);
         }
-        fetchData();
-    }
-        , [selected]);
-    return <div className="flex flex-col overflow-y-auto h-full">
-        {messages.map((message: { id: number; sender_id: number; receiver_id: number; content: string; created_at: string; }) => (
-            <div key={message.id} className={`flex justify-${message.sender_id === me ? 'end' : 'start'} p-2`}>
-                <p className={`${message.sender_id === me ? 'bg-amber-500' : 'bg-blue-500'} text-white p-2 rounded-lg m-2`}>
-                    <strong>{message.sender_id}:</strong> {message.content}
-                    </p>
-                </div>
-        ))}
-    </div>;
+    };
+
+    useEffect(() => {
+        fetchMessages();
+
+        const ws = new WebSocket('ws://localhost:4000');
+        wsRef.current = ws;
+
+        ws.onmessage = (e) => {
+            try {
+                const msg = JSON.parse(e.data);
+                if (
+                    msg.type === 'new_message' &&
+                    (msg.sender_id === selected || msg.receiver_id === selected)
+                ) {
+                    console.log('🔄 Updating messages...');
+                    fetchMessages();
+                }
+            } catch (err) {
+                console.error('Error parsing message:', err);
+            }
+        };
+
+        return () => ws.close();
+    }, [selected]);
+
+    // Scroll to the bottom whenever messages change
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
+
+    return (
+        <div className="flex flex-col">
+            <div className="flex justify-center items-center p-4">
+                <p className="text-gray-500 text-sm">{messages.length} messages</p>
+            </div>
+
+            <div className="flex flex-col h-[60vh] overflow-y-scroll">
+                {messages.map((m: any) => (
+                    <div
+                        key={m.id}
+                        className={`flex justify-${m.sender_id === me ? 'end' : 'start'} p-2`}
+                    >
+                        <p
+                            className={`${
+                                m.sender_id === me ? 'bg-white' : 'bg-blue-500'
+                            } text-black p-2 rounded-lg m-2`}
+                        >
+                            <strong>{m.sender_id}:</strong> {m.content}
+                        </p>
+                    </div>
+                ))}
+                {/* Invisible div to scroll to */}
+                <div ref={messagesEndRef} />
+            </div>
+        </div>
+    );
 }

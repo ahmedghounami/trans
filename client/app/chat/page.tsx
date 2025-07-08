@@ -3,8 +3,8 @@ import { IoChatboxEllipses } from "react-icons/io5";
 import { CiSearch } from "react-icons/ci";
 import { use, useEffect, useState } from "react";
 import UserInfo from "./userinfo";
-import FetchMessages from "./fetchmessages";
 import Cookies from 'js-cookie';
+import Room from "./room";
 
 export default function Chat() {
     const [users, setUsers] = useState([]);
@@ -106,9 +106,10 @@ export default function Chat() {
                         {/* <div className="flex flex-col h-[80vh] overflow-y-auto">
                             hello
                         </div> */}
-                        <FetchMessages selected={selected} me={me} />
+                        <Room selected={selected} me={me} />
                     </div>
                 )}
+                
             </div>
             <div className=" flex-1/4">
                 hello
