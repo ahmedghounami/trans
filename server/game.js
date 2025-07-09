@@ -3,18 +3,67 @@ const WebSocket = require('ws');
 const url = require('url');
 let players = []
 let playercount = 1;
+function CalculateballVelocity(positions, angle)
+{
+    let vx = Math.cos(angle * (Math.PI / 180)) * positions.speed;
+    let vy = Math.sin(angle * (Math.PI / 180)) * positions.speed;
+    vx *= positions.direction;
+    vy *= positions.direction;
+    return{vx,vy}
+}
 const ws = new WebSocket.Server({ port:  9090});
+function bootmouvement(keysPressed, positions)
+{
+    const intervalID = setInterval(()=>{
+        let pretectedposition = 50;
+        let predectedtime = 100;
+        let {ballx, bally, angle} = positions
+        
+        if(positions.direction == 1)
+        {
+            let {vx, vy} = CalculateballVelocity(positions, angle)
+            let directionchanged = false;
+            while(ballx < 96)
+            {
+                if((bally + vy  <= 2 || bally + vy >= 98) && !directionchanged)
+                {
+                    if(!angle)
+                        angle -= 5;
+                    angle *= -1 ;
+                    directionchanged = true;
+                }
+                else if((bally + vy >  2 && bally + vy < 98)) 
+                    directionchanged = false;
+                ballx += vx;
+                bally += vy;
+                ({vx, vy} = CalculateballVelocity(positions, angle))
+            }
+        }
+        
+        const isup = bally < positions.p2
+        console.log(bally);
+        // positions.p2 = bally;
+        predectedtime =  Math.abs(((bally - positions.p2) / 2.5)*20)
+        isup ? keysPressed['bootUp'] = true : keysPressed['bootDown'] = true;
+        setTimeout(()=>{
+            keysPressed['bootUp'] = false;
+            keysPressed['bootDown'] = false
+        },predectedtime)
+    },1000)
+}
 ws.on('connection', (ws, request) => {
 const keysPressed = {};
 const query = url.parse(request.url, true).query
 const gametype = query.gametype;
-let positions = {p1:50, p2:50,host:0, ballx:50,score:{p1:11, p2:11}, bally:50, angle:0, vx:0, vy:0, direction:1, directionchanged:false, speed:1, bootrange:70} ;
+let positions = {p1:50, p2:50,host:0, ballx:50,score:{p1:0, p2:0}, bally:50, angle:0, direction:1, directionchanged:false, speed:1, bootrange:70} ;
 console.log('Client connected');
 players = [...players, {id:playercount, startgame:0, positions, gametype, oponent:null, p1:0}];
 const Curentplayer = players.find(p=>p.id == playercount);
     
 if(gametype == "local" || gametype == "localvsboot"){
     Curentplayer.startgame = 1
+    if(gametype == "localvsboot")
+        bootmouvement(keysPressed, Curentplayer.positions);
 }
 playercount++;
 
@@ -52,10 +101,7 @@ playercount++;
     }
 if(Curentplayer.startgame)
 {
-  let vx = Math.cos(Curentplayer.positions.angle * (Math.PI / 180)) * Curentplayer.positions.speed;
-  let vy = Math.sin(Curentplayer.positions.angle * (Math.PI / 180)) * Curentplayer.positions.speed;
-  vx *= Curentplayer.positions.direction;
-  vy *= Curentplayer.positions.direction;
+  let {vx, vy} = CalculateballVelocity(Curentplayer.positions, Curentplayer.positions.angle)
   if(Curentplayer.p1 == 0 ){
     if(keysPressed["w"] &&( Curentplayer.positions.p1 - 10)-2.5 >= 0)     
         Curentplayer.positions.p1=Curentplayer.positions.p1-2.5
@@ -74,10 +120,10 @@ if(Curentplayer.startgame)
         if(keysPressed["ArrowDown"] && (10 + Curentplayer.positions.p2) + 2.5 <= 100 )
             Curentplayer.positions.p2=Curentplayer.positions.p2+2.5}
     if(gametype == "localvsboot"){
-        if(Curentplayer.positions.bally > Curentplayer.positions.p2 +5 && Curentplayer.positions.ballx > Curentplayer.positions.bootrange   && (10 + Curentplayer.positions.p2) + 2.5 <= 100 )
-            Curentplayer.positions.p2=Curentplayer.positions.p2+2.5
-        else if(Curentplayer.positions.bally < Curentplayer.positions.p2 -5 && Curentplayer.positions.ballx > Curentplayer.positions.bootrange  && ( Curentplayer.positions.p2 - 10) - 2.5 >= 0 )
-            Curentplayer.positions.p2=Curentplayer.positions.p2-2.5}
+        if(keysPressed["bootUp"] && Curentplayer.positions.p2 - 2.5 - 10 >= 0)
+            Curentplayer.positions.p2=Curentplayer.positions.p2-2.5
+        if(keysPressed["bootDown"] && (10 + Curentplayer.positions.p2) + 2.5 <= 100 )
+            Curentplayer.positions.p2=Curentplayer.positions.p2+2.5}
     if(gametype == "online")
     {
         if(Curentplayer.p1 == 1){
@@ -108,7 +154,7 @@ if(Curentplayer.startgame)
           {
               let diff = (Curentplayer.positions.bally - Curentplayer.positions.p1) / 10;
               if(!diff)
-                  diff++;
+                  diff = 0.02
               Curentplayer.positions.direction = 1;
               Curentplayer.positions.angle = diff *(75)
               if(Curentplayer.positions.speed < 3)
@@ -123,7 +169,8 @@ if(Curentplayer.startgame)
           }
       else if((Curentplayer.positions.bally + vy >  2 && Curentplayer.positions.bally + vy < 98)) 
           Curentplayer.positions.directionchanged = false;
-      Curentplayer.positions = {...Curentplayer.positions, ballx:(Curentplayer.positions.ballx+vx), bally:(Curentplayer.positions.bally+vy)}
+      Curentplayer.positions.ballx=(Curentplayer.positions.ballx+vx)
+      Curentplayer.positions.bally=(Curentplayer.positions.bally+vy)
         }
   }
   else{
@@ -139,9 +186,9 @@ if(Curentplayer.startgame)
         player.oponent.oponent = null;
         player.oponent.p1 = 0;
         player.oponent.startgame = 0;}}
-    Curentplayer.positions  = {...Curentplayer.positions,p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
-    if(Curentplayer.oponent)
-        Curentplayer.oponent.positions  = {...Curentplayer.oponent.positions,p1:50,score:Curentplayer.positions.score, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
+    Curentplayer.positions.p1=50; Curentplayer.positions.p2=50;
+    Curentplayer.positions.ballx=50; Curentplayer.positions.bally=50;
+    Curentplayer.positions.angle=0; Curentplayer.positions.speed=1;
   }
 }
   ws.send(JSON.stringify(Curentplayer.positions))
@@ -155,7 +202,7 @@ ws.on('close', () => {
         player.oponent.oponent = null;
         player.oponent.p1 = 0;
         player.oponent.startgame = 0;
-        player.oponent.positions  = {...player.oponent.positions,p1:50, p2:50, ballx:50, bally:50, angle:0, vx:0, vy:0, directionchanged:false, speed:1, bootrange:70}
+        player.oponent.positions  = {...player.oponent.positions,p1:50, p2:50, ballx:50, bally:50, angle:0}
     }
      return player.id != Curentplayer.id
     });
