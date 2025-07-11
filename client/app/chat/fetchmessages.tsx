@@ -5,15 +5,15 @@ export default function FetchMessages({
     me,
     setMessages,
     messages,
+    update,
 }: {
     selected: number;
     me: number;
     setMessages: (messages: any[]) => void;
     messages: any[];
+    update: number;
 }) {
-    const wsRef = useRef<WebSocket | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for the end of the messages container
-
     const fetchMessages = async () => {
         try {
             const res = await fetch(`http://localhost:4000/messages/${selected}/${me}`);
@@ -27,27 +27,7 @@ export default function FetchMessages({
 
     useEffect(() => {
         fetchMessages();
-
-        const ws = new WebSocket('ws://localhost:4000');
-        wsRef.current = ws;
-
-        ws.onmessage = (e) => {
-            try {
-                const msg = JSON.parse(e.data);
-                if (
-                    msg.type === 'new_message' &&
-                    (msg.sender_id === selected || msg.receiver_id === selected)
-                ) {
-                    console.log('🔄 Updating messages...');
-                    fetchMessages();
-                }
-            } catch (err) {
-                console.error('Error parsing message:', err);
-            }
-        };
-
-        return () => ws.close();
-    }, [selected]);
+    }, [update, selected, me]); // Fetch messages when update changes or selected/me change
 
     // Scroll to the bottom whenever messages change
     useEffect(() => {

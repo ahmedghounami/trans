@@ -1,73 +1,70 @@
-"use client"
-import { useEffect, useState } from 'react';
+"use client";
+import { useEffect, useState } from "react";
+import socket from "../socket";
 
 export default function SendMessage({
-    me,
-    selected,
-    setMessages,
+  me,
+  selected,
+  setUpdate,
+  update,
 }: {
-    me: number;
-    selected: number;
-    setMessages: (messages: any[]) => void;
+  me: number;
+  selected: number;
+  setUpdate: (update: number) => void;
+  update: number;
 }) {
-    const [socket, setSocket] = useState<WebSocket | null>(null);
-    const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
-    useEffect(() => {
-        const ws = new WebSocket('ws://localhost:4000');
-        ws.onopen = () => console.log('✅ WebSocket connected');
-        ws.onmessage = (e) => console.log('📨 Message:', e.data);
-        ws.onerror = (err) => console.error('WebSocket error:', err);
-        setSocket(ws);
+  useEffect(() => {
+    // Only log once
+    const handleConnect = () => console.log("✅ Socket connected");
+    const handleDisconnect = () => console.log("🔌 Socket disconnected");
 
-        return () => {
-            ws.close();
-        };
-    }, []);
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
 
-    const sendMessage = async () => {
-        if (!message.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
+    return () => {
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+    };
+  }, []);
 
-        const payload = {
-            content: message,
-            sender_id: me,
-            receiver_id: selected,
-        };
+  const sendMessage = () => {
+    if (!message.trim()) return;
 
-        socket.send(JSON.stringify(payload));
-        setMessage('');
-        try {
-            const res = await fetch(`http://localhost:4000/messages/${selected}/${me}`);
-            if (!res.ok) throw new Error('Failed to fetch messages');
-            const data = await res.json();
-            setMessages(data);
-        } catch (err) {
-            console.error('❗ Fetch error:', err);
-        }
-
+    const payload = {
+      content: message,
+      sender_id: me,
+      receiver_id: selected,
     };
 
-    return (
-        <div className="p-4 flex ">
-            <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type your message..."
-                className="border p-2 rounded w-full"
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        sendMessage();
-                    }
-                }}
-            />
-            <button
-                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={sendMessage}
-            >
-                Send
-            </button>
-        </div>
-    );
+    socket.emit("chat message", payload);
+    console.log("📤 Sent message:", payload);
+    setMessage("");
+    setUpdate(update + 1);
+  };
+
+  return (
+    <div className="p-4 flex">
+      <input
+        type="text"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Type your message..."
+        className="border p-2 rounded w-full"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            sendMessage();
+          }
+        }}
+      />
+      <button
+        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+        onClick={sendMessage}
+      >
+        Send
+      </button>
+    </div>
+  );
 }

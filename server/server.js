@@ -1,52 +1,17 @@
-
-
-// import Fastify from 'fastify';
-// import { WebSocketServer } from 'ws';
-
-// const fastify = Fastify();
-// const PORT = 3001;
-
-// // Start Fastify server
-// fastify.listen({ port: PORT }, (err, address) => {
-//   if (err) throw err;
-//   console.log(`🚀 Server running at ${address}`);
-
-//   // Start WebSocket server on the same port
-//   const wss = new WebSocketServer({ server: fastify.server });
-
-//   wss.on('connection', function connection(ws) {
-//     console.log('🔌 Client connected');
-
-//     ws.on('message', function message(data) {
-//       console.log('📩 Received:', data.toString());
-
-//       // Reply back
-//       ws.send(`👋 Hello from Fastify WebSocket! You said: ${data}`);
-//     });
-
-//     ws.send('🎉 Welcome to the WebSocket server!');
-//   });
-// });
-
-
-
-// -----------------------------------------------// 
-
-
-// server.mjs or server.js with "type": "module"
-
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import sqlite3 from 'sqlite3';
-import { WebSocketServer } from 'ws';
-// Create server
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+
 const fastify = Fastify();
 
 await fastify.register(cors, {
-  origin: 'http://localhost:3000', // your Next.js frontend origin
-  credentials: true, // Allow cookies to be sent
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+  origin: 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
+
 
 
 // Connect SQLite DB
@@ -81,6 +46,8 @@ db.serialize(() => {
           `);
 });
 
+
+// Register routes on fastify
 const devRoute = (await import('./routes/devroute.js')).default;
 fastify.register(devRoute, { db });
 
@@ -90,60 +57,41 @@ fastify.register(chatRoute, { db });
 const authRoute = (await import('./routes/authroute.js')).default;
 fastify.register(authRoute, { db });
 
+// Create raw HTTP server from fastify's internal handler
+const httpServer = fastify.server;
 
+// Setup Socket.IO server on top of the HTTP server
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
 
-// Start server
-try {
-  await fastify.listen({ port: 4000 });
-  console.log('Server running on http://localhost:4000');
-  const clients = new Set(); //
-  const wss = new WebSocketServer({ server: fastify.server });
+io.on('connection', (socket) => {
+  console.log('⚡ Socket.IO client connected:', socket.id);
 
-  wss.on('connection', function connection(ws) {
-    console.log('🔌 Client connected');
-
-    ws.on('message', function message(data) {
-      // add the message to the database
-      // const data = data.toString();
-      const { content, sender_id, receiver_id } = JSON.parse(data.toString());
-      console.log('📩 Received:', content, 'semderid: ', sender_id, 'receiverid: ', receiver_id);
-      db.run(`INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)`, [sender_id, receiver_id, content], function (err) {
-        if (err) {
-          console.error('Error inserting message:', err.message);
-          return;
-        }
-        const newMessage = {
-          type: 'new_message',
-          id: this.lastID, // ID of the inserted row
-          sender_id,
-          receiver_id,
-          content,
-          created_at: new Date().toISOString(),
-        };
-
-        const json = JSON.stringify(newMessage);
-
-        // ✅ Broadcast to all connected clients
-        clients.forEach((client) => {
-          if (client.readyState === 1) {
-            client.send(json);
-          }
-        });
-      });
-
-      // Reply back
-      ws.send(JSON.stringify({
-        type: 'echo',
-        message: `👋 Hello from Fastify WebSocket! You said: ${data}`,
-      }));
+  socket.on('chat message', (msg) => {
+    console.log('📩 Received message:', msg);
+    const { content, sender_id, receiver_id } = msg;
+    db.run(`INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)`, [sender_id, receiver_id, content], function (err) {
+      if (err) {
+        console.error('Error inserting message:', err.message);
+        return;
+      }
     });
-
-    ws.send(JSON.stringify({
-      type: 'welcome',
-      message: '🎉 Welcome to the WebSocket server!',
-    }));
   });
-} catch (err) {
-  console.error(err);
-  process.exit(1);
-}
+
+  socket.on('disconnect', () => {
+    console.log('❌ Socket.IO client disconnected:', socket.id);
+  });
+});
+await fastify.ready();
+const PORT = 4000;
+httpServer.listen(PORT, (err) => {
+  if (err) {
+    console.error('Error starting server:', err);
+    process.exit(1);
+  }
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});

@@ -11,11 +11,12 @@ export default function Room({
     me: number;
 }) {
     const [messages, setMessages] = useState([]);
+    const [update, setUpdate] = useState(0);
 
     return (
         <div className="flex flex-col h-full justify-between">
-            <FetchMessages selected={selected} me={me}  messages={messages} setMessages={setMessages} />
-            <SendMessage me={me} selected={selected} setMessages={setMessages} />
+            <FetchMessages selected={selected} me={me}  messages={messages} setMessages={setMessages} update={update} />
+            <SendMessage me={me} selected={selected}  setUpdate={setUpdate} update={update} />
         </div>
     );
 }
