@@ -4,7 +4,7 @@ export default function Topheader() {
   return (
     <div className="flex justify-end p-2 items-center">
       <IoNotifications size={24} />
-      <div className="flex flex-col ml-10">
+      <div className="flex flex-col  ml-10">
         <h1 className="text-lg font-semibold">Welcome, User!</h1>
         <p className="text-sm text-gray-500">1000 $</p>
         </div>
@@ -18,4 +18,3 @@ export default function Topheader() {
     </div>
   );
 }
-
