@@ -40,6 +40,7 @@ import cors from '@fastify/cors';
 import sqlite3 from 'sqlite3';
 import { WebSocketServer } from 'ws';
 // Create server
+import game from './game.js'
 const fastify = Fastify();
 
 await fastify.register(cors, {

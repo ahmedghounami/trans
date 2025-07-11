@@ -1,6 +1,6 @@
 
-const WebSocket = require('ws');
-const url = require('url');
+import { WebSocketServer } from 'ws';
+import url from 'url';
 let players = []
 let playercount = 1;
 function CalculateballVelocity(positions, angle)
@@ -11,7 +11,7 @@ function CalculateballVelocity(positions, angle)
     vy *= positions.direction;
     return{vx,vy}
 }
-const ws = new WebSocket.Server({ port:  9090});
+const ws = new WebSocketServer({ port:  9090});
 function bootmouvement(keysPressed, positions)
 {
     const intervalID = setInterval(()=>{
@@ -41,7 +41,6 @@ function bootmouvement(keysPressed, positions)
         }
         
         const isup = bally < positions.p2
-        console.log(bally);
         // positions.p2 = bally;
         predectedtime =  Math.abs(((bally - positions.p2) / 2.5)*20)
         isup ? keysPressed['bootUp'] = true : keysPressed['bootDown'] = true;
@@ -213,3 +212,4 @@ ws.on('close', () => {
 });
 
 // module.exports = wss;
+export default {};
