@@ -19,15 +19,15 @@ export default function Leftheader() {
     ];
 
     return (
-        <div className="h-full w-full flex flex-col justify-between items-center text-white shadow-xl p-4">
+        <div className="h-full w-full flex flex-col justify-between items-center text-white  shadow-xl p-4">
             {/* Logo */}
-            <div className="mt-4 mb-4">
+            <div className=" w-20 p-1">
                 <img
                     src="/logo.png"
                     alt="Logo"
                     className="rounded-full border border-gray-600 shadow-md hidden md:block"
-                    width={64}
-                    height={64}
+                    width={200}
+                    height={200}
                 />
             </div>
 

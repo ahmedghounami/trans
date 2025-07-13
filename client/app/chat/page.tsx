@@ -100,34 +100,35 @@ export default function Chat() {
                             className="w-full pl-10 pr-3 py-2 rounded-xl border border-gray-300 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                         />
                         {value && (
-                            <div className="overflow-y-scroll absolute flex flex-col items-center justify-center mt-2 left-0 top-10 w-full rounded-lg h-[200px] bg-[#2c2c2c] border border-gray-600 shadow-lg z-10">
-                               
-                               {searchResults.map((user => (
-                                user.id !== me &&
-                                <div className="w-[90%] bg-[#494949] transition-colors duration-200  h-full p-4 cursor-pointer flex items-center gap-2  hover:bg-[#3b3b3b]"
-                                    key={user.id}
-                                    onClick={() => {
-                                        setSelected(user.id);
-                                        setValue("");
-                                    }}
-                                >
-                                    <img
-                                        src={user.picture || "/profile.jpg"}
-                                        alt="Profile"
-                                        className="w-8 h-8 rounded-full"
-                                    />
-                                    <span className="text-sm">{user.name}</span>
-                                </div>
-                                )))}
+                            <div className="absolute  left-[5%] top-12 w-[90%] z-20 max-h-[300px] overflow-y-auto bg-[#1a1a1a] border border-[#3d008d] shadow-xl rounded-xl px-2 py-3 space-y-2 custom-scroll">
+                                {searchResults
+                                    .filter((user) => user.id !== me)
+                                    .map((user) => (
+                                        <div
+                                            key={user.id}
+                                            className="flex items-center gap-3 px-4 py-2 rounded-lg bg-[#2a2a2a] hover:bg-purple-800/30 transition-colors cursor-pointer"
+                                            onClick={() => {
+                                                setSelected(user.id);
+                                                setValue("");
+                                            }}
+                                        >
+                                            <img
+                                                src={user.picture || "/profile.jpg"}
+                                                alt="Profile"
+                                                className="w-10 h-10 rounded-full border-2 border-purple-600 shadow-md"
+                                            />
+                                            <span className="text-white font-medium text-sm tracking-wide">
+                                                {user.name}
+                                            </span>
+                                        </div>
+                                    ))}
+
                                 {value && searchResults.length === 0 && (
-                                    <div className="text-gray-500 text-sm">
-                                        No users found
-                                    </div>
+                                    <div className="text-center text-gray-500 text-sm">No users found</div>
                                 )}
-
-
                             </div>
                         )}
+
                     </div>
 
 
