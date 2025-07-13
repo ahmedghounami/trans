@@ -3,7 +3,7 @@
 import { IoChatboxEllipses } from "react-icons/io5";
 import { FaArrowRight } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Cookies from 'js-cookie';
 import UserInfo from "./userinfo";
 import Room from "./room";
@@ -13,6 +13,23 @@ export default function Chat() {
     const [me, setMe] = useState(0);
     const [selected, setSelected] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
+    const [value, setValue] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    useEffect(() => {
+        const fectusers = async () => {
+            try {
+                const res = await fetch('http://localhost:4000/search?search=' + value);
+                const data = await res.json();
+                console.log("Fetched users:", searchResults);
+                setSearchResults(data);
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        }
+        fectusers();
+    }
+        , [value]); // Fetch users when value changes
+
 
     useEffect(() => {
         const checkMobile = () => {
@@ -40,7 +57,7 @@ export default function Chat() {
             }
         }
         fetchMe();
-    }, []);
+    }, [value]);
 
     useEffect(() => {
         async function fetchUsers() {
@@ -74,10 +91,43 @@ export default function Chat() {
                             className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                         />
                         <input
+                            value={value}
+                            onChange={(e) => {
+                                setValue(e.target.value);
+                            }}
                             type="text"
                             placeholder="Search..."
-                            className="w-full pl-10 pr-3 py-2 rounded-xl border border-gray-300 text-sm text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="w-full pl-10 pr-3 py-2 rounded-xl border border-gray-300 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                         />
+                        {value && (
+                            <div className="overflow-y-scroll absolute flex flex-col items-center justify-center mt-2 left-0 top-10 w-full rounded-lg h-[200px] bg-[#2c2c2c] border border-gray-600 shadow-lg z-10">
+                               
+                               {searchResults.map((user => (
+                                user.id !== me &&
+                                <div className="w-[90%] bg-[#494949] transition-colors duration-200  h-full p-4 cursor-pointer flex items-center gap-2  hover:bg-[#3b3b3b]"
+                                    key={user.id}
+                                    onClick={() => {
+                                        setSelected(user.id);
+                                        setValue("");
+                                    }}
+                                >
+                                    <img
+                                        src={user.picture || "/profile.jpg"}
+                                        alt="Profile"
+                                        className="w-8 h-8 rounded-full"
+                                    />
+                                    <span className="text-sm">{user.name}</span>
+                                </div>
+                                )))}
+                                {value && searchResults.length === 0 && (
+                                    <div className="text-gray-500 text-sm">
+                                        No users found
+                                    </div>
+                                )}
+
+
+                            </div>
+                        )}
                     </div>
 
 
