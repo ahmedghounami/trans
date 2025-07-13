@@ -42,24 +42,31 @@ export default function FetchMessages({
                 <p className="text-gray-500 text-sm">{messages.length} messages</p>
             </div>
 
-            <div className="flex flex-col h-[60vh] overflow-y-scroll">
-                {messages.map((m: any) => (
-                    <div
-                        key={m.id}
-                        className={`flex justify-${m.sender_id === me ? 'end' : 'start'} p-2`}
-                    >
-                        <p
-                            className={`${
-                                m.sender_id === me ? 'bg-white' : 'bg-blue-500'
-                            } text-black p-2 rounded-lg m-2`}
+            <div className="flex flex-col h-[60vh] overflow-y-auto px-4 py-2 space-y-3 custom-scrollbar">
+                {messages.map((m: any) => {
+                    const isMe = m.sender_id === me;
+                    return (
+                        <div
+                            key={m.id}
+                            className={`max-w-[75%] px-4 py-2 rounded-xl text-sm relative
+          ${isMe
+                                    ? 'self-end bg-[#3B2F8F] text-white'
+                                    : 'self-start bg-[#2B2B2B] text-white'}
+        `}
                         >
-                            <strong>{m.sender_id}:</strong> {m.content}
-                        </p>
-                    </div>
-                ))}
-                {/* Invisible div to scroll to */}
+                            <p className="break-words max-w-[10rem]
+            md:max-w-[20rem] lg:max-w-[30rem]">
+                                {m.content}
+                            </p>
+                            <span className="text-[0.65rem] text-gray-400 mt-1 block text-right">
+                                {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        </div>
+                    );
+                })}
                 <div ref={messagesEndRef} />
             </div>
+
         </div>
     );
 }

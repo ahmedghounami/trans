@@ -1,33 +1,31 @@
 "use client";
 import { useEffect, useState } from "react";
 import socket from "../socket";
+import { RiSendPlane2Fill } from "react-icons/ri";
 
 export default function SendMessage({
   me,
   selected,
-  setUpdate,
-  update,
 }: {
   me: number;
   selected: number;
-  setUpdate: (update: number) => void;
-  update: number;
 }) {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    // Only log once
-    const handleConnect = () => console.log("✅ Socket connected");
-    const handleDisconnect = () => console.log("🔌 Socket disconnected");
-
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
+    socket.on("connect", () => {
+      console.log("✅ Socket connected");
+      socket.emit("join", me);
+    });
+    socket.on("disconnect", () => {
+      console.log("🔌 Socket disconnected");
+    });
 
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("disconnect", handleDisconnect);
+      socket.off("connect");
+      socket.off("disconnect");
     };
-  }, []);
+  }, [me]);
 
   const sendMessage = () => {
     if (!message.trim()) return;
@@ -41,30 +39,31 @@ export default function SendMessage({
     socket.emit("chat message", payload);
     console.log("📤 Sent message:", payload);
     setMessage("");
-    setUpdate(update + 1);
   };
 
   return (
-    <div className="p-4 flex">
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type your message..."
-        className="border p-2 rounded w-full"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            sendMessage();
-          }
-        }}
-      />
-      <button
-        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-        onClick={sendMessage}
-      >
-        Send
-      </button>
+    <div className="p-4 border-t border-gray-600 ">
+      <div className="relative flex items-center">
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type your message..."
+          className="w-full py-3 pl-5 pr-12 bg-[#2c2c2c] text-white placeholder-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              sendMessage();
+            }
+          }}
+        />
+        <button
+          onClick={sendMessage}
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-400 active:scale-95 transition-transform duration-150"
+        >
+          <RiSendPlane2Fill size={22} />
+        </button>
+      </div>
     </div>
   );
 }
