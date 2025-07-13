@@ -4,17 +4,19 @@ import { IoChatboxEllipses } from "react-icons/io5";
 import { FaArrowRight } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
 import { use, useEffect, useState } from "react";
-import Cookies from 'js-cookie';
 import UserInfo from "./userinfo";
 import Room from "./room";
+import Search from "./serach";
+
+import { useUser } from "../Context/UserContext";
 
 export default function Chat() {
     const [users, setUsers] = useState([]);
-    const [me, setMe] = useState(0);
     const [selected, setSelected] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
     const [value, setValue] = useState("");
     const [searchResults, setSearchResults] = useState([]);
+
     useEffect(() => {
         const fectusers = async () => {
             try {
@@ -41,25 +43,6 @@ export default function Chat() {
     }, []);
 
     useEffect(() => {
-        async function fetchMe() {
-            try {
-                const res = await fetch('http://localhost:4000/me', {
-                    method: 'GET',
-                    headers: {
-                        'authorization': `Bearer ${Cookies.get('token')}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                const data = await res.json();
-                setMe(data.id);
-            } catch (error) {
-                console.error("Error fetching user:", error);
-            }
-        }
-        fetchMe();
-    }, [value]);
-
-    useEffect(() => {
         async function fetchUsers() {
             try {
                 const res = await fetch('http://localhost:4000/users');
@@ -71,20 +54,22 @@ export default function Chat() {
         }
         fetchUsers();
     }, []);
+
+    const { user } = useUser();
+
+    
+    const me = user?.id;
     const showSidebar = !isMobile || (isMobile && selected === 0);
     const showChat = !isMobile || (isMobile && selected !== 0);
+
     return (
         <div className="flex h-full w-full text-white overflow-hidden">
-            {/* Sidebar */}
             {showSidebar && (
                 <div className={` ${isMobile ? "flex-1" : ""} w-[320px] min-w-[280px] border-r border-[#a0a0a0] flex flex-col`}>
-                    {/* Header */}
                     <div className="flex justify-between items-center p-4 border-b border-[#a0a0a0]">
                         <h1 className="text-2xl font-bold">Chatbox</h1>
                         <IoChatboxEllipses size={30} />
                     </div>
-
-                    {/* Search */}
                     <div className="relative px-4 py-2">
                         <CiSearch
                             size={20}
@@ -100,38 +85,10 @@ export default function Chat() {
                             className="w-full pl-10 pr-3 py-2 rounded-xl border border-gray-300 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                         />
                         {value && (
-                            <div className="absolute  left-[5%] top-12 w-[90%] z-20 max-h-[300px] overflow-y-auto bg-[#1a1a1a] border border-[#3d008d] shadow-xl rounded-xl px-2 py-3 space-y-2 custom-scroll">
-                                {searchResults
-                                    .filter((user) => user.id !== me)
-                                    .map((user) => (
-                                        <div
-                                            key={user.id}
-                                            className="flex items-center gap-3 px-4 py-2 rounded-lg bg-[#2a2a2a] hover:bg-purple-800/30 transition-colors cursor-pointer"
-                                            onClick={() => {
-                                                setSelected(user.id);
-                                                setValue("");
-                                            }}
-                                        >
-                                            <img
-                                                src={user.picture || "/profile.jpg"}
-                                                alt="Profile"
-                                                className="w-10 h-10 rounded-full border-2 border-purple-600 shadow-md"
-                                            />
-                                            <span className="text-white font-medium text-sm tracking-wide">
-                                                {user.name}
-                                            </span>
-                                        </div>
-                                    ))}
-
-                                {value && searchResults.length === 0 && (
-                                    <div className="text-center text-gray-500 text-sm">No users found</div>
-                                )}
-                            </div>
+                            <Search searchResults={searchResults} me={me} setSelected={setSelected} value={value} setValue={setValue} />
                         )}
 
                     </div>
-
-
                     <div className="flex-1 overflow-y-auto px-2 pb-4">
                         {users.filter(user => user.id !== me).map(user => (
                             <UserInfo

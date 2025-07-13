@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 
 export default function Leftheader() {
     const pathname = usePathname();
-
+    
     const navItems = [
         { href: "/home", icon: <GoHomeFill size={26} />, label: "Home" },
         { href: "/chat", icon: <IoChatbubbleSharp size={26} />, label: "Chat" },

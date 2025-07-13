@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Leftheader from "./leftheader";
 import Topheader from "./topheader";
@@ -43,7 +43,7 @@ export const LayoutComp = ({ children }: { children: React.ReactNode }) => {
                         </>
                     ) : (
                         <div className="w-20 bg-[#0000004d]">
-                            <Leftheader  />
+                            <Leftheader />
                         </div>
                     )}
                     <div className="flex flex-1 flex-col z-10 bg-[#0000004d]">
