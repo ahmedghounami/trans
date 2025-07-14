@@ -30,7 +30,7 @@ export const LayoutComp = ({ children }: { children: React.ReactNode }) => {
                     {isMobile ? (
                         <>
                             <button
-                                className="absolute top-2 left-2 z-50 p-2 bg-black/60 rounded-full text-white md:hidden"
+                                className="absolute top-5 left-2 z-50 p-2 bg-black/60 rounded-full text-white md:hidden"
                                 onClick={() => setIsOpen(!isOpen)}
                             >
                                 <GiHamburgerMenu size={28} />
