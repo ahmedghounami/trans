@@ -49,7 +49,7 @@ export default function SendMessage({
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message..."
-          className="w-full py-3 pl-5 pr-12 bg-[#2c2c2c] text-white placeholder-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+          className="w-full py-3 pl-5 pr-12 border-[#3800d2]  border-1 text-white placeholder-gray-400 rounded-full focus:outline-none focus:ring-0 focus:ring-blue-500 transition-all duration-200"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -59,9 +59,9 @@ export default function SendMessage({
         />
         <button
           onClick={sendMessage}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-400 active:scale-95 transition-transform duration-150"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#7700ff]  active:scale-95 transition-transform duration-150 "
         >
-          <RiSendPlane2Fill size={22} />
+          <RiSendPlane2Fill size={26} />
         </button>
       </div>
     </div>
