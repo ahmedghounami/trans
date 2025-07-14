@@ -10,7 +10,7 @@ import { usePathname } from "next/navigation";
 
 export default function Leftheader() {
     const pathname = usePathname();
-
+    
     const navItems = [
         { href: "/home", icon: <GoHomeFill size={26} />, label: "Home" },
         { href: "/chat", icon: <IoChatbubbleSharp size={26} />, label: "Chat" },
@@ -19,20 +19,20 @@ export default function Leftheader() {
     ];
 
     return (
-        <div className="h-screen flex flex-col p-2 justify-between items-center text-white shadow-xl">
+        <div className="h-full w-full flex flex-col justify-between items-center text-white  shadow-xl p-4">
             {/* Logo */}
-            <div className="mt-4">
+            <div className=" w-20 p-1">
                 <img
                     src="/logo.png"
                     alt="Logo"
-                    className="rounded-full border border-gray-600 shadow-md"
-                    width={64}
-                    height={64}
+                    className="rounded-full border border-gray-600 shadow-md hidden md:block"
+                    width={200}
+                    height={200}
                 />
             </div>
 
-            {/* Navigation Icons */}
-            <nav className="flex flex-col gap-2 items-center">
+            {/* Nav Items */}
+            <nav className="flex flex-col gap-4 items-center">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
@@ -40,15 +40,15 @@ export default function Leftheader() {
                             key={item.href}
                             href={item.href}
                             aria-label={item.label}
-                            className={`group relative p-3 rounded-lg flex items-center justify-center transition-transform duration-300 ease-in-out
-                ${isActive ? "text-blue-500 scale-110" : "text-gray-400 hover:text-blue-400 hover:scale-110"}
-              `}
+                            className={`group relative p-3 rounded-lg flex items-center justify-center transition duration-300
+                                ${isActive ? "text-blue-500 scale-110" : "text-gray-400 hover:text-blue-400 hover:scale-110"}
+                            `}
                         >
-                            <div className="flex flex-col justify-center items-center">
-                                <div className="group-hover:bg-blue-500/10 rounded-full p-2 transition-all duration-300 ease-in-out cursor-pointer">
+                            <div className="flex flex-col items-center">
+                                <div className="group-hover:bg-blue-500/10 rounded-full p-2">
                                     {item.icon}
                                 </div>
-                                <span className={`text-xs  ${isActive ? "opacity-100" : "opacity-0"} :  group-hover:opacity-100 transition duration-300`}>
+                                <span className={`text-xs ${isActive ? "opacity-100" : "opacity-0"} group-hover:opacity-100 transition`}>
                                     {item.label}
                                 </span>
                             </div>
@@ -59,13 +59,10 @@ export default function Leftheader() {
 
             {/* Logout */}
             <button
-                aria-label="Logout"
-                className="flex flex-col items-center text-gray-400 hover:text-red-500 transition duration-300 group mb-6"
-                onClick={() => {
-                    console.log("Logout clicked");
-                }}
+                className="flex flex-col items-center text-gray-400 hover:text-red-500 transition duration-300 group mt-8"
+                onClick={() => console.log("Logout clicked")}
             >
-                <div className="group-hover:bg-red-500/10 p-2 rounded-full transition duration-300">
+                <div className="group-hover:bg-red-500/10 p-2 rounded-full">
                     <IoLogOut size={28} />
                 </div>
                 <span className="text-xs mt-1 opacity-0 group-hover:opacity-100 transition duration-300">
