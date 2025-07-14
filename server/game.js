@@ -12,7 +12,7 @@ function CalculateballVelocity(positions, angle)
     return{vx,vy}
 }
 const ws = new WebSocketServer({ port:  9090});
-function bootmouvement(keysPressed, positions)
+function botmouvement(keysPressed, positions)
 {
     const intervalID = setInterval(()=>{
         let pretectedposition = 50;
@@ -43,10 +43,10 @@ function bootmouvement(keysPressed, positions)
         const isup = bally < positions.p2
         // positions.p2 = bally;
         predectedtime =  Math.abs(((bally - positions.p2) / 2.5)*20)
-        isup ? keysPressed['bootUp'] = true : keysPressed['bootDown'] = true;
+        isup ? keysPressed['botUp'] = true : keysPressed['botDown'] = true;
         setTimeout(()=>{
-            keysPressed['bootUp'] = false;
-            keysPressed['bootDown'] = false
+            keysPressed['botUp'] = false;
+            keysPressed['botDown'] = false
         },predectedtime)
     },1000)
 }
@@ -54,15 +54,15 @@ ws.on('connection', (ws, request) => {
 const keysPressed = {};
 const query = url.parse(request.url, true).query
 const gametype = query.gametype;
-let positions = {p1:50, p2:50,host:0, ballx:50,score:{p1:0, p2:0}, bally:50, angle:0, direction:1, directionchanged:false, speed:1, bootrange:70} ;
+let positions = {p1:50, p2:50,host:0, ballx:50,score:{p1:0, p2:0}, bally:50, angle:0, direction:1, directionchanged:false, speed:1, botrange:70} ;
 console.log('Client connected');
 players = [...players, {id:playercount, startgame:0, positions, gametype, oponent:null, p1:0}];
 const Curentplayer = players.find(p=>p.id == playercount);
     
-if(gametype == "local" || gametype == "localvsboot"){
+if(gametype == "local" || gametype == "localvsbot"){
     Curentplayer.startgame = 1
-    if(gametype == "localvsboot")
-        bootmouvement(keysPressed, Curentplayer.positions);
+    if(gametype == "localvsbot")
+        botmouvement(keysPressed, Curentplayer.positions);
 }
 playercount++;
 
@@ -118,10 +118,10 @@ if(Curentplayer.startgame)
             Curentplayer.positions.p2=Curentplayer.positions.p2-2.5
         if(keysPressed["ArrowDown"] && (10 + Curentplayer.positions.p2) + 2.5 <= 100 )
             Curentplayer.positions.p2=Curentplayer.positions.p2+2.5}
-    if(gametype == "localvsboot"){
-        if(keysPressed["bootUp"] && Curentplayer.positions.p2 - 2.5 - 10 >= 0)
+    if(gametype == "localvsbot"){
+        if(keysPressed["botUp"] && Curentplayer.positions.p2 - 2.5 - 10 >= 0)
             Curentplayer.positions.p2=Curentplayer.positions.p2-2.5
-        if(keysPressed["bootDown"] && (10 + Curentplayer.positions.p2) + 2.5 <= 100 )
+        if(keysPressed["botDown"] && (10 + Curentplayer.positions.p2) + 2.5 <= 100 )
             Curentplayer.positions.p2=Curentplayer.positions.p2+2.5}
     if(gametype == "online")
     {
