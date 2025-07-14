@@ -4,7 +4,7 @@ import sqlite3 from 'sqlite3';
 import { Server } from 'socket.io';
 import {sockethandler} from './socket.js';
 
-// import game from './game.js';
+import game from './game.js';
 
 const fastify = Fastify();
 
