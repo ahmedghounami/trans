@@ -85,7 +85,7 @@ playercount++;
         
        return (p.id != Curentplayer.id && p.startgame == 0)
     });
-    if(player && Curentplayer.startgame == 0 && !Curentplayer.oponent)
+    if(player && Curentplayer.startgame == 0 && !Curentplayer.oponent && !player.startgame && !player.oponent)
     {
         
         player.oponent = Curentplayer;
@@ -174,6 +174,8 @@ if(Curentplayer.startgame)
   }
   else{
       Curentplayer.positions.direction == 1 ? Curentplayer.positions.score.p2++ : Curentplayer.positions.score.p1++;
+      if(Curentplayer.oponent)
+        Curentplayer.oponent.positions.score = Curentplayer.positions.score;
     if((Curentplayer.positions.score.p2 > 11 && Curentplayer.positions.score.p1 + 2 <= Curentplayer.positions.score.p2 )
         || (Curentplayer.positions.score.p1 > 11 && Curentplayer.positions.score.p2 + 2 <= Curentplayer.positions.score.p1)
     ){
@@ -181,10 +183,14 @@ if(Curentplayer.startgame)
         
         Curentplayer.positions.win = 1;
         Curentplayer.startgame = 0;
-        if(Curentplayer.oponent){
-        player.oponent.oponent = null;
-        player.oponent.p1 = 0;
-        player.oponent.startgame = 0;}}
+        Curentplayer.p1=0;
+        if(Curentplayer.oponent != null){
+        // Curentplayer.oponent.oponent = null;
+        // Curentplayer.oponent.p1 = 0;
+        Curentplayer.oponent.startgame = 0;
+    Curentplayer.oponent=null
+}
+}
     Curentplayer.positions.p1=50; Curentplayer.positions.p2=50;
     Curentplayer.positions.ballx=50; Curentplayer.positions.bally=50;
     Curentplayer.positions.angle=0; Curentplayer.positions.speed=1;
