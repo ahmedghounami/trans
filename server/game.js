@@ -5,10 +5,14 @@ let players = []
 let playercount = 1;
 function CalculateballVelocity(positions, angle)
 {
-    let vx = Math.cos(angle * (Math.PI / 180)) * positions.speed;
-    let vy = Math.sin(angle * (Math.PI / 180)) * positions.speed;
-    vx *= positions.direction;
-    vy *= positions.direction;
+    let vx = 0.5; // to make horizontale speed stable for all angles
+    let vy = Math.sin(angle * (Math.PI / 180));
+    //vector normalization to keep speed constant.
+    const lenght = Math.sqrt((vx * vx) + (vy * vy));
+    vx /=lenght; 
+    vy /=lenght; 
+    vx *= positions.direction * positions.speed;
+    vy *= positions.direction * positions.speed;
     return{vx,vy}
 }
 const ws = new WebSocketServer({ port:  9090});
@@ -146,7 +150,7 @@ if(Curentplayer.startgame)
                   diff = 0.02
               Curentplayer.positions.direction = -1;
               Curentplayer.positions.angle = diff *(-75);
-              if(Curentplayer.positions.speed < 3)
+            //   if(Curentplayer.positions.speed < 3)
                   Curentplayer.positions.speed += 0.05;
               }
       else if(((Curentplayer.positions.bally >= Curentplayer.positions.p1 - 10 && Curentplayer.positions.bally <= Curentplayer.positions.p1 + 10) && Curentplayer.positions.ballx + vx  < 4) && Curentplayer.positions.direction == -1)
@@ -156,7 +160,7 @@ if(Curentplayer.startgame)
                   diff = 0.02
               Curentplayer.positions.direction = 1;
               Curentplayer.positions.angle = diff *(75)
-              if(Curentplayer.positions.speed < 3)
+            //   if(Curentplayer.positions.speed < 3)
                   Curentplayer.positions.speed += 0.05;
           }
       if((Curentplayer.positions.bally + vy  <= 2 || Curentplayer.positions.bally + vy >= 98) && !Curentplayer.positions.directionchanged)
