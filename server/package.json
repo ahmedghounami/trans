@@ -14,12 +14,12 @@
   "scripts": {
     "start": "nodemon server.js"
   },
+  "type": "module",
   "name": "server",
   "version": "1.0.0",
   "main": "server.js",
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
-  "type": "module"
+  "description": ""
 }
