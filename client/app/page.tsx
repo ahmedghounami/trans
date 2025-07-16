@@ -11,7 +11,7 @@ export default function LandingPage() {
         <img
           src="/logo.png"
           alt="Logo"
-          className="m-[1%] rounded-full border border-gray-600 shadow-md w-[90px] h-[60px]"
+          className="m-[1%]  shadow-md w-[90px] h-[60px]"
           width={150}
           height={150}
         />

@@ -25,7 +25,7 @@ export default function Leftheader() {
                 <img
                     src="/logo.png"
                     alt="Logo"
-                    className="rounded-full border border-gray-600 shadow-md hidden md:block"
+                    className="  shadow-md hidden md:block"
                     width={200}
                     height={200}
                 />

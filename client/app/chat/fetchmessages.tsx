@@ -15,6 +15,7 @@ export default function FetchMessages({
 }) {
     const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for the end of the messages container
     const fetchMessages = async () => {
+        console.log("first time");
         try {
             const res = await fetch(`http://localhost:4000/messages/${selected}/${me}`);
             if (!res.ok) throw new Error('Failed to fetch messages');
@@ -27,13 +28,15 @@ export default function FetchMessages({
 
     useEffect(() => {
         fetchMessages();
-    }, [update, selected, me]); // Fetch messages when update changes or selected/me change
+    }, [selected]); // Fetch messages when update changes or selected/me change
 
     // Scroll to the bottom whenever messages change
     useEffect(() => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
+
+        
     }, [messages]);
 
     return (
@@ -57,6 +60,9 @@ export default function FetchMessages({
                             <p className="break-words max-w-[10rem]
             md:max-w-[20rem] lg:max-w-[30rem]">
                                 {m.content}
+                                {!m.status && (
+                                    <span className="text-yellow-400 ml-2">⏳</span>
+                                )}
                             </p>
                             <span className="text-[0.65rem] text-gray-400 mt-1 block text-right">
                                 {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

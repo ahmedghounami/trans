@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import sqlite3 from 'sqlite3';
 import { Server } from 'socket.io';
-import {sockethandler} from './socket.js';
+import { sockethandler } from './socket.js';
 
 import game from './game.js';
 
@@ -42,6 +42,7 @@ db.serialize(() => {
           sender_id INTEGER NOT NULL,
           receiver_id INTEGER NOT NULL,
           content TEXT NOT NULL,
+          status BOOL DEFAULT false,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (sender_id) REFERENCES users(id),
           FOREIGN KEY (receiver_id) REFERENCES users(id)
@@ -69,6 +70,12 @@ const io = new Server(httpServer, {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
   },
+  connectionStateRecovery: {
+    // the backup duration of the sessions and the packets
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    // whether to skip middlewares upon successful recovery
+    skipMiddlewares: true,
+  }
 });
 
 sockethandler(io, db);
