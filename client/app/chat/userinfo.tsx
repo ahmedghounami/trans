@@ -4,13 +4,15 @@ export default function UserInfo({
   user,
   setSelected,
   selected,
-  me
+  me,
+  messages
 }: {
   user: {
     id: number;
     name: string;
     picture: string;
     me: number;
+    messages: any[];
   };
   selected: number;
   setSelected: (id: number) => void;
@@ -36,7 +38,7 @@ export default function UserInfo({
     };
     fetchLastMessage();
   }
-    , [user.id, me]); // Fetch last message when user or me changes
+    , [messages, me]); // Fetch last message when user or me changes
 
 
   return (

@@ -7,13 +7,14 @@ import FetchMessages from './fetchmessages';
 export default function Room({
     selected,
     me,
+    messages,
+    setMessages
 }: {
     selected: number;
     me: number;
+    messages: any[];
+    setMessages: (messages: any[]) => void;
 }) {
-    const [messages, setMessages] = useState<any[]>([]); // Initialize messages as an empty array
-    const [update, setUpdate] = useState(0);
-
     useEffect(() => {
         // Join personal room for this user
         socket.emit("join", me); // This ensures the user is in their own room
@@ -39,7 +40,7 @@ export default function Room({
 
     return (
         <div className="flex flex-col h-full justify-between">
-            <FetchMessages selected={selected} me={me} messages={messages} setMessages={setMessages} update={update} />
+            <FetchMessages selected={selected} me={me} messages={messages} setMessages={setMessages} />
             <SendMessage me={me} selected={selected} setMessages={setMessages}/>
         </div>
     );

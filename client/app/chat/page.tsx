@@ -11,8 +11,7 @@ export default function Chat() {
     const [users, setUsers] = useState([]);
     const [selected, setSelected] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
-    
-
+    const [messages, setMessages] = useState<any[]>([]); // Initialize messages as an empty array
 
     useEffect(() => {
         const checkMobile = () => {
@@ -51,8 +50,8 @@ export default function Chat() {
                     selected={selected}
                     setSelected={setSelected}
                     isMobile={isMobile}
-                   
                     me={me}
+                    messages={messages}
                 />
             )}
             {showChat && (
@@ -84,7 +83,7 @@ export default function Chat() {
                                 )}
                             </div>
                             <div className="flex-1 overflow-y-auto">
-                                <Room selected={selected} me={me} />
+                                <Room selected={selected} me={me} messages={messages} setMessages={setMessages} />
                             </div>
                         </>
                     )}

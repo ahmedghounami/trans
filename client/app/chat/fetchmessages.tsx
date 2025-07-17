@@ -5,13 +5,12 @@ export default function FetchMessages({
     me,
     setMessages,
     messages,
-    update,
+
 }: {
     selected: number;
     me: number;
     setMessages: (messages: any[]) => void;
     messages: any[];
-    update: number;
 }) {
     const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for the end of the messages container
     const fetchMessages = async () => {
