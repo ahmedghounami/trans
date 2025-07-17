@@ -34,8 +34,7 @@ const sockethandler = (io, db) => {
             status: true,
             created_at: new Date().toISOString(),
           };
-
-          // ✅ Emit to both sender and receiver
+         
           io.to(`user:${sender_id}`).emit("new message", messageData);
           io.to(`user:${receiver_id}`).emit("new message", messageData);
         }

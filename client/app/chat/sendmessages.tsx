@@ -48,13 +48,12 @@ export default function SendMessage({
       created_at: new Date().toISOString(), // Add timestamp for message creation
     };
 
-    setMessages((prev) => [...prev, payload]);
+    // setMessages((prev) => [...prev, payload]);
 
-    if (isSocketReady) {
+    // if (isSocketReady) {
       socket.emit("chat message", payload);
       console.log("📤 Sent message:", payload);
-    }
-    console.log("📤 Sent message:", payload);
+    // }
     // setMessages((prevMessages: any[]) => [...prevMessages, payload]);
     setMessage(""); // Clear the input field after sending
   };

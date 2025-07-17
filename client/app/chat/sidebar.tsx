@@ -68,6 +68,7 @@ export default function Sidebar({
                                 user={user}
                                 selected={selected}
                                 setSelected={setSelected}
+                                me={me}
                             />
                         ))}
                     </div>
