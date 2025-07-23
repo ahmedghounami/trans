@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { Snippet } from "next/font/google";
+import { Suspense, useEffect, useState } from "react";
 
 export default function UserInfo({
   user,
@@ -24,21 +27,30 @@ export default function UserInfo({
     setSelected(user.id);
   };
 
-  useEffect(() => {
-    // fetch last message between me and user 
+  // console.log(user.id, "user id in userinfo");
+  // console.log(me, "me in userinfo");
+  
+  useEffect(() => {  
     const fetchLastMessage = async () => {
       try {
         const res = await fetch(`http://localhost:4000/lastmessage/${me}/${user.id}`);
+        if (!res.ok) throw new Error("Response not ok");
+
         const data = await res.json();
-        setLastMessage(data.content);
-        console.log("Last message fetched:", data);
+        if (data && data.content) {
+          setLastMessage(data.content);
+          console.log("Last message fetched:", data);
+        } else {
+          setLastMessage(""); // Clear if no message
+          console.log("No message data received");
+        }
       } catch (error) {
         console.error("Error fetching last message:", error);
+        setLastMessage("");
       }
     };
     fetchLastMessage();
-  }
-    , [messages, me]); // Fetch last message when user or me changes
+  }, [me, user?.id, messages]);
 
 
   return (

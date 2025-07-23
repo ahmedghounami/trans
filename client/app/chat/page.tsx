@@ -13,6 +13,7 @@ export default function Chat() {
     const [isMobile, setIsMobile] = useState(false);
     const [messages, setMessages] = useState<any[]>([]); // Initialize messages as an empty array
 
+    
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 768);
@@ -21,7 +22,7 @@ export default function Chat() {
         window.addEventListener("resize", checkMobile); // Update isMobile on resize
         return () => window.removeEventListener("resize", checkMobile); // Cleanup listener on unmount
     }, []);
-
+    
     useEffect(() => {
         async function fetchUsers() {
             try {
@@ -34,11 +35,20 @@ export default function Chat() {
         }
         fetchUsers();
     }, []);
-
-    const { user } = useUser();
-
     
-    const me = user?.id;
+    const { user, loading } = useUser();
+    console.log("User context:", user, "Loading:", loading);
+    if (loading) {
+        return <div className="flex items-center justify-center h-screen text-white">Loading...</div>;
+    }
+
+    if (!user) {
+        return <div className="flex items-center justify-center h-screen text-white">Failed to load user.</div>;
+    }
+    const me = user.id;
+    
+    console.log("Current user:", user);
+
     const showSidebar = !isMobile || (isMobile && selected === 0);
     const showChat = !isMobile || (isMobile && selected !== 0);
 
@@ -64,6 +74,14 @@ export default function Chat() {
                         <>
                             <div className="flex justify-between  items-center border-b border-[#a0a0a0] px-4 py-3 gap-4">
                                 <div className="flex items-center gap-4">
+                                    {isMobile && (
+                                        <button
+                                            className="text-gray-400 hover:text-white transition-colors rotate-180"
+                                            onClick={() => setSelected(0)}
+                                        >
+                                            <FaArrowRight size={24} />
+                                        </button>
+                                    )}
                                     <img
                                         src={users.find(user => user.id === selected)?.picture || "/profile.jpg"}
                                         alt="Profile"
@@ -73,14 +91,6 @@ export default function Chat() {
                                         {users.find(user => user.id === selected)?.name}
                                     </h2>
                                 </div>
-                                {isMobile && (
-                                    <button
-                                        className="text-gray-400 hover:text-white transition-colors"
-                                        onClick={() => setSelected(0)}
-                                    >
-                                        <FaArrowRight size={24} />
-                                    </button>
-                                )}
                             </div>
                             <div className="flex-1 overflow-y-auto">
                                 <Room selected={selected} me={me} messages={messages} setMessages={setMessages} />

@@ -58,13 +58,17 @@ export default function Sidebar({
                     placeholder="Search..."
                     className="w-full pl-10 pr-3 py-2 rounded-xl border border-gray-300 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
-                {value && (
-                    <Search searchResults={searchResults} me={me} setSelected={setSelected} value={value} setValue={setValue} />
-                )}
+                {value &&
+                    (searchResults.length > 0 ? (
+                        <Search searchResults={searchResults} me={me} setSelected={setSelected} value={value} setValue={setValue} />
+                    ) :
+                        <div className="absolute top-full left-0 w-full bg-[#1a1a1a] rounded-lg shadow-lg mt-2">
+                            <p className="p-4 text-gray-500">No results found</p>
+                        </div>
+                    )}
 
             </div>
             <div className="flex-1 overflow-y-auto px-2 pb-4">
-
                 {users.filter(user => user.id !== me).map(user => (
                     <UserInfo
                         key={user.id}
