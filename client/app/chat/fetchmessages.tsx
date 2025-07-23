@@ -35,16 +35,15 @@ export default function FetchMessages({
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
 
-        
+
     }, [messages]);
 
     return (
-        <div className="flex flex-col">
-            <div className="flex justify-center items-center p-4">
+        <div className="flex flex-col h-[86%]">
+            <div className="flex justify-center items-center p-2">
                 <p className="text-gray-500 text-sm">{messages.length} messages</p>
             </div>
-
-            <div className="flex flex-col h-[60vh] overflow-y-auto px-4 py-2 space-y-3 custom-scrollbar">
+            <div className="flex flex-col overflow-y-auto px-4 py-2 space-y-3 custom-scrollbar">
                 {messages.map((m: any) => {
                     const isMe = m.sender_id === me;
                     return (
@@ -60,7 +59,7 @@ export default function FetchMessages({
             md:max-w-[20rem] lg:max-w-[30rem]">
                                 {m.content}
                                 {!m.status && (
-                                    <span className="text-yellow-400 ml-2">⏳</span>
+                                    <span className="text-yellow-400 ml-2"></span>
                                 )}
                             </p>
                             <span className="text-[0.65rem] text-gray-400 mt-1 block text-right">

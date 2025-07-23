@@ -59,7 +59,7 @@ export default function SendMessage({
   };
 
   return (
-    <div className="p-4 border-t border-gray-600 ">
+    <div className="p-4 border-t border-gray-600 h-[12%]">
       <div className="relative flex items-center">
         <input
           type="text"

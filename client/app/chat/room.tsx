@@ -39,7 +39,7 @@ export default function Room({
     }, [selected, me]);
 
     return (
-        <div className="flex flex-col h-full justify-between">
+        <div className="flex flex-col h-full justify-between relative">
             <FetchMessages selected={selected} me={me} messages={messages} setMessages={setMessages} />
             <SendMessage me={me} selected={selected} setMessages={setMessages}/>
         </div>
