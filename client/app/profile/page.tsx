@@ -43,7 +43,7 @@ export default function Profile() {
                         🎮 Game History
                     </h1>
 
-                    <div className="grid grid-cols-5 justify-items-center text-[#b9b3dfcc]  text-xs font-extrabold uppercase tracking-wider px-4 py-2 border-b border-[#7b5ddf26] bg-[#ffffff04]">
+                    <div className="grid grid-cols-5 justify-items-center text-[#b9b3dfcc]  text-xs font-extrabold uppercase tracking-wider px-5 py-2 border-b border-[#7b5ddf26] bg-[#ffffff04]">
                         <div>Date</div>
                         <div>Opponent</div>
                         <div>Result</div>

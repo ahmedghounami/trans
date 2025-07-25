@@ -23,7 +23,7 @@ export default function OpponentInfo({ id }:
   if (!opponent) return <span>Loading...</span>;
 
   return (
-    <span className="flex items-center gap-2 text-sm text-[#d6d5d5cd] font-light tracking-tight">
+    <span className="flex gap-2  font-bold text-sm text-[#d6d6d6]  tracking-tight">
       <img
         src={opponent.picture}
         alt="opponent"

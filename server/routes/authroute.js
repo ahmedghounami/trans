@@ -1,4 +1,5 @@
 
+
 import jwt from 'jsonwebtoken';
 
 const SECRET = 'your_jwt_secret';
@@ -34,7 +35,7 @@ export default async function authRoutes(fastify, opts) {
                         user: {
                             id: row.id,
                             name: row.name,
-                            picture: row.picture,
+                            picture: row.picture
                         },
                     });
                     resolve(row);
@@ -57,11 +58,13 @@ export default async function authRoutes(fastify, opts) {
                         reply.status(500).send({ error: 'Database error' });
                         return reject(err);
                     }
+                    console.log('User data:', row)
                     if (row) {
                         reply.send({
                             id: row.id,
                             name: row.name,
                             picture: row.picture,
+                            gold: row.gold,
                         });
                         resolve(row);
                     } else {

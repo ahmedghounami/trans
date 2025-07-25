@@ -33,6 +33,7 @@ db.serialize(() => {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL,
           picture TEXT NOT NULL,
+          gold INTEGER DEFAULT 0,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
           );
           `);

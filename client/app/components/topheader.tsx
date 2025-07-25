@@ -42,7 +42,7 @@ export default function Topheader() {
             ) : (
               <>
                 <h1 className="text-lg font-semibold text-white">{user.name}</h1>
-                <p className="text-sm text-purple-400">{user.balance || '1000'} $</p>
+                <p className="text-sm text-purple-400">{user.gold} $</p>
               </>
             )}
           </div>
