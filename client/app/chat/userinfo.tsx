@@ -23,12 +23,9 @@ export default function UserInfo({
   const [lastmessage, setLastMessage] = useState("");
 
   const selectedhandler = () => {
-    console.log("Selected user is:", user);
     setSelected(user.id);
   };
 
-  // console.log(user.id, "user id in userinfo");
-  // console.log(me, "me in userinfo");
   
   useEffect(() => {  
     const fetchLastMessage = async () => {
@@ -39,7 +36,6 @@ export default function UserInfo({
         const data = await res.json();
         if (data && data.content) {
           setLastMessage(data.content);
-          console.log("Last message fetched:", data);
         } else {
           setLastMessage(""); // Clear if no message
           console.log("No message data received");

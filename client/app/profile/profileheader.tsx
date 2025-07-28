@@ -1,11 +1,11 @@
 export default function ProfileHeader({ profileImage, name }: { profileImage: string, name: string }) {
     return (
-        <div className="flex-2/6 relative flex flex-col justify-end items-center">
+        <div className="flex-1/6 relative flex flex-col justify-end items-center">
 
             <img src="/online.jpeg" alt="background"
                 className="absolute top-2 left-[2%] self-center w-[96%] h-[85%] object-cover rounded-2xl z-0"
             />
-
+            
             <div className="absolute top-[77%] w-[90%] bg-[rgba(0,0,0,0.75)] flex p-2 rounded-2xl h-[25%]">
                 <img src={profileImage} alt="Profile" className="w-16 h-16 rounded-full" />
                 <div className="flex flex-col ml-4 flex-1/4">

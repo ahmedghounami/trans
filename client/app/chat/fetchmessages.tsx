@@ -14,7 +14,6 @@ export default function FetchMessages({
 }) {
     const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for the end of the messages container
     const fetchMessages = async () => {
-        console.log("first time");
         try {
             const res = await fetch(`http://localhost:4000/messages/${selected}/${me}`);
             if (!res.ok) throw new Error('Failed to fetch messages');

@@ -37,7 +37,6 @@ export default function Chat() {
     }, []);
     
     const { user, loading } = useUser();
-    console.log("User context:", user, "Loading:", loading);
     if (loading) {
         return <div className="flex items-center justify-center h-screen text-white">Loading...</div>;
     }
@@ -47,7 +46,6 @@ export default function Chat() {
     }
     const me = user.id;
     
-    console.log("Current user:", user);
 
     const showSidebar = !isMobile || (isMobile && selected === 0);
     const showChat = !isMobile || (isMobile && selected !== 0);

@@ -27,7 +27,6 @@ export default function Sidebar({
             try {
                 const res = await fetch('http://localhost:4000/search?search=' + value);
                 const data = await res.json();
-                console.log("Fetched users:", searchResults);
                 setSearchResults(data);
             } catch (error) {
                 console.error("Error fetching users:", error);

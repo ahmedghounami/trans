@@ -38,7 +38,7 @@ export default async function gameRoutes(fastify, opts) {
         });
     });
 
-    // get all games for a specific user by user id from qury
+    // get all games for a specific user 
 
     fastify.get('/games/:userId', async (req, reply) => {
         const userId = req.params.userId;
@@ -53,5 +53,33 @@ export default async function gameRoutes(fastify, opts) {
             });
         });
     });
+    // get all games won by a specific user
+    // fastify.get('/games/won/:userId', async (req, reply) => {
+    //     const userId = req.params.userId;
+
+    //     return new Promise((resolve, reject) => {
+    //         db.all(`SELECT * FROM games WHERE winner_id = ?`, [userId], (err, rows) => {
+    //             if (err) {
+    //                 reply.status(500).send({ error: 'Database error' });
+    //                 return reject(err);
+    //             }
+    //             resolve(rows);
+    //         });
+    //     });
+    // });
+    // // get all games lost by a specific user
+    // fastify.get('/games/lost/:userId', async (req, reply) => {
+    //     const userId = req.params.userId;
+
+    //     return new Promise((resolve, reject) => {
+    //         db.all(`SELECT * FROM games WHERE (player1_id = ? AND winner_id != ?) OR (player2_id = ? AND winner_id != ?)`, [userId, userId, userId, userId], (err, rows) => {
+    //             if (err) {
+    //                 reply.status(500).send({ error: 'Database error' });
+    //                 return reject(err);
+    //             }
+    //             resolve(rows);
+    //         });
+    //     });
+    // });
 }
 // gameRoutes.js (ES Module)

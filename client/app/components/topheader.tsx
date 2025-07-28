@@ -8,7 +8,6 @@ import Link from 'next/link';
 export default function Topheader() {
   const { user } = useUser();
   const [value, setValue] = useState("");
-  console.log("User in Topheader:", user);
 
   return (
     <div className="flex w-full justify-between items-center p-4 shadow-md rounded-lg">

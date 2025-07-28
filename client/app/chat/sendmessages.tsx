@@ -52,7 +52,6 @@ export default function SendMessage({
 
     // if (isSocketReady) {
       socket.emit("chat message", payload);
-      console.log("📤 Sent message:", payload);
     // }
     // setMessages((prevMessages: any[]) => [...prevMessages, payload]);
     setMessage(""); // Clear the input field after sending
