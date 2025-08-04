@@ -3,11 +3,11 @@ import { useUser } from '../Context/UserContext';
 import { Skeleton } from '@heroui/skeleton';
 import { CiSearch } from 'react-icons/ci';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function Topheader() {
   const { user } = useUser();
   const [value, setValue] = useState("");
-  console.log("User in Topheader:", user);
 
   return (
     <div className="flex w-full justify-between items-center p-4 shadow-md rounded-lg">
@@ -31,7 +31,7 @@ export default function Topheader() {
         <div
           className='flex items-center ' >
           <IoNotifications size={24} className="text-white" />
-
+        <Link href="/profile" className="flex items-center ml-4">
           <div className="flex flex-col ml-6">
             {!user ? (
               <>
@@ -41,7 +41,7 @@ export default function Topheader() {
             ) : (
               <>
                 <h1 className="text-lg font-semibold text-white">{user.name}</h1>
-                <p className="text-sm text-purple-400">{user.balance || '1000'} $</p>
+                <p className="text-sm text-purple-400">{user.gold} $</p>
               </>
             )}
           </div>
@@ -57,7 +57,9 @@ export default function Topheader() {
               height={48}
             />
           )}
+          </Link>
         </div>
+
       </div>
       );
 }

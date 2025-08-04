@@ -3,9 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { useUser } from '../Context/UserContext';
 export default function LoginPage() {
     const router = useRouter();
     const [name, setName] = useState('');
+    
+    const user = useUser();
+    
 
     const handleLogin = async () => {
         const name = document.querySelector('input[name="name"]')?.value.trim();
@@ -25,9 +29,11 @@ export default function LoginPage() {
                 secure: true,
                 sameSite: "lax",
             });
-
-            router.push("/chat");
+            
+            // router.push("/chat");
+            window.location.href = "/chat"; // Redirect to chat page
         }
+        
         else {
             const errorData = await res.json();
             alert(`Login failed: ${errorData.message}`);

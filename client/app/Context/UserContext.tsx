@@ -21,10 +21,11 @@ export const UserProvider = ({ children }) => {
             Authorization: `Bearer ${Cookies.get("token")}`,
           },
         });
-        if (!res.ok) {
-          throw new Error("Failed to fetch user data");
-        }
+        // if (!res.ok) {
+        //   throw new Error("Failed to fetch user data");
+        // }
         const data = await res.json();
+        console.log("User data fetched:", data);
         setUser(data);
       } catch (error) {
         console.error("Error fetching me:", error);

@@ -7,13 +7,14 @@ import FetchMessages from './fetchmessages';
 export default function Room({
     selected,
     me,
+    messages,
+    setMessages
 }: {
     selected: number;
     me: number;
+    messages: any[];
+    setMessages: (messages: any[]) => void;
 }) {
-    const [messages, setMessages] = useState([]);
-    const [update, setUpdate] = useState(0);
-
     useEffect(() => {
         // Join personal room for this user
         socket.emit("join", me); // This ensures the user is in their own room
@@ -25,7 +26,8 @@ export default function Room({
                 (msg.sender_id === me && msg.receiver_id === selected)
             ) {
                 console.log("📥 Received live message:", msg);
-                setUpdate((u) => u + 1);
+                // insert the new message at the end of the messages array
+                setMessages((prevMessages) => [...prevMessages, msg]);
             }
         };
 
@@ -37,9 +39,9 @@ export default function Room({
     }, [selected, me]);
 
     return (
-        <div className="flex flex-col h-full justify-between">
-            <FetchMessages selected={selected} me={me} messages={messages} setMessages={setMessages} update={update} />
-            <SendMessage me={me} selected={selected} />
+        <div className="flex flex-col h-full justify-between relative">
+            <FetchMessages selected={selected} me={me} messages={messages} setMessages={setMessages} />
+            <SendMessage me={me} selected={selected} setMessages={setMessages}/>
         </div>
     );
 }

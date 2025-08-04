@@ -3,12 +3,21 @@ import { useEffect, useState } from "react";
 import socket from "../socket";
 import { RiSendPlane2Fill } from "react-icons/ri";
 
+type Message = {
+  content: string;
+  sender_id: number;
+  receiver_id: number;
+  status: boolean;
+};
+
 export default function SendMessage({
   me,
   selected,
+  setMessages,
 }: {
   me: number;
   selected: number;
+  setMessages: (messages: Message[]) => void;
 }) {
   const [message, setMessage] = useState("");
 
@@ -29,20 +38,27 @@ export default function SendMessage({
 
   const sendMessage = () => {
     if (!message.trim()) return;
-
+    const isSocketReady = socket.connected && navigator.onLine;
     const payload = {
+      id: Date.now(), // Use timestamp as a simple unique ID
       content: message,
       sender_id: me,
+      status: isSocketReady, // Check if the user is online
       receiver_id: selected,
+      created_at: new Date().toISOString(), // Add timestamp for message creation
     };
 
-    socket.emit("chat message", payload);
-    console.log("📤 Sent message:", payload);
-    setMessage("");
+    // setMessages((prev) => [...prev, payload]);
+
+    // if (isSocketReady) {
+      socket.emit("chat message", payload);
+    // }
+    // setMessages((prevMessages: any[]) => [...prevMessages, payload]);
+    setMessage(""); // Clear the input field after sending
   };
 
   return (
-    <div className="p-4 border-t border-gray-600 ">
+    <div className="p-4 border-t border-gray-600 h-[12%]">
       <div className="relative flex items-center">
         <input
           type="text"

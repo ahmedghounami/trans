@@ -5,13 +5,12 @@ export default function FetchMessages({
     me,
     setMessages,
     messages,
-    update,
+
 }: {
     selected: number;
     me: number;
     setMessages: (messages: any[]) => void;
     messages: any[];
-    update: number;
 }) {
     const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for the end of the messages container
     const fetchMessages = async () => {
@@ -27,22 +26,23 @@ export default function FetchMessages({
 
     useEffect(() => {
         fetchMessages();
-    }, [update, selected, me]); // Fetch messages when update changes or selected/me change
+    }, [selected]); // Fetch messages when update changes or selected/me change
 
     // Scroll to the bottom whenever messages change
     useEffect(() => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
+
+
     }, [messages]);
 
     return (
-        <div className="flex flex-col">
-            <div className="flex justify-center items-center p-4">
+        <div className="flex flex-col h-[86%]">
+            <div className="flex justify-center items-center p-2">
                 <p className="text-gray-500 text-sm">{messages.length} messages</p>
             </div>
-
-            <div className="flex flex-col h-[60vh] overflow-y-auto px-4 py-2 space-y-3 custom-scrollbar">
+            <div className="flex flex-col overflow-y-auto px-4 py-2 space-y-3 custom-scrollbar">
                 {messages.map((m: any) => {
                     const isMe = m.sender_id === me;
                     return (
@@ -57,6 +57,9 @@ export default function FetchMessages({
                             <p className="break-words max-w-[10rem]
             md:max-w-[20rem] lg:max-w-[30rem]">
                                 {m.content}
+                                {!m.status && (
+                                    <span className="text-yellow-400 ml-2"></span>
+                                )}
                             </p>
                             <span className="text-[0.65rem] text-gray-400 mt-1 block text-right">
                                 {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
