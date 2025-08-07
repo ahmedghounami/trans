@@ -68,6 +68,7 @@ if(gametype == "local" || gametype == "localvsbot"){
     if(gametype == "localvsbot")
         botmouvement(keysPressed, Curentplayer.positions);
 }
+    let post = 0
   const intervalId = setInterval(()=>{
     const player = players.find(p=>{
         
@@ -86,7 +87,47 @@ if(gametype == "local" || gametype == "localvsbot"){
     {
         Curentplayer.startgame = 1;
     }
-if(Curentplayer.startgame)
+    // console.log(Curentplayer.p1);
+    if(Curentplayer.positions.win && Curentplayer.startgame)
+    {
+        console.log("WIN");
+        if(Curentplayer.p1 == 1 && post == 0)
+        {
+            console.log("POSt");
+            
+            async function postresult(){
+            const id = Curentplayer.id;
+            console.log(id);
+            const winnergold = 50;
+            const losergold = 0;
+            let oppid = Curentplayer.id;
+            if(Curentplayer.oponent)
+                oppid = Curentplayer.oponent.id
+            const response = await fetch('http://localhost:4000/games/:' + id + '/:' + oppid ,{  method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    player1_score: Curentplayer.positions.score.p2,
+                    player2_score: Curentplayer.positions.score.p1,
+                    player1_gold_earned: Curentplayer.positions.win == 1 ? winnergold : losergold,
+                    player2_gold_earned: Curentplayer.positions.win == 1 ? losergold : winnergold,
+                    winner_id: Curentplayer.positions.win == 1 ? id : oppid
+                    
+
+                })
+            })
+            const res = await response.json()
+            // console.log("HERE",res);
+        }
+                postresult();
+                post = 1;
+        }
+
+        ws.send(JSON.stringify(Curentplayer.positions))
+        ws.close();
+    }
+if(Curentplayer.startgame && !Curentplayer.positions.win)
 {
   let {vx, vy} = CalculateballVelocity(Curentplayer.positions, Curentplayer.positions.angle)
   if(Curentplayer.p1 == 0 ){
@@ -161,7 +202,6 @@ if(Curentplayer.startgame)
         }
   }
   else{
-    console.log(Curentplayer.id);
     if(Curentplayer.p1 == 0 ){
       Curentplayer.positions.direction == 1 ? Curentplayer.positions.score.p2++ : Curentplayer.positions.score.p1++;
     }
@@ -170,18 +210,18 @@ if(Curentplayer.startgame)
     if((Curentplayer.positions.score.p2 > 11 && Curentplayer.positions.score.p1 + 2 <= Curentplayer.positions.score.p2 )
         || (Curentplayer.positions.score.p1 > 11 && Curentplayer.positions.score.p2 + 2 <= Curentplayer.positions.score.p1)
     ){
-        console.log("WIN");
         
         Curentplayer.positions.win = 1;
         if(Curentplayer.positions.score.p1 > Curentplayer.positions.score.p2)
             Curentplayer.positions.win = -1;
-        Curentplayer.startgame = 0;
-        Curentplayer.p1=0;
+        // Curentplayer.startgame = 0;
+        // Curentplayer.p1=0;
         if(Curentplayer.oponent != null){
+            Curentplayer.oponent.positions.win = -1 * Curentplayer.positions.win
         // Curentplayer.oponent.oponent = null;
         // Curentplayer.oponent.p1 = 0;
-        Curentplayer.oponent.startgame = 0;
-    Curentplayer.oponent=null
+        // Curentplayer.oponent.startgame = 0;
+    // Curentplayer.oponent=null
 }
 }
     Curentplayer.positions.p1=50; Curentplayer.positions.p2=50;
@@ -214,14 +254,12 @@ ws.on('connection', (ws, request) => {
 const keysPressed = {};
 const query = url.parse(request.url, true).query
 const gametype = query.gametype;
-let positions = {p1:50, p2:50,host:0, ballx:50,score:{p1:0, p2:0}, bally:50, angle:0, direction:1, directionchanged:false, speed:1, botrange:70} ;
+let positions = {p1:50, p2:50,host:0, ballx:50,score:{p1:11, p2:11}, bally:50, angle:0, direction:1, directionchanged:false, speed:1, botrange:70} ;
 console.log('Client connected');
 let intervalId;
   ws.on('message', (msg) => {
     const data = JSON.parse(msg);
     if(data.type == 'getpositions' ){
-    console.log('getpositions');
-    console.log(data.id);
     playerid = data.id;
     const playeringame = players.find(p=>p.id == playerid);
     if(!playeringame)
