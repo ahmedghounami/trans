@@ -3,9 +3,13 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
+import Loader from "@/app/components/loading";
+import { useRouter } from "next/navigation";
 
 export default function Game()
 {
+    
+      const router = useRouter();
     const serchParams = useSearchParams()
     const gametype = serchParams.get('gametype')
     // console.log(gametype);
@@ -61,8 +65,27 @@ export default function Game()
         document.addEventListener('keydown', keydown)
         document.addEventListener('keyup', keyup)
 }},[me])
-    // console.log(Positions);
-    
+    if(!Positions.score) {
+        console.log("loading");
+    return<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
+        <Loader word={"loading..."}></Loader>
+    </div>
+    }
+    if (Positions.win) {
+        setTimeout(() => {
+            router.push("/home")
+        }, 500);
+        console.log("Victory");
+        console.log(Positions.win);
+        
+    return<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
+        {Positions.win == 1 ?
+            <Loader word={"Victory!"}></Loader>:
+            <Loader word={"Defeat"}></Loader>
+    }
+    </div>
+        
+    }
     return<div className="bg-gray-400/30 backdrop-blur-sm flex justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
         <div className="flex  flex-col gap-5 w-2/3">
             <div className="flex items-center justify-between px-5">

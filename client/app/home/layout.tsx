@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
+import SkinContainer from "../components/SkinContainer";
 
 export default function Home({
   children,
@@ -9,17 +10,23 @@ export default function Home({
   children: React.ReactNode;
 }> ) {
   const [GameType, setGameType] = useState("localvsbot")
+  const [skinType, setSkinType] = useState('table');
   const router = useRouter();
   return (
 <>
-      <div className="flex flex-col p-4 gap-4 w-full h-full">
-        <div className="flex-1 flex gap-4">
+      <div className="flex flex-col overflow-y-scroll [&::-webkit-scrollbar-thumb]:bg-blue-400
+               [&::-webkit-scrollbar-thumb]:rounded-full
+               [&::-webkit-scrollbar]:w-2
+               h-[calc(100vh-65px)]
+               w-[calc(100vw-88px)]
+                p-4  gap-4  ">
+        <div className="flex-1 min-h-64 flex gap-4">
           <div className=" relative   overflow-hidden rounded-2xl flex-4/6">
             <Image fill  className=" object-cover object-center" src={`/${GameType}.webp`}  alt="profile"></Image>
             <div className="absolute h-1/6  bottom-0 left-0 right-0">
               <div className="bg-black/40 flex justify-evenly absolute w-full z-20 h-full  backdrop-blur-sm">
               <div className="bg-gray-300/50 flex items-center justify-center self-center  h-3/4 aspect-square rounded-full"></div>
-              <button onClick={()=>{router.push('/home/game?gametype=' + GameType)}} className="bg-blue-400 flex items-center justify-center  h-full aspect-square rounded-full -translate-y-1/2">
+              <button onClick={()=>{router.push('/home/game?gametype=' + GameType)}} className="bg-blue-400 cursor-pointer flex items-center justify-center  h-full aspect-square rounded-full -translate-y-1/2">
             <Image className=" h-3/4 w-fit " src="game-controller.svg" width={60} height={40} alt="profile"></Image>
               </button>
               <div className="bg-gray-300/50 flex items-center justify-center self-center  h-3/4 aspect-square rounded-full"></div>
@@ -30,7 +37,7 @@ export default function Home({
           <div className="bg-amber-200 flex-2/6 "> </div>
 
         </div>
-          <div className="px-4 py-2 max-w-[calc(100vw-120px)] gap-4   overflow-y-hidden overflow-x-scroll flex-non
+          <div className="px-4 py-2 max-w-[calc(100vw-120px)] gap-4    overflow-x-scroll flex-none 
             flex 
            [&::-webkit-scrollbar-thumb]:bg-blue-400
            [&::-webkit-scrollbar-thumb]:rounded-full
@@ -69,7 +76,26 @@ export default function Home({
               </div>
             </div>
         </div>
-        <div className="bg-blue-500 flex-1">skins</div>
+        <div className="flex gap-4 flex-col flex-1">
+          <div className="flex justify-center flex-none w-3/5 self-center relative">
+            <label className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 ${skinType == "table"?"text-blue-500" :"text-white"}`}>
+              <input className="hidden" type="radio" name="skin" onChange={()=>setSkinType('table')} value="table" defaultChecked  />
+            table
+            </label>
+            <label className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 ${skinType == "ball"?"text-blue-500" :"text-white"}`}>
+              <input className="hidden" type="radio" name="skin" onChange={()=>setSkinType('ball')} value="ball" />
+            ball
+            </label>
+            <label className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 ${skinType == "paddle"?"text-blue-500" :"text-white"}`}>
+              <input className="hidden" type="radio" name="skin" onChange={()=>setSkinType('paddle')} value="paddle"/>
+            paddle
+            </label>
+            <div className={`absolute h-2 w-full bottom-0 rounded-full bg-amber-50`}>
+              <div className={`absolute transition-all duration-300 h-2 w-1/3 ${skinType == 'table' ? "left-0":skinType == 'ball'?"left-1/3":"left-2/3"} bottom-0 rounded-full bg-blue-500`}></div>
+            </div>
+          </div>
+          <div className="flex-1 flex min-h-56 "><SkinContainer skinType={skinType}></SkinContainer></div>
+        </div>
       </div>
         {children}
       </>

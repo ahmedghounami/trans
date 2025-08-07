@@ -173,6 +173,8 @@ if(Curentplayer.startgame)
         console.log("WIN");
         
         Curentplayer.positions.win = 1;
+        if(Curentplayer.positions.score.p1 > Curentplayer.positions.score.p2)
+            Curentplayer.positions.win = -1;
         Curentplayer.startgame = 0;
         Curentplayer.p1=0;
         if(Curentplayer.oponent != null){
@@ -186,8 +188,8 @@ if(Curentplayer.startgame)
     Curentplayer.positions.ballx=50; Curentplayer.positions.bally=50;
     Curentplayer.positions.angle=0; Curentplayer.positions.speed=1;
   }
-}
   ws.send(JSON.stringify(Curentplayer.positions))
+}
   }, 20)
   
 ws.on('close', () => {
