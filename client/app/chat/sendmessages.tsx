@@ -1,73 +1,85 @@
-"use client"
-import { useEffect, useState } from 'react';
+"use client";
+import { useEffect, useState } from "react";
+import socket from "../socket";
+import { RiSendPlane2Fill } from "react-icons/ri";
+
+type Message = {
+  content: string;
+  sender_id: number;
+  receiver_id: number;
+  status: boolean;
+};
 
 export default function SendMessage({
-    me,
-    selected,
-    setMessages,
+  me,
+  selected,
+  setMessages,
 }: {
-    me: number;
-    selected: number;
-    setMessages: (messages: any[]) => void;
+  me: number;
+  selected: number;
+  setMessages: (messages: Message[]) => void;
 }) {
-    const [socket, setSocket] = useState<WebSocket | null>(null);
-    const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
-    useEffect(() => {
-        const ws = new WebSocket('ws://localhost:4000');
-        ws.onopen = () => console.log('✅ WebSocket connected');
-        ws.onmessage = (e) => console.log('📨 Message:', e.data);
-        ws.onerror = (err) => console.error('WebSocket error:', err);
-        setSocket(ws);
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("✅ Socket connected");
+      socket.emit("join", me);
+    });
+    socket.on("disconnect", () => {
+      console.log("🔌 Socket disconnected");
+    });
 
-        return () => {
-            ws.close();
-        };
-    }, []);
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+    };
+  }, [me]);
 
-    const sendMessage = async () => {
-        if (!message.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
-
-        const payload = {
-            content: message,
-            sender_id: me,
-            receiver_id: selected,
-        };
-
-        socket.send(JSON.stringify(payload));
-        setMessage('');
-        try {
-            const res = await fetch(`http://localhost:4000/messages/${selected}/${me}`);
-            if (!res.ok) throw new Error('Failed to fetch messages');
-            const data = await res.json();
-            setMessages(data);
-        } catch (err) {
-            console.error('❗ Fetch error:', err);
-        }
-
+  const sendMessage = () => {
+    if (!message.trim()) return;
+    const isSocketReady = socket.connected && navigator.onLine;
+    const payload = {
+      id: Date.now(), // Use timestamp as a simple unique ID
+      content: message,
+      sender_id: me,
+      status: isSocketReady, // Check if the user is online
+      receiver_id: selected,
+      created_at: new Date().toISOString(), // Add timestamp for message creation
     };
 
-    return (
-        <div className="p-4 flex ">
-            <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type your message..."
-                className="border p-2 rounded w-full"
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        sendMessage();
-                    }
-                }}
-            />
-            <button
-                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={sendMessage}
-            >
-                Send
-            </button>
-        </div>
-    );
+    // setMessages((prev) => [...prev, payload]);
+
+    // if (isSocketReady) {
+      socket.emit("chat message", payload);
+    // }
+    // setMessages((prevMessages: any[]) => [...prevMessages, payload]);
+    setMessage(""); // Clear the input field after sending
+  };
+
+  return (
+    <div className="p-4 border-t border-gray-600 h-[12%]">
+      <div className="relative flex items-center">
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type your message..."
+          className="w-full py-3 pl-5 pr-12 border-[#3800d2]  border-1 text-white placeholder-gray-400 rounded-full focus:outline-none focus:ring-0 focus:ring-blue-500 transition-all duration-200"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              sendMessage();
+            }
+          }}
+        />
+        <button
+          onClick={sendMessage}
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#7700ff]  active:scale-95 transition-transform duration-150 "
+        >
+          <RiSendPlane2Fill size={26} />
+        </button>
+      </div>
+    </div>
+  );
 }

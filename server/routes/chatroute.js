@@ -1,6 +1,20 @@
 export default async function chatRoutes(fastify, opts) {
     const db = opts.db;
 
+    fastify.get('/search', async (req, reply) => {
+        const { search } = req.query;
+        return new Promise((resolve, reject) => {
+            db.all(`SELECT * FROM users WHERE name LIKE ?`, [`%${search || ''}%`], (err, rows) => { // search for users by name
+                if (err) {
+                    console.error('Get users error:', err.message);
+                    reply.status(500).send({ error: 'Database error' });
+                    return reject(err);
+                }
+                resolve(rows);
+            }
+            );
+        });
+    });
 
     fastify.post('/users', async (req, reply) => {
         const { name, picture } = req.body;
@@ -64,4 +78,35 @@ export default async function chatRoutes(fastify, opts) {
         });
     });
 
+    // Get last message between two users
+    fastify.get('/lastmessage/:sender_id/:receiver_id', async (req, reply) => {
+        const { sender_id, receiver_id } = req.params;
+      
+        return new Promise((resolve, reject) => {
+          db.get(
+            `SELECT * FROM messages 
+             WHERE (sender_id = ? AND receiver_id = ?) 
+                OR (sender_id = ? AND receiver_id = ?) 
+             ORDER BY created_at DESC LIMIT 1`,
+            [sender_id, receiver_id, receiver_id, sender_id],
+            (err, row) => {
+              if (err) {
+                reply.status(500).send({ error: 'Database error' });
+                return reject(err);
+              }
+      
+              if (!row) {
+                // 👇 Always send a JSON object, even if empty
+                reply.send({ content: "" });
+                return resolve();
+              }
+      
+              // ✅ Message found, send it
+              reply.send({ content: row.content });
+              resolve();
+            }
+          );
+        });
+      });
+      
 }
