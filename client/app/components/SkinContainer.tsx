@@ -15,7 +15,7 @@ useEffect(()=>{
     setSkins(data)
 },[skinType])
   return( 
-    <div className="px-4 py-2 max-w-[calc(100vw-120px)] gap-8   overflow-y-hidden overflow-x-scroll 
+    <div className="px-4 py-2  max-w-[calc(100vw-125px)] max-[768]:max-w-[94vw] gap-8   overflow-y-hidden overflow-x-scroll 
                 flex items-center 
                [&::-webkit-scrollbar-thumb]:bg-blue-400
                [&::-webkit-scrollbar-thumb]:rounded-full
