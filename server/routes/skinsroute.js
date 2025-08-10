@@ -68,5 +68,61 @@ export default async function skinsRoutes(fastify, opts) {
             });
         });
     } )
+    fastify.post('/select_skin', async (request, reply) => {
+        console.log("POST");
+        
+         return new Promise((resolve, reject) => {
+            const {player_id, oldskin, newskin} = request.query
+            if (!player_id || !oldskin || !newskin)
+            {
+                reply.status(400).send({ error: 'Missing player_id in query' });
+                return reject(new Error('Missing player_id in query'));
+            }
+            db.all(
+            `SELECT player_skins.* , skins.type
+             FROM player_skins
+             JOIN skins ON player_skins.skin_id = skins.id
+             WHERE player_id = ?
+               AND (skin_id = ? OR skin_id = ?)`,
+            [player_id, oldskin, newskin], (err, rows) => {
+                if (err) {
+                    reply.status(500).send({ error: 'Database error' });
+                    return reject(err);
+                }
+                else if(rows.length != 2 || rows[0].type != rows[1].type)
+                {
+                    reply.status(500).send({ error: 'Database error' });
+                    return reject(new Error('diferent skin type'));
+                }
+                else
+                {
+                    db.run(
+                      `UPDATE player_skins
+                       SET selected = 0
+                       WHERE player_id = ? AND skin_id = ?`,
+                      [player_id, oldskin],
+                      function(err) {
+                        if (err) {
+                          console.error("Error updating row:", err);
+                        }
+                      }
+                    );
+                    db.run(
+                      `UPDATE player_skins
+                       SET selected = 1
+                       WHERE player_id = ? AND skin_id = ?`,
+                      [player_id, newskin],
+                      function(err) {
+                        if (err) {
+                          console.error("Error updating row:", err);
+                        }
+                      }
+                    );
+                }
+
+                resolve(rows);
+            })
+        });
+    } )
     
 }

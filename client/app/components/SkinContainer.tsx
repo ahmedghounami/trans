@@ -23,8 +23,27 @@ export default function SkinContainer({skinType, skins, selected, setselected}){
       else
         setselected({...selected, type:typeindex});}
     }, [skinType, skins]);
-    function changeselected(skin)
+     function changeselected(skin)
     {
+      console.log("new skin :", skin);
+      console.log("old skin :", selected.types[selected.type]);
+      async function postselect(){
+      const response = await fetch(
+        'http://localhost:4000/select_skin?player_id=' + skin.player_id + 
+        "&oldskin="+ selected.types[selected.type].skin_id+
+        "&newskin=" + skin.skin_id 
+        ,{  method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+          }
+        )
+        const data = await response.json();
+        console.log(data);
+        
+      }
+              postselect()
         const newtypes = selected.types;
         if(skinType == 'table')
             newtypes[0] = skin
