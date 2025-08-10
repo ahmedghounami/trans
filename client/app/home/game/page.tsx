@@ -13,6 +13,8 @@ export default function Game()
       const router = useRouter();
     const serchParams = useSearchParams()
     const gametype = serchParams.get('gametype')
+      const {selected} = Homecontext();
+
     // console.log(gametype);
     
     const [Positions, setPositions] = useState({})
@@ -44,7 +46,8 @@ export default function Game()
         document.addEventListener('keydown', keydown)
         document.addEventListener('keyup', keyup)
 }},[me])
-    if(!Positions.score) {
+    if(!Positions.score || !selected.types || !selected.types[0]
+    ) {
         console.log("loading");
     return<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
         <Loader word={"loading..."}></Loader>
@@ -83,13 +86,22 @@ export default function Game()
                 </div>
             </div>
             {/* transform -scale-x-100 add this to table to mirror rotation */}
-            <div id="table" className={` relative ${Positions.host && `transform -scale-x-100`}  bg-[#252525] flex justify-center  border-4 rounded-2xl w-full aspect-[9/5]`}>
+            <div id="table" 
+            style={{background:selected.types[0].img[0] == '#'  ?selected.types[0].img:""}}
+            className={` relative ${Positions.host && `transform -scale-x-100`}  bg-[#252525] flex justify-center  border-4 rounded-2xl w-full aspect-[9/5]`}
+            >
                 <div className=" border border-dashed h-full "></div>
-                <div id="padle1" className={`h-1/5 -translate-y-1/2  aspect-[1/6] rounded-full bg-[#fff] absolute left-1`}
-                 style={{ top: `${Positions.p1}%` }}></div>
+                <div
+                id="padle1"
+                className={`h-1/5 -translate-y-1/2  aspect-[1/6] rounded-full bg-[#fff] absolute left-1`}
+                 style={{ top: `${Positions.p1}%`,background:selected.types[1].img[0] == '#'  ?selected.types[1].img:"" }}
+                 ></div>
                 <div id="padle2" className="h-1/5 -translate-y-1/2 aspect-[1/6] rounded-full bg-green-700 absolute right-1"
-                 style={{ top: `${Positions.p2}%` }}></div>
-                <div id="ball" style={ {top: `${Positions.bally}%`, left: `${Positions.ballx}%`} } className=" bg-[#c7c7c7] h-[4%] -translate-1/2 aspect-square   rounded-full absolute"></div>
+                 style={{ top: `${Positions.p2}%`,background:selected.types[1].img[0] == '#'  ?selected.types[1].img:"" }}></div>
+                <div id="ball"
+                style={ {top: `${Positions.bally}%`, left: `${Positions.ballx}%` , background:selected.types[2].img[0] == '#'  ?selected.types[2].img:""} }
+                className=" bg-[#c7c7c7] h-[4%] -translate-1/2 aspect-square   rounded-full absolute"
+                ></div>
             </div>
         </div>
     </div>

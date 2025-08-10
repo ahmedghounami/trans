@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
     let table 
     let ball 
     let paddle 
-export default function SkinContainer({skinType}){
+export default function SkinContainer({skinType, skins, selected, setselected}){
 // useEffect(()=>{
 //     setSkins(data)
-      const {skins} = Homecontext();
-      const [selected, setselected] = useState({})
+      // const {skins} = Homecontext();
+      
     useEffect(()=>{
        table = skins.find(item => item.type == 'table' && item.selected)
        ball = skins.find(item => item.type == 'ball' && item.selected)

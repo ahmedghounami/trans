@@ -13,6 +13,7 @@ export default function Home({
 }> ) {
   const [GameType, setGameType] = useState("localvsbot")
   const [skinType, setSkinType] = useState('table');
+  const [selected, setselected] = useState({})
   const router = useRouter();
   const [skins, setSkins] = useState([]);
   // useEffect(()=>{
@@ -67,7 +68,7 @@ export default function Home({
           
   }},[me])  
   return (
-<HomeContext.Provider value={{skins, me}}>
+<HomeContext.Provider value={{skins, me, selected}}>
       <div className="flex flex-col 
                h-full
                w-full
@@ -146,7 +147,7 @@ export default function Home({
               <div className={`absolute transition-all duration-300 h-2 w-1/3 ${skinType == 'table' ? "left-0":skinType == 'ball'?"left-1/3":"left-2/3"} bottom-0 rounded-full bg-blue-500`}></div>
             </div>
           </div>
-          <div className="flex-1 flex min-h-56 "><SkinContainer skinType={skinType}></SkinContainer></div>
+          <div className="flex-1 flex min-h-56 "><SkinContainer skinType={skinType} skins={skins} selected={selected} setselected={setselected}></SkinContainer></div>
         </div>
       </div>
         {children}
