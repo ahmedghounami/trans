@@ -1,10 +1,11 @@
 'use client';
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Cookies from 'js-cookie';
 import Loader from "@/app/components/loading";
 import { useRouter } from "next/navigation";
+import { Homecontext } from "../layout";
 
 export default function Game()
 {
@@ -16,31 +17,9 @@ export default function Game()
     
     const [Positions, setPositions] = useState({})
     
-    const [me, setMe] = useState(0);
-    useEffect(() => {
-            async function fetchme() {
-                try {
-                    const response = await fetch('http://localhost:4000/me', {
-                        method: 'GET',
-                        headers: {
-                            'authorization': `Bearer ${Cookies.get('token')}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const data = await response.json();
-                    console.log("Fetched user data:", data);
-                    setMe(data);
-    
-                } catch (error) {
-                    console.error("Error fetching user data:", error);
-                }
-            }
-            fetchme();
-        }
-            , []);
+      const {me} = Homecontext();
+      console.log(me);
+      
     useEffect(()=>
     {
         if(me){
@@ -104,13 +83,13 @@ export default function Game()
                 </div>
             </div>
             {/* transform -scale-x-100 add this to table to mirror rotation */}
-            <div id="table" className={` relative ${Positions.host && `transform -scale-x-100`}  bg-[#A7C7CB] flex justify-center  border-4 rounded-2xl w-full aspect-[9/5]`}>
+            <div id="table" className={` relative ${Positions.host && `transform -scale-x-100`}  bg-[#252525] flex justify-center  border-4 rounded-2xl w-full aspect-[9/5]`}>
                 <div className=" border border-dashed h-full "></div>
-                <div id="padle1" className={`h-1/5 -translate-y-1/2  aspect-[1/6] rounded-full bg-red-700 absolute left-1`}
+                <div id="padle1" className={`h-1/5 -translate-y-1/2  aspect-[1/6] rounded-full bg-[#fff] absolute left-1`}
                  style={{ top: `${Positions.p1}%` }}></div>
                 <div id="padle2" className="h-1/5 -translate-y-1/2 aspect-[1/6] rounded-full bg-green-700 absolute right-1"
                  style={{ top: `${Positions.p2}%` }}></div>
-                <div id="ball" style={ {top: `${Positions.bally}%`, left: `${Positions.ballx}%`} } className="h-[4%] -translate-1/2 aspect-square   bg-amber-400 rounded-full absolute"></div>
+                <div id="ball" style={ {top: `${Positions.bally}%`, left: `${Positions.ballx}%`} } className=" bg-[#c7c7c7] h-[4%] -translate-1/2 aspect-square   rounded-full absolute"></div>
             </div>
         </div>
     </div>

@@ -66,6 +66,25 @@ db.serialize(() => {
           FOREIGN KEY (winner_id) REFERENCES users(id)
           );
           `);
+  db.run(`
+          CREATE TABLE IF NOT EXISTS skins (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          type TEXT NOT NULL,
+          price INTEGER,
+          img TEXT NOT NULL
+          );
+    `);
+  db.run(`
+          CREATE TABLE IF NOT EXISTS  player_skins (
+          player_id INTEGER,
+          skin_id INTEGER,
+          selected BOOLEAN NOT NULL DEFAULT 0,
+          PRIMARY KEY (player_id, skin_id), 
+          FOREIGN KEY (player_id) REFERENCES users(id),
+          FOREIGN KEY (skin_id) REFERENCES skins(id)
+          );
+  `);
 });
 
 
@@ -82,6 +101,8 @@ fastify.register(authRoute, { db });
 const gameRoute = (await import('./routes/gameroute.js')).default;
 fastify.register(gameRoute, { db });
 
+const skinsRoute = (await import('./routes/skinsroute.js')).default;
+fastify.register(skinsRoute, { db });
 // Create raw HTTP server from fastify's internal handler
 const httpServer = fastify.server;
 
