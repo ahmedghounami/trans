@@ -58,7 +58,7 @@ export default async function authRoutes(fastify, opts) {
                         reply.status(500).send({ error: 'Database error' });
                         return reject(err);
                     }
-                    console.log('User data:', row)
+                    // console.log('User data:', row)
                     if (row) {
                         reply.send({
                             id: row.id,

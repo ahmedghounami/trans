@@ -8,9 +8,10 @@ import Games_status from "./games_status";
 
 export default function Profile() {
     const [games, setGames] = useState([]);
+    const { user, loading } = useUser();
     useEffect(() => {
         const fetch_games = async () => {
-            const response = await fetch("http://localhost:4000/games/1", {
+            const response = await fetch(`http://localhost:4000/games/${user?.id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -27,18 +28,17 @@ export default function Profile() {
     }
         , []);
 
-    const { user, loading } = useUser();
     if (loading) {
-        return <div className="flex items-center justify-center h-screen text-white">Loading...</div>;
+        return <div className="flex items-center justify-center h-screen text-white animate-pulse">
+            <div className="text-2xl font-bold">Loading...</div>
+        </div>;
     }
-    const profileImage = user?.picture;
-    const name = user?.name;
 
     return (
-        <div className="flex flex-col h-full ">
-            < ProfileHeader profileImage={profileImage} name={name} />
+        <div className="flex flex-col h-full relative">
+            < ProfileHeader user={user} games={games} />
             {/* ////////////////////////////////////////////////////////// */}
-            <div className="flex-1/3 flex gap-2 m-5">
+            <div className="flex-1/5 flex gap-2 m-5">
                 <div className="flex-1/2 bg-[#352c523d] rounded-xl flex flex-col gap-2 border border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm">
                     <h1 className="text-lg font-extrabold text-white p-4 w-full border-b border-[#7b5ddf44] tracking-wide bg-[#ffffff08] rounded-t-xl">
                         🎮 Game History
@@ -52,7 +52,7 @@ export default function Profile() {
                         <div>Gold</div>
                     </div>
 
-                    <div className="overflow-y-auto max-h-[10vh] sm:max-h-[30vh] md:max-h-[30vh] lg:max-h-[30vh] custom-scrollbar px-3 py-2 space-y-2">
+                    <div className="overflow-y-auto max-h-[40vh] custom-scrollbar px-3 py-2 space-y-2">
                         {games.map((game) => {
                             const isPlayer1 = user.id === game.player1_id;
                             const myScore = isPlayer1 ? game.player1_score : game.player2_score;
@@ -81,9 +81,9 @@ export default function Profile() {
 
                 <div className="flex-1/2 flex flex-col gap-2">
                     <div className="flex-1/2 bg-[#5c45a85c] rounded-lg p-4 flex gap-2" >
-                        <Games_status
+                        {/* <Games_status
                             userId={user.id}
-                        />
+                        /> */}
                     </div>
                     <div className="flex-1/2 bg-[#5c45a85c] rounded-lg p-4 flex gap-2">
                     </div>
