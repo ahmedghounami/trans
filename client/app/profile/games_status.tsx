@@ -68,6 +68,7 @@ export default function Games_status({ userId }: { userId: string }) {
     const [games, setGames] = useState(0);
     const [win, setWin] = useState(0);
     const [lost, setLost] = useState(0);
+    const [draw, setDraw] = useState(0);
 
     useEffect(() => {
         const fetchGamesStatus = async () => {
@@ -83,6 +84,7 @@ export default function Games_status({ userId }: { userId: string }) {
                         (game) => game.winner_id !== Number(userId) && game.winner_id !== 0
                     ).length
                 );
+                setDraw(games - win - lost);
             } catch (err) {
                 console.error("Error:", err);
             }

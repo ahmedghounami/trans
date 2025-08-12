@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../../Context/UserContext';
 export default function LoginPage() {
     const router = useRouter();
     const [name, setName] = useState('');
