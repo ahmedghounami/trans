@@ -1,10 +1,6 @@
 import Games_status from "./games_status";
 
 export default function ProfileHeader({ user, games }: { user: any, games: any[] }) {
-    // Early return if user or games is not loaded
-    if (!user || !games || games.length === 0) {
-        return <div className="text-white">Loading...</div>;
-    }
 
     const wins = games.filter(game => game.winner_id === user.id).length;
     const level = Math.floor(wins / 10);
@@ -12,7 +8,7 @@ export default function ProfileHeader({ user, games }: { user: any, games: any[]
     const xp = wins * 100; // Assuming each win gives 100 XP
     const goldearned = user.gold;
 
-    console.log("User data in ProfileHeader:", user.picture);
+    console.log("User data in ProfileHeader: -", user.picture);
 
     return (
         <div className="flex-1/6 relative flex flex-col justify-end items-center">
@@ -25,7 +21,7 @@ export default function ProfileHeader({ user, games }: { user: any, games: any[]
                 <img
                     src={user.picture}
                     alt="Profile"
-                    className="w-16 h-16 border border-purple-600 rounded-full"
+                    className="w-22 h-22 border border-purple-600 rounded-full shadow-lg object-cover z-10"
                 />
                 <div className="flex flex-col ml-4 flex-1/4">
                     <div className="flex items-center gap-2 mt-1">

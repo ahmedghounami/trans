@@ -23,13 +23,17 @@ export default function OpponentInfo({ id }:
   if (!opponent) return <span>Loading...</span>;
 
   return (
-    <span className="flex gap-2  font-bold text-sm text-[#d6d6d6]  tracking-tight">
+    <div className="flex gap-2 items-center font-bold text-sm text-[#d6d6d6]  tracking-tight cursor-pointer"
+      onClick={() => {
+        window.location.href = `/profile/${opponent.id}`;
+      }
+      }>
       <img
         src={opponent.picture}
         alt="opponent"
         className="w-6 h-6 rounded-full"
       />
       {opponent.name}
-    </span>
+    </div>
   );
 }
