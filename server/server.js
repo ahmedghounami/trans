@@ -15,8 +15,6 @@ await fastify.register(cors, {
 });
 
 
-
-
 // Connect SQLite DB
 const db = new sqlite3.Database('sqlite.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
   if (err) {
@@ -28,64 +26,84 @@ const db = new sqlite3.Database('sqlite.db', sqlite3.OPEN_READWRITE | sqlite3.OP
 
 // Create tables
 db.serialize(() => {
-  db.run(`
-          CREATE TABLE IF NOT EXISTS users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          picture TEXT NOT NULL,
-          gold INTEGER DEFAULT 0,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-          );
-          `);
-  db.run(`
-          CREATE TABLE IF NOT EXISTS messages (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          sender_id INTEGER NOT NULL,
-          receiver_id INTEGER NOT NULL,
-          content TEXT NOT NULL,
-          status BOOL DEFAULT false,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (sender_id) REFERENCES users(id),
-          FOREIGN KEY (receiver_id) REFERENCES users(id)
-          );
-          `);
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		picture TEXT NOT NULL,
+		gold INTEGER DEFAULT 0,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	  );
+	`);
 
-  db.run(`
-          CREATE TABLE IF NOT EXISTS games (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          date DATETIME NOT NULL,
-          player1_id INTEGER,
-          player2_id INTEGER,
-          player1_score INTEGER,
-          player2_score INTEGER,
-          player1_gold_earned INTEGER,
-          player2_gold_earned INTEGER,
-          winner_id INTEGER,
-          FOREIGN KEY (player1_id) REFERENCES users(id),
-          FOREIGN KEY (player2_id) REFERENCES users(id),
-          FOREIGN KEY (winner_id) REFERENCES users(id)
-          );
-          `);
-  db.run(`
-          CREATE TABLE IF NOT EXISTS skins (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          type TEXT NOT NULL,
-          price INTEGER,
-          img TEXT NOT NULL
-          );
-    `);
-  db.run(`
-          CREATE TABLE IF NOT EXISTS  player_skins (
-          player_id INTEGER,
-          skin_id INTEGER,
-          selected BOOLEAN NOT NULL DEFAULT 0,
-          PRIMARY KEY (player_id, skin_id), 
-          FOREIGN KEY (player_id) REFERENCES users(id),
-          FOREIGN KEY (skin_id) REFERENCES skins(id)
-          );
-  `);
-});
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS messages (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		sender_id INTEGER NOT NULL,
+		receiver_id INTEGER NOT NULL,
+		content TEXT NOT NULL,
+		status BOOL DEFAULT false,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (sender_id) REFERENCES users(id),
+		FOREIGN KEY (receiver_id) REFERENCES users(id)
+	  );
+	`);
+
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS games (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		date DATETIME NOT NULL,
+		player1_id INTEGER,
+		player2_id INTEGER,
+		player1_score INTEGER,
+		player2_score INTEGER,
+		player1_gold_earned INTEGER,
+		player2_gold_earned INTEGER,
+		winner_id INTEGER,
+		FOREIGN KEY (player1_id) REFERENCES users(id),
+		FOREIGN KEY (player2_id) REFERENCES users(id),
+		FOREIGN KEY (winner_id) REFERENCES users(id)
+	  );
+	`);
+
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS skins (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		type TEXT NOT NULL,
+		price INTEGER,
+		img TEXT NOT NULL
+	  );
+	`);
+
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS player_skins (
+		player_id INTEGER,
+		skin_id INTEGER,
+		selected BOOLEAN NOT NULL DEFAULT 0,
+		PRIMARY KEY (player_id, skin_id),
+		FOREIGN KEY (player_id) REFERENCES users(id),
+		FOREIGN KEY (skin_id) REFERENCES skins(id)
+	  );
+	`);
+
+	// Tables
+	db.run("INSERT INTO skins (name, type, price, img) VALUES (?, ?, ?, ?)", ["table1", "tables", 500, "/images/table1.png"]);
+	db.run("INSERT INTO skins (name, type, price, img) VALUES (?, ?, ?, ?)", ["table2", "tables", 500, "/images/table2.png"]);
+	db.run("INSERT INTO skins (name, type, price, img) VALUES (?, ?, ?, ?)", ["table3", "tables", 500, "/images/table3.png"]);
+	db.run("INSERT INTO skins (name, type, price, img) VALUES (?, ?, ?, ?)", ["table4", "tables", 500, "/images/table4.png"]);
+
+	// Balls
+	db.run("INSERT INTO skins (name, type, price, img) VALUES (?, ?, ?, ?)", ["ball1", "balls", 50, "/images/ball.webp"]);
+	db.run("INSERT INTO skins (name, type, price, img) VALUES (?, ?, ?, ?)", ["ball2", "balls", 60, "/images/ball.webp"]);
+	db.run("INSERT INTO skins (name, type, price, img) VALUES (?, ?, ?, ?)", ["ball3", "balls", 70, "/images/ball.webp"]);
+
+	// Paddles
+	db.run("INSERT INTO skins (name, type, price, img) VALUES (?, ?, ?, ?)", ["paddle1", "paddles", 90, "/images/paddle1.webp"]);
+	db.run("INSERT INTO skins (name, type, price, img) VALUES (?, ?, ?, ?)", ["paddle2", "paddles", 110, "/images/paddle2.webp"]);
+	db.run("INSERT INTO skins (name, type, price, img) VALUES (?, ?, ?, ?)", ["paddle3", "paddles", 130, "/images/paddle3.webp"]);
+  });
+
 
 
 // Register routes on fastify
@@ -121,6 +139,10 @@ const io = new Server(httpServer, {
 });
 
 sockethandler(io, db);
+
+const buyRoute = (await import('./routes/buyroute.js')).default;
+fastify.register(buyRoute, { db });
+
 
 await fastify.ready();
 const PORT = 4000;
