@@ -83,7 +83,7 @@ export default function Topheader() {
             <img
               src={user.picture || "/back.webp"}
               alt="User"
-              className="w-12 h-12 rounded-full ml-6 border border-purple-600 shadow-lg"
+                className="w-12 h-12 rounded-full ml-6 border border-purple-600 shadow-lg object-cover bg-center"
               width={48}
               height={48}
             />

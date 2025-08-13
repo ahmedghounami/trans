@@ -90,7 +90,7 @@ export default function Chat() {
                                         <img
                                         src={users.find(user => user.id === selected)?.picture || "/profile.jpg"}
                                         alt="Profile"
-                                        className="w-12 h-12 rounded-full"
+                                        className="w-12 h-12 rounded-full object-cover shadow-md border border-gray-300"
                                     />
                                     <h2 className="text-xl font-semibold">
                                         {users.find(user => user.id === selected)?.name}

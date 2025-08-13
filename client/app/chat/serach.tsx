@@ -22,7 +22,7 @@ export default function Search({ searchResults, me, setSelected, value, setValue
                         <img
                             src={user.picture || "/profile.jpg"}
                             alt="Profile"
-                            className="w-10 h-10 rounded-full border-2 border-purple-600 shadow-md"
+                            className="w-10 h-10 rounded-full border-2 border-purple-600 shadow-md object-cover"
                         />
                         <span className="text-white font-medium text-sm tracking-wide">
                             {user.name}
