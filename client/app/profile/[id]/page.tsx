@@ -12,6 +12,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import PingPongAchievements from "../achievement";
 import { Gamepad2 } from "lucide-react";
+import Loading from "@/app/components/loading";
 
 export default function Profile() {
     const [games, setGames] = useState([]);
@@ -85,7 +86,7 @@ export default function Profile() {
     if (loading || !user) {
         return (
             <div className="flex items-center justify-center h-screen text-white animate-pulse">
-                <div className="text-2xl font-bold">Loading...</div>
+                <Loading />
             </div>
         );
     }

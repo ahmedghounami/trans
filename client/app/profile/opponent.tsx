@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Loading from "../components/loading";
 
 export default function OpponentInfo({ id }:
   { id: string }
@@ -20,8 +21,7 @@ export default function OpponentInfo({ id }:
     fetchOpponent();
   }, [id]);
 
-  if (!opponent) return <span>Loading...</span>;
-
+  if (!opponent) return <Loading />;
   return (
     <div className="flex gap-2 items-center font-bold text-sm text-[#d6d6d6]  tracking-tight cursor-pointer"
       onClick={() => {

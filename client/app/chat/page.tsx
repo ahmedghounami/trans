@@ -6,6 +6,7 @@ import Room from "./room";
 
 import { useUser } from "../Context/UserContext";
 import Sidebar from "./sidebar";
+import Loading from "../components/loading";
 
 export default function Chat() {
     const [users, setUsers] = useState([]);
@@ -38,7 +39,7 @@ export default function Chat() {
 
     const { user, loading } = useUser();
     if (loading) {
-        return <div className="flex items-center justify-center h-screen text-white">Loading...</div>;
+        return <Loading />;
     }
 
     if (!user) {

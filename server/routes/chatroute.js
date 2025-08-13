@@ -4,7 +4,7 @@ export default async function chatRoutes(fastify, opts) {
     fastify.get('/search', async (req, reply) => {
         const { search } = req.query;
         return new Promise((resolve, reject) => {
-            db.all(`SELECT * FROM users WHERE name LIKE ?`, [`%${search || ''}%`], (err, rows) => { // search for users by name
+            db.all(`SELECT * FROM users WHERE name LIKE ?`, [`%${search || ''}%`], (err, rows) => {
                 if (err) {
                     console.error('Get users error:', err.message);
                     reply.status(500).send({ error: 'Database error' });
