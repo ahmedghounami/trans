@@ -7,10 +7,11 @@ import { IoMdSettings } from "react-icons/io";
 import { IoLogOut } from "react-icons/io5";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Cookie from "js-cookie";
 
 export default function Leftheader() {
     const pathname = usePathname();
-    
+
     const navItems = [
         { href: "/home", icon: <GoHomeFill size={26} />, label: "Home" },
         { href: "/chat", icon: <IoChatbubbleSharp size={26} />, label: "Chat" },
@@ -60,12 +61,19 @@ export default function Leftheader() {
             {/* Logout */}
             <button
                 className="flex flex-col items-center text-gray-400 hover:text-red-500 transition duration-300 group mt-8"
-                onClick={() => console.log("Logout clicked")}
+                onClick={() => {
+                    Cookie.remove("token");
+                    window.location.href = "/login";
+                }}
             >
                 <div className="group-hover:bg-red-500/10 p-2 rounded-full">
                     <IoLogOut size={28} />
                 </div>
-                <span className="text-xs mt-1 opacity-0 group-hover:opacity-100 transition duration-300">
+                <span className="text-xs mt-10 opacity-0 group-hover:opacity-100 transition duration-300"
+
+                >
+
+
                     Logout
                 </span>
             </button>

@@ -18,10 +18,12 @@ export default async function chatRoutes(fastify, opts) {
 
     fastify.post('/users', async (req, reply) => {
         const { name, picture } = req.body;
+        console.log('Creating user:', name, picture);
         if (!name || !picture) return reply.status(400).send({ error: 'Name and picture are required' });
 
         return new Promise((resolve, reject) => {
-            db.run(`INSERT INTO users (name, picture) VALUES (?, ?)`, [name, picture], function (err) {
+            db.run(`INSERT OR IGNORE INTO users (name, picture) VALUES (?, ?)`, [name, picture], function (err) {
+                
                 if (err) {
                     console.error('Insert user error:', err.message);
                     reply.status(500).send({ error: 'Database error' });

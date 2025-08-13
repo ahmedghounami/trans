@@ -1,7 +1,6 @@
-export default function Search({ searchResults, me, setSelected, value, setValue }: {
+export default function NavSearch({ searchResults, me, value, setValue }: {
     searchResults: { id: number; name: string; picture?: string }[];
     me: number;
-    setSelected: (id: number) => void;
     value: string;
     setValue: (value: string) => void;
 }
@@ -15,8 +14,8 @@ export default function Search({ searchResults, me, setSelected, value, setValue
                         key={user.id}
                         className="flex items-center gap-3 px-4 py-2 rounded-lg bg-[#2a2a2a] hover:bg-purple-800/30 transition-colors cursor-pointer"
                         onClick={() => {
-                            setSelected(user.id);
                             setValue("");
+                            window.location.href = `/profile/${user.id}`;
                         }}
                     >
                         <img

@@ -48,7 +48,11 @@ export const LayoutComp = ({ children }: { children: React.ReactNode }) => {
                     )}
                     <div className="flex flex-1 flex-col z-10 bg-[#0000004d]">
                         <Topheader />
-                        <main className="flex-1 lg:border-l-[0.5px] md:border-l-[0.5px] border-[#9c9c9c] border-t-[0.1px] rounded-tl-xl overflow-auto bg-[#0e052472]">
+                        <main className="flex-1 lg:border-l-[0.5px] md:border-l-[0.5px] border-[#9c9c9c] border-t-[0.1px] rounded-tl-xl overflow-auto bg-[#0e052472]
+                        [&::-webkit-scrollbar-thumb]:bg-blue-400
+               [&::-webkit-scrollbar-thumb]:rounded-full
+               [&::-webkit-scrollbar]:w-2
+                        ">
                             {children}
                         </main>
                     </div>

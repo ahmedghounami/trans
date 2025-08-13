@@ -13,7 +13,7 @@ export default function Chat() {
     const [isMobile, setIsMobile] = useState(false);
     const [messages, setMessages] = useState<any[]>([]); // Initialize messages as an empty array
 
-    
+
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 768);
@@ -22,7 +22,7 @@ export default function Chat() {
         window.addEventListener("resize", checkMobile); // Update isMobile on resize
         return () => window.removeEventListener("resize", checkMobile); // Cleanup listener on unmount
     }, []);
-    
+
     useEffect(() => {
         async function fetchUsers() {
             try {
@@ -35,7 +35,7 @@ export default function Chat() {
         }
         fetchUsers();
     }, []);
-    
+
     const { user, loading } = useUser();
     if (loading) {
         return <div className="flex items-center justify-center h-screen text-white">Loading...</div>;
@@ -45,7 +45,7 @@ export default function Chat() {
         return <div className="flex items-center justify-center h-screen text-white">Failed to load user.</div>;
     }
     const me = user.id;
-    
+
 
     const showSidebar = !isMobile || (isMobile && selected === 0);
     const showChat = !isMobile || (isMobile && selected !== 0);
@@ -80,24 +80,33 @@ export default function Chat() {
                                             <FaArrowRight size={24} />
                                         </button>
                                     )}
-                                    <img
+                                    <button
+                                        onClick={() => {
+                                            window.location.href = `/profile/${selected}`;
+                                            }}
+                                            className="flex items-center gap-4"
+                                    >
+
+                                        <img
                                         src={users.find(user => user.id === selected)?.picture || "/profile.jpg"}
                                         alt="Profile"
-                                        className="w-12 h-12 rounded-full"
+                                        className="w-12 h-12 rounded-full object-cover shadow-md border border-gray-300"
                                     />
                                     <h2 className="text-xl font-semibold">
                                         {users.find(user => user.id === selected)?.name}
                                     </h2>
-                                </div>
+
+                                </button>
                             </div>
-                            <div className="flex-1 overflow-y-auto">
-                                <Room selected={selected} me={me} messages={messages} setMessages={setMessages} />
-                            </div>
-                        </>
-                    )}
-                </div>
-            )
-            }
+                        </div>
+                    <div className="flex-1 overflow-y-auto">
+                        <Room selected={selected} me={me} messages={messages} setMessages={setMessages} />
+                    </div>
+                </>
+            )}
+        </div>
+    )
+}
         </div >
     );
 }

@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-
 :root {
   --font-chakra: "Chakra Petch", sans-serif;
 }
@@ -21,19 +20,75 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-  
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-
   height: 100%;
   overflow: hidden;
-
-
 }
 
 .font-orbitron {
   font-family: var(--font-orbitron);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #7b5ddf #2a1f3d;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #2a1f3d;
+  border-radius: 10px;
+  border: 1px solid #7b5ddf22;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #7b5ddf, #9d7bff);
+  border-radius: 10px;
+  border: 1px solid #7b5ddf44;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #9d7bff, #7b5ddf);
+  box-shadow: 0 0 10px #7b5ddf44;
+}
+
+/* Animation keyframes */
+@keyframes glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px #7b5ddf44;
+  }
+
+  50% {
+    box-shadow: 0 0 20px #7b5ddf77, 0 0 30px #7b5ddf44;
+  }
+}
+
+.glow-animation {
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }
