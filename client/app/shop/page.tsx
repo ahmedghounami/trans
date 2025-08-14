@@ -1,74 +1,36 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useUser } from "../Context/UserContext";
 import Tables from "./Tables";
 import Balls from "./Balls";
 import Paddles from "./Paddles";
 
-type User = {
-  id: number;
-  name: string;
-  gold: number;
-};
-
 export default function Shop() {
-  const [category, setCategory] = useState<"tables" | "balls" | "paddles">("tables");
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+	const {user, loading} = useUser();
+	const [category, setCategory] = useState<"tables" | "balls" | "paddles">("tables");
+	if (loading){
+		return <div className="flex items-center justify-center h-screen text-white">Loading...</div>;
+	}
+	if (!user){
+		return <div className="flex items-center justify-center h-screen text-white">Failed to load user.</div>;
+	}
 
-  // 🔹 Mock fetch user (replace with real API call later)
-  useEffect(() => {
-    // Example: simulate fetching user from backend
-    setCurrentUser({ id: 1, name: "Hatim", gold: 500 });
-  }, []);
-
-  if (!currentUser) {
-    return (
-      <div className="text-center mt-20">
-        <p>Loading user...</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 mt-20">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold">Welcome to Shop Page</h1>
-        <div className="mt-4 flex justify-center space-x-4">
-          <button
-            onClick={() => setCategory("tables")}
-            className={`px-6 py-2 text-sm font-semibold uppercase ${
-              category === "tables"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : "text-gray-400"
-            }`}
-          >
-            Tables
-          </button>
-          <button
-            onClick={() => setCategory("balls")}
-            className={`px-6 py-2 text-sm font-semibold uppercase ${
-              category === "balls"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : "text-gray-400"
-            }`}
-          >
-            Balls
-          </button>
-          <button
-            onClick={() => setCategory("paddles")}
-            className={`px-6 py-2 text-sm font-semibold uppercase ${
-              category === "paddles"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : "text-gray-400"
-            }`}
-          >
-            Paddles
-          </button>
-        </div>
-      </div>
-
-      {category === "tables" && <Tables currentUser={currentUser} />}
-      {category === "balls" && <Balls currentUser={currentUser} />}
-      {category === "paddles" && <Paddles currentUser={currentUser} />}
-    </div>
-  );
+	return (
+		<div className="flex gap-4 flex-col flex-1 md:space-y-4">
+			<div className="flex justify-center flex-none w-3/5 self-center relative">
+				<button onClick={() => setCategory("tables")} className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 ${category === "tables"? "border-b-2 border-blue-500 text-blue-500":"text-white"}`}>
+					Tables
+				</button>
+				<button onClick={() => setCategory("balls")} className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 ${category === "balls"? "border-b-2 border-blue-500 text-blue-500": "text-white"}`}>
+					Balls
+				</button>
+				<button onClick={() => setCategory("paddles")} className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300${category === "paddles"? "border-b-2 border-blue-500 text-blue-500":"text-white"}`}>
+					Paddles
+				</button>
+			</div>
+			{category === "tables" && <Tables currentUser={user} />}
+			{category === "balls" && <Balls currentUser={user} />}
+			{category === "paddles" && <Paddles currentUser={user} />}
+		</div>
+	);
 }
