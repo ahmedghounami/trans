@@ -24,9 +24,9 @@ export default function Tables({ currentUser }: Props) {
 	const [selected, setSelected] = useState<Item>(items[0]);
 
 	return (
-		<div className="flex flex-col md:flex-row md:space-x-10">
+		<div className="flex flex-col md:flex-row md:space-x-10 relative">
 			{/* left bar */}
-			<div className="flex space-x-4 overflow-x-auto pb-4 md:flex-col md:space-x-0 md:space-y-4 md:w-1/3 ml-60 md:overflow-y-auto md:max-h-screen md:pr-2">
+			<div className="flex space-x-4 overflow-x-auto pb-4 md:flex-col md:space-x-0 md:space-y-4 md:w-1/3 ml-60 md:overflow-y-auto max-h-[85vh] md:pr-2">
 				{items.map((item) => (
 					<div key={item.id} onClick={() => setSelected(item)} className={`flex-shrink-0 w-140 p-4 border rounded-lg cursor-pointer hover:shadow-lg flex flex-col items-center ${selected.id === item.id ? "border-blue-500 shadow-lg" : ""}`}>
 						<img src={item.image} alt={item.name} className="w-120 h-75 object-cover rounded-lg mb-2"/>
