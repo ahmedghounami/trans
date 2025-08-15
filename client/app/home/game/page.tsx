@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 import Loader from "@/app/components/loading";
 import { useRouter } from "next/navigation";
 import { Homecontext } from "../layout";
+import Loading from "@/app/components/loading";
 
 export default function Game()
 {
@@ -50,7 +51,7 @@ export default function Game()
     ) {
         console.log("loading");
     return<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
-        <Loader word={"loading..."}></Loader>
+        <Loading/>
     </div>
     }
     if (Positions.win) {
