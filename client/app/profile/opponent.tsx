@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Loading from "../components/loading";
 
 export default function OpponentInfo({ id }:
   { id: string }
@@ -20,16 +21,19 @@ export default function OpponentInfo({ id }:
     fetchOpponent();
   }, [id]);
 
-  if (!opponent) return <span>Loading...</span>;
-
+  if (!opponent) return <Loading />;
   return (
-    <span className="flex gap-2  font-bold text-sm text-[#d6d6d6]  tracking-tight">
+    <div className="flex gap-2 items-center font-bold text-sm text-[#d6d6d6]  tracking-tight cursor-pointer"
+      onClick={() => {
+        window.location.href = `/profile/${opponent.id}`;
+      }
+      }>
       <img
         src={opponent.picture}
         alt="opponent"
         className="w-6 h-6 rounded-full"
       />
       {opponent.name}
-    </span>
+    </div>
   );
 }
