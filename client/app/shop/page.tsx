@@ -29,38 +29,38 @@ export default function Shop() {
 
   return (
     <div className="flex gap-4 flex-col flex-1 md:space-y-4">
-      <div className="flex justify-center flex-none w-3/5 self-center relative">
-        <button
-          onClick={() => setCategory("tables")}
-          className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 ${
-            category === "tables"
-              ? "border-b-2 border-blue-500 text-blue-500"
-              : "text-white"
-          }`}>
-          Tables
-        </button>
-        <button
-          onClick={() => setCategory("balls")}
-          className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 ${
-            category === "balls"
-              ? "border-b-2 border-blue-500 text-blue-500"
-              : "text-white"
-          }`}>
-          Balls
-        </button>
-        <button
-          onClick={() => setCategory("paddles")}
-          className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300${
-            category === "paddles"
-              ? "border-b-2 border-blue-500 text-blue-500"
-              : "text-white"
-          }`}>
-          Paddles
-        </button>
-      </div>
-      {category === "tables" && <Tables currentUser={user} />}
-      {category === "balls" && <Balls currentUser={user} />}
-      {category === "paddles" && <Paddles currentUser={user} />}
-    </div>
+		<div className="flex justify-center flex-none w-3/5 self-center relative">
+			{["tables", "balls", "paddles"].map((type, idx) => (
+			<button
+				key={type}
+				onClick={() => setCategory(type as "tables" | "balls" | "paddles")}
+				className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 font-semibold ${
+				category === type ? "text-blue-500" : "text-white"
+				}`}
+			>
+				{type.charAt(0).toUpperCase() + type.slice(1)}
+			</button>
+			))}
+
+			{/* Sliding indicator */}
+			<div className="absolute h-2 w-full bottom-0 rounded-full bg-amber-50">
+			<div
+				className={`absolute transition-all duration-300 h-2 w-1/3 bottom-0 rounded-full bg-blue-500 ${
+				category === "tables"
+					? "left-0"
+					: category === "balls"
+					? "left-1/3"
+					: "left-2/3"
+				}`}
+			></div>
+			</div>
+		</div>
+
+		{/* Category Content */}
+		{category === "tables" && <Tables currentUser={user} />}
+		{category === "balls" && <Balls currentUser={user} />}
+		{category === "paddles" && <Paddles currentUser={user} />}
+		</div>
+
   );
 }

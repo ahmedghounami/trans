@@ -69,7 +69,7 @@ db.serialize(() => {
 	db.run(`
 	  CREATE TABLE IF NOT EXISTS skins (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL,
+		name TEXT NOT NULL UNIQUE,
 		type TEXT NOT NULL,
 		price INTEGER,
 		img TEXT NOT NULL
@@ -86,31 +86,7 @@ db.serialize(() => {
 		FOREIGN KEY (skin_id) REFERENCES skins(id)
 	  );
 	`);
-
-	db.run("DELETE FROM skins");
-	db.run("DELETE FROM player_skins");
-
-	// Paddles
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [1, "paddle1", "paddles", 90, "/paddle.webp"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [2, "paddle2", "paddles", 110, "/blue-precision-paddle.png"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [3, "paddle3", "paddles", 135, "/futuristic-quantum-paddle.png"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [4, "paddle4", "paddles", 140, "/purple-magical-paddle.png"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [5, "paddle5", "paddles", 150, "/red-speed-ping-pong-paddle-flames.png"]);
-
-	// Tables
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [11,"table1", "tables", 500, "/table1.png"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [22,"table2", "tables", 500, "/table2.png"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [33,"table3", "tables", 500, "/table3.png"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [44,"table4", "tables", 500, "/table4.png"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [55,"table5", "tables", 700, "/luxury-diamond-ping-pong.png"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [66,"table6", "tables", 600, "/neon-purple-ping-pong.png"]);
-
-	// Balls
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [111,"ball1", "balls", 50, "/ball.webp"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [222,"ball2", "balls", 60, "/ball-2-blue-metallic.png"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [333,"ball3", "balls", 70, "/ball-3-green-textured.png"]);
-	db.run("INSERT INTO skins (id, name, type, price, img) VALUES (?, ?, ?, ?, ?)", [444,"ball4", "balls", 70, "/ball-6-yellow-star.png"]);
-  });
+});
 
 // Register routes on fastify
 const devRoute = (await import('./routes/devroute.js')).default;
@@ -127,6 +103,13 @@ fastify.register(gameRoute, { db });
 
 const skinsRoute = (await import('./routes/skinsroute.js')).default;
 fastify.register(skinsRoute, { db });
+
+const buyRoute = (await import('./routes/buyroute.js')).default;
+fastify.register(buyRoute, { db });
+
+const shopRoute = (await import('./routes/shoproute.js')).default;
+fastify.register(shopRoute, { db });
+
 // Create raw HTTP server from fastify's internal handler
 const httpServer = fastify.server;
 
@@ -145,10 +128,6 @@ const io = new Server(httpServer, {
 });
 
 sockethandler(io, db);
-
-const buyRoute = (await import('./routes/buyroute.js')).default;
-fastify.register(buyRoute, { db });
-
 
 await fastify.ready();
 const PORT = 4000;
