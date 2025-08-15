@@ -3,7 +3,7 @@ export default async function skinsRoutes(fastify, opts) {
  await db.run(`
     INSERT OR IGNORE INTO skins (name, type, price, img) VALUES
     ('Pastel Blue', 'ball', 0, '#ff7300'),
-    ('Pastel Blue', 'table', 0, '#b8b8b8'),
+    ('Pastel Blue', 'table', 0, '/table1.png'),
     ('Pastel Blue', 'paddle', 0, '#388E3C'),
     ('Pastel Blue', 'table', 0, '#d181b0'),
     ('Pastel Blue', 'paddle', 0, '#a73276'),
