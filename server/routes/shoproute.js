@@ -3,7 +3,7 @@ export default async function shopRoute(fastify, opts) {
 
 	fastify.get("/paddles", (request, reply) => {
 		const db = opts.db;
-		db.all("SELECT * FROM skins WHERE type = ?", ["paddles"], (err, rows) => {
+		db.all("SELECT * FROM skins WHERE type = ?", ["paddle"], (err, rows) => {
 			if
 				(err) reply.code(500).send({ error: "Database error" });
 			else
@@ -12,7 +12,7 @@ export default async function shopRoute(fastify, opts) {
 	});
 	fastify.get("/balls", (request, reply) => {
 		const db = opts.db;
-		db.all("SELECT * FROM skins WHERE type = ?", ["balls"], (err, rows) => {
+		db.all("SELECT * FROM skins WHERE type = ?", ["ball"], (err, rows) => {
 			if
 				(err) reply.code(500).send({ error: "Database error" });
 			else
@@ -21,7 +21,7 @@ export default async function shopRoute(fastify, opts) {
 	});
 		fastify.get("/tables", (request, reply) => {
 		const db = opts.db;
-		db.all("SELECT * FROM skins WHERE type = ?", ["tables"], (err, rows) => {
+		db.all("SELECT * FROM skins WHERE type = ?", ["table"], (err, rows) => {
 			if (err)
 				reply.code(500).send({ error: "Database error" });
 			else

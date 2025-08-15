@@ -37,14 +37,26 @@ export default function Tables({ currentUser }: Props) {
 	return (
 		<div className="flex flex-col md:flex-row md:space-x-10 relative">
 			{/* left bar */}
-			<div className="flex space-x-4 overflow-x-auto pb-4 md:flex-col md:space-x-0 md:space-y-4 md:w-1/3 ml-60 md:overflow-y-auto max-h-[85vh] md:pr-2 [scrollbar-width:thin] [scrollbar-color:#3B82F6_#E5E7EB] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:bg-blue-500 [&::-webkit-scrollbar-thumb:hover]:bg-blue-600">
+			<div
+				className="flex space-x-4 overflow-x-auto pb-4 md:flex-col md:space-x-0 md:space-y-4 md:w-1/3 ml-60 md:overflow-y-auto max-h-[85vh] md:pr-2 [scrollbar-width:thin] [scrollbar-color:#3B82F6_#E5E7EB] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:bg-blue-500 [&::-webkit-scrollbar-thumb:hover]:bg-blue-600">
 				{items.map((item) => (
-					<div key={item.id}onClick={()=>setSelected(item)}className={`flex-shrink-0 w-140 p-4 border rounded-lg cursor-pointer hover:shadow-lg flex flex-col items-center ${selected.id === item.id ? "border-blue-500 shadow-lg" : ""}`}>
-						<img src={item.img} alt={item.name} className="w-120 h-75 object-cover rounded-lg mb-2"/>
-						<div className="text-lg font-semibold">${item.price}</div>
+					<div
+						key={item.id}
+						onClick={()=>setSelected(item)}
+						className={`flex-shrink-0 w-140 p-4 border rounded-lg cursor-pointer hover:shadow-lg flex flex-col items-center ${selected.id === item.id ? "border-blue-500 shadow-lg" : ""}`}
+					>
+						<img
+							src={item.img}
+							alt={item.name}
+							className="w-120 h-75 object-cover rounded-lg mb-2"
+						/>
+							<div className="text-lg font-semibold">
+								${item.price}
+							</div>
 					</div>
 				))}
 			</div>
+
 			{/* right bar */}
 			<div className="mt-20 md:mt-28 md:w-2/3 md:self-start flex flex-col items-center">
 				{selected && (
@@ -59,7 +71,10 @@ export default function Tables({ currentUser }: Props) {
 							</div>
 						</div>
 						{/* Buy Button */}
-						<button onClick={() => BuyItem(currentUser.id, selected.id, selected.price)} className="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-colors duration-300">
+						<button
+							onClick={() => BuyItem(currentUser.id, selected.id, selected.price)}
+							className="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-colors duration-300"
+						>
 							Buy
 						</button>
 					</>

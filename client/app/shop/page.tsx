@@ -8,32 +8,31 @@ import Paddles from "./Paddles";
 // function Button
 
 export default function Shop() {
-  const { user, loading } = useUser();
-  const [category, setCategory] = useState<"tables" | "balls" | "paddles">(
-    "tables"
-  );
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen text-white">
-        Loading...
-      </div>
-    );
-  }
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center h-screen text-white">
-        Failed to load user.
-      </div>
-    );
-  }
+	const { user, loading } = useUser();
+	const [category, setCategory] = useState<"table" | "ball" | "paddle">("table");
 
-  return (
-    <div className="flex gap-4 flex-col flex-1 md:space-y-4">
+	if (loading) {
+		return (
+			<div className="flex items-center justify-center h-screen text-white">
+				Loading...
+			</div>
+		);
+	}
+	if (!user) {
+		return (
+			<div className="flex items-center justify-center h-screen text-white">
+				Failed to load user.
+			</div>
+		);
+	}
+
+	return (
+		<div className="flex gap-4 flex-col flex-1 md:space-y-4">
 		<div className="flex justify-center flex-none w-3/5 self-center relative">
-			{["tables", "balls", "paddles"].map((type, idx) => (
+			{["table", "ball", "paddle"].map((type, idx) => (
 			<button
 				key={type}
-				onClick={() => setCategory(type as "tables" | "balls" | "paddles")}
+				onClick={() => setCategory(type as "table" | "ball" | "paddle")}
 				className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 font-semibold ${
 				category === type ? "text-blue-500" : "text-white"
 				}`}
@@ -46,9 +45,9 @@ export default function Shop() {
 			<div className="absolute h-2 w-full bottom-0 rounded-full bg-amber-50">
 			<div
 				className={`absolute transition-all duration-300 h-2 w-1/3 bottom-0 rounded-full bg-blue-500 ${
-				category === "tables"
+				category === "table"
 					? "left-0"
-					: category === "balls"
+					: category === "ball"
 					? "left-1/3"
 					: "left-2/3"
 				}`}
@@ -57,10 +56,10 @@ export default function Shop() {
 		</div>
 
 		{/* Category Content */}
-		{category === "tables" && <Tables currentUser={user} />}
-		{category === "balls" && <Balls currentUser={user} />}
-		{category === "paddles" && <Paddles currentUser={user} />}
+		{category === "table" && <Tables currentUser={user} />}
+		{category === "ball" && <Balls currentUser={user} />}
+		{category === "paddle" && <Paddles currentUser={user} />}
 		</div>
 
-  );
+	);
 }
