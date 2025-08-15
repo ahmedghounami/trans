@@ -68,6 +68,26 @@ export default async function skinsRoutes(fastify, opts) {
             });
         });
     } )
+    fastify.get('/selected_paddle', async (request, reply) => {
+         return new Promise((resolve, reject) => {
+            const {player_id} = request.query
+            if (!player_id)
+            {
+                reply.status(400).send({ error: 'Missing player_id in query' });
+                return reject(new Error('Missing player_id in query'));
+            }
+            db.get(`SELECT * , skins.* FROM player_skins
+                    JOIN skins ON player_skins.skin_id = skins.id
+                  WHERE player_id = ? AND selected = 1 AND type='paddle'
+                  LIMIT 1;`, [player_id], (err, row) => {
+                if (err) {
+                    reply.status(500).send({ error: 'Database error' });
+                    return reject(err);
+                }
+                resolve(row);
+            });
+        });
+    } )
     fastify.post('/select_skin', async (request, reply) => {
         console.log("POST");
 
