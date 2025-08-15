@@ -129,9 +129,27 @@ export default function Home({
             </div>
           </div>
         </div>
-        
-        <Statistics className="flex-1" />
-      </div>
+
+        <div className="flex gap-4 flex-col flex-1">
+          <div className="flex justify-center flex-none w-3/5 self-center relative">
+            <label className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 ${skinType == "table" ? "text-blue-500" : "text-white"}`}>
+              <input className="hidden" type="radio" name="skin" onChange={() => setSkinType('table')} value="table" defaultChecked />
+              table
+            </label>
+            <label className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 ${skinType == "ball" ? "text-blue-500" : "text-white"}`}>
+              <input className="hidden" type="radio" name="skin" onChange={() => setSkinType('ball')} value="ball" />
+              ball
+            </label>
+            <label className={`w-1/3 flex justify-center items-center h-14 cursor-pointer transition-all duration-300 ${skinType == "paddle" ? "text-blue-500" : "text-white"}`}>
+              <input className="hidden" type="radio" name="skin" onChange={() => setSkinType('paddle')} value="paddle" />
+              paddle
+            </label>
+            <div className={`absolute h-2 w-full bottom-0 rounded-full bg-amber-50`}>
+              <div className={`absolute transition-all duration-300 h-2 w-1/3 ${skinType == 'table' ? "left-0" : skinType == 'ball' ? "left-1/3" : "left-2/3"} bottom-0 rounded-full bg-blue-500`}></div>
+            </div>
+          </div>
+          <div className="flex-1 flex min-h-56 "><SkinContainer skinType={skinType} skins={skins} selected={selected} setselected={setselected}></SkinContainer></div>
+        </div>      </div>
       {children}
     </HomeContext.Provider>
 
