@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { createContext, useContext, useEffect, useState } from "react";
 import SkinContainer from "../components/SkinContainer";
-import Statistics from "../profile/staistique";
+import Statistics from "../home/staistique";
 
 const HomeContext = createContext();
 export default function Home({

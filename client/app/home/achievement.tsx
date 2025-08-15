@@ -93,8 +93,8 @@ export default function PingPongAchievements({ games, user }: { games: any[], us
     const gameCount = games.length;
     const totalGold = user.gold || 0;
     const winrate = gameCount > 0 ? Math.round((games.filter(game => game.winner_id === user.id).length / gameCount) * 100) : 0;
-    
-    
+
+
     const streak = (() => {
         let maxStreak = 0
         let currentStreak = 0
@@ -143,47 +143,6 @@ export default function PingPongAchievements({ games, user }: { games: any[], us
 
     return (
         <div className="flex flex-col gap-4 w-full justify-between">
-            {/* Achievements Section */}
-            <div className="flex  items-center gap-3 mb-4">
-                <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg shadow-lg">
-                    <Trophy className="w-5 h-5 text-white" />
-                </div>
-                <h2 className="text-lg font-bold text-white">Achievements</h2>
-
-            </div>
-
-            <div className="flex justify-around">
-                <AchievementCard
-                    icon={Trophy}
-                    name="First Victory"
-                    completed={gameCount > 0}
-                // tier="gold"
-                />
-
-                <AchievementCard
-                    icon={Flame}
-                    name="Streak Master"
-                    progress={streak}
-                    total={10}
-                    completed={streak >= 10}
-                />
-                <AchievementCard
-                    icon={Coins}
-                    name="Gold Master"
-                    progress={totalGold}
-                    total={1000}
-                    tier="bronze"
-                    completed={totalGold >= 1000}
-                />
-                <AchievementCard
-                    icon={Crown}
-                    name="Champion"
-                    progress={1}
-                    total={1}
-                    completed={true}
-                />
-            </div>
-
             {/* Stats Section */}
 
             <div className="flex items-center gap-3 mb-4 border-t border-amber-500/20 pt-4">
@@ -228,7 +187,51 @@ export default function PingPongAchievements({ games, user }: { games: any[], us
                 />
             </div>
 
+            {/* Achievements Section */}
+            <div className="flex  items-center gap-3 mb-4">
+                <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg shadow-lg">
+                    <Trophy className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-lg font-bold text-white">Achievements</h2>
+
+            </div>
+
+            <div className="flex justify-around">
+                <AchievementCard
+                    icon={Trophy}
+                    name="First Victory"
+                    completed={gameCount > 0}
+                // tier="gold"
+                />
+
+                <AchievementCard
+                    icon={Flame}
+                    name="Streak Master"
+                    progress={streak}
+                    total={10}
+                    completed={streak >= 10}
+                />
+                <AchievementCard
+                    icon={Coins}
+                    name="Gold Master"
+                    progress={totalGold}
+                    total={1000}
+                    tier="bronze"
+                    completed={totalGold >= 1000}
+                />
+                <AchievementCard
+                    icon={Crown}
+                    name="Champion"
+                    progress={1}
+                    total={1}
+                    completed={true}
+                />
+            </div>
+
+
             {/* Mini Progress Section */}
+
+
 
         </div>
 
