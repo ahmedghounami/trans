@@ -15,8 +15,6 @@ await fastify.register(cors, {
 });
 
 
-
-
 // Connect SQLite DB
 const db = new sqlite3.Database('sqlite.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
   if (err) {
@@ -28,65 +26,67 @@ const db = new sqlite3.Database('sqlite.db', sqlite3.OPEN_READWRITE | sqlite3.OP
 
 // Create tables
 db.serialize(() => {
-  db.run(`
-          CREATE TABLE IF NOT EXISTS users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          picture TEXT NOT NULL,
-          gold INTEGER DEFAULT 0,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-          );
-          `);
-  db.run(`
-          CREATE TABLE IF NOT EXISTS messages (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          sender_id INTEGER NOT NULL,
-          receiver_id INTEGER NOT NULL,
-          content TEXT NOT NULL,
-          status BOOL DEFAULT false,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (sender_id) REFERENCES users(id),
-          FOREIGN KEY (receiver_id) REFERENCES users(id)
-          );
-          `);
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		picture TEXT NOT NULL,
+		gold INTEGER DEFAULT 0,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	  );
+	`);
 
-  db.run(`
-          CREATE TABLE IF NOT EXISTS games (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          date DATETIME NOT NULL,
-          player1_id INTEGER,
-          player2_id INTEGER,
-          player1_score INTEGER,
-          player2_score INTEGER,
-          player1_gold_earned INTEGER,
-          player2_gold_earned INTEGER,
-          winner_id INTEGER,
-          FOREIGN KEY (player1_id) REFERENCES users(id),
-          FOREIGN KEY (player2_id) REFERENCES users(id),
-          FOREIGN KEY (winner_id) REFERENCES users(id)
-          );
-          `);
-  db.run(`
-          CREATE TABLE IF NOT EXISTS skins (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          type TEXT NOT NULL,
-          price INTEGER,
-          img TEXT NOT NULL
-          );
-    `);
-  db.run(`
-          CREATE TABLE IF NOT EXISTS  player_skins (
-          player_id INTEGER,
-          skin_id INTEGER,
-          selected BOOLEAN NOT NULL DEFAULT 0,
-          PRIMARY KEY (player_id, skin_id), 
-          FOREIGN KEY (player_id) REFERENCES users(id),
-          FOREIGN KEY (skin_id) REFERENCES skins(id)
-          );
-  `);
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS messages (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		sender_id INTEGER NOT NULL,
+		receiver_id INTEGER NOT NULL,
+		content TEXT NOT NULL,
+		status BOOL DEFAULT false,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (sender_id) REFERENCES users(id),
+		FOREIGN KEY (receiver_id) REFERENCES users(id)
+	  );
+	`);
+
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS games (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		date DATETIME NOT NULL,
+		player1_id INTEGER,
+		player2_id INTEGER,
+		player1_score INTEGER,
+		player2_score INTEGER,
+		player1_gold_earned INTEGER,
+		player2_gold_earned INTEGER,
+		winner_id INTEGER,
+		FOREIGN KEY (player1_id) REFERENCES users(id),
+		FOREIGN KEY (player2_id) REFERENCES users(id),
+		FOREIGN KEY (winner_id) REFERENCES users(id)
+	  );
+	`);
+
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS skins (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL UNIQUE,
+		type TEXT NOT NULL,
+		price INTEGER,
+		img TEXT NOT NULL
+	  );
+	`);
+
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS player_skins (
+		player_id INTEGER,
+		skin_id INTEGER,
+		selected BOOLEAN NOT NULL DEFAULT 0,
+		PRIMARY KEY (player_id, skin_id),
+		FOREIGN KEY (player_id) REFERENCES users(id),
+		FOREIGN KEY (skin_id) REFERENCES skins(id)
+	  );
+	`);
 });
-
 
 // Register routes on fastify
 const devRoute = (await import('./routes/devroute.js')).default;
@@ -103,6 +103,13 @@ fastify.register(gameRoute, { db });
 
 const skinsRoute = (await import('./routes/skinsroute.js')).default;
 fastify.register(skinsRoute, { db });
+
+const buyRoute = (await import('./routes/buyroute.js')).default;
+fastify.register(buyRoute, { db });
+
+const shopRoute = (await import('./routes/shoproute.js')).default;
+fastify.register(shopRoute, { db });
+
 // Create raw HTTP server from fastify's internal handler
 const httpServer = fastify.server;
 
