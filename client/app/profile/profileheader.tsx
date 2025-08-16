@@ -43,6 +43,7 @@ export default function ProfileHeader({ user, games }: { user: any, games: any[]
                         value={progress * 10}
                         max="100"
                     ></progress>
+                    
                 </div>
                 <Games_status userId={user.id} className="flex-3/4 flex justify-end" />
             </div>

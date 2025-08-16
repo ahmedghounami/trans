@@ -8,7 +8,7 @@ const AchievementCard = ({ icon: Icon, name, progress, total, completed = false,
         tier = 'gold'; // Force gold tier if completed
     const getTierStyle = (tier) => {
         switch (tier) {
-            case 'gold': return 'border-yellow-500/50 shadow-lg shadow-yellow-500/20 bg-gradient-to-br from-yellow-500/10 to-orange-500/10';
+            case 'gold': return 'border-yellow-500/50 shadow-lg shadow-yellow-500/20 bg-gradient-to-br from-yellow-500/10 to-purple-500/10';
             case 'silver': return 'border-purple-400/50 shadow-lg shadow-purple-400/20 bg-gradient-to-br from-purple-500/10 to-blue-500/10';
             default: return 'border-purple-500/30 shadow-lg shadow-purple-500/10 bg-gradient-to-br from-purple-800/20 to-purple-900/20';
         }
@@ -16,7 +16,7 @@ const AchievementCard = ({ icon: Icon, name, progress, total, completed = false,
 
     const getIconColor = (tier) => {
         switch (tier) {
-            case 'gold': return 'from-yellow-400 to-orange-500';
+            case 'gold': return 'from-yellow-800/30 to-yellow-500/40';
             case 'silver': return 'from-purple-400 to-blue-500';
             default: return 'from-purple-500 to-pink-500';
         }
@@ -43,9 +43,9 @@ const AchievementCard = ({ icon: Icon, name, progress, total, completed = false,
                         <span className="text-xs text-purple-200">{progress}/{total}</span>
                         <span className="text-xs font-semibold text-white">{Math.round(progressPercentage)}%</span>
                     </div>
-                    <div className="relative w-full bg-black/40 rounded-full h-2 overflow-hidden">
+                    <div className="relative w-full bg-gray-600 rounded-full h-2 overflow-hidden">
                         <div
-                            className={`h-full rounded-full transition-all duration-1000 ease-out ${completed ? 'bg-gradient-to-r from-green-400 to-emerald-500' : `bg-gradient-to-r ${getIconColor(tier)}`}`}
+                            className={` h-full rounded-full transition-all duration-1000 ease-out ${completed ? 'bg-gradient-to-r from-green-400 to-emerald-500' : `bg-gradient-to-r ${getIconColor(tier)}`}`}
                             style={{ width: `${Math.min(progressPercentage, 100)}%` }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
@@ -60,8 +60,8 @@ const AchievementCard = ({ icon: Icon, name, progress, total, completed = false,
 
 const StatCard = ({ icon: Icon, label, value, trend, color = "from-purple-500 to-pink-500", subtitle }) => {
     return (
-        <div className="relative bg-gradient-to-br from-black/40 to-purple-900/20 backdrop-blur-md rounded-xl p-4 border border-purple-500/20 shadow-lg shadow-purple-500/10 transition-all duration-300 hover:scale-105 hover:border-purple-400/40">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-xl" />
+        <div className="relative bg-gradient-to-br from-black/40 to-purple-900/20 backdrop-blur-md rounded-xl p-4 border border-purple-500/20 shadow-lg shadow-purple-500/10 transition-all duration-300 hover:scale-102 hover:border-purple-400/40">
+            <div className="bg-gradient-to-br from-purple-500/5 to-transparent rounded-xl" />
 
             <div className="relative flex items-center gap-3">
                 <div className={`p-2.5 rounded-xl bg-gradient-to-r ${color} shadow-lg`}>
@@ -145,7 +145,7 @@ export default function PingPongAchievements({ games, user }: { games: any[], us
         <div className="flex flex-col gap-4 w-full justify-between">
             {/* Stats Section */}
 
-            <div className="flex items-center gap-3 mb-4 border-t border-amber-500/20 pt-4">
+            <div className="flex items-center gap-3 mb-4 pt-4">
                 <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg shadow-lg">
                     <BarChart3 className="w-5 h-5 text-white" />
                 </div>
@@ -183,13 +183,13 @@ export default function PingPongAchievements({ games, user }: { games: any[], us
                     label="Peak Hours"
                     value={favoriteTimeSlot()}
                     subtitle="Most active time"
-                    color="from-amber-500 to-orange-600"
+                    color="from-amber-500 to-purple-600"
                 />
             </div>
 
             {/* Achievements Section */}
             <div className="flex  items-center gap-3 mb-4">
-                <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg shadow-lg">
+                <div className="p-2 bg-gradient-to-r from-yellow-400 to-purple-500 rounded-lg shadow-lg">
                     <Trophy className="w-5 h-5 text-white" />
                 </div>
                 <h2 className="text-lg font-bold text-white">Achievements</h2>
