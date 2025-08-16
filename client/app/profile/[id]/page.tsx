@@ -10,7 +10,7 @@ import ProfileHeader from "../profileheader";
 import { useParams, useRouter } from "next/navigation";
 
 
-import PingPongAchievements from "../../home/achievement";
+import PingPongAchievements from "../../home/cards";
 import { Gamepad2 } from "lucide-react";
 import Loading from "@/app/components/loading";
 
@@ -98,7 +98,7 @@ export default function Profile() {
             <ProfileHeader user={user} games={games} />
             {/* ////////////////////////////////////////////////////////// */}
             <div className="flex-1/5 flex gap-2 m-5">
-                
+
 
                 <div className="flex-1/2 flex flex-col gap-2">
                     <div className="flex-1 bg-[#2b24423d] rounded-lg p-4 flex gap-2 border border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm">

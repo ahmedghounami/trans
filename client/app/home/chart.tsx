@@ -41,12 +41,9 @@ const SimplePerformanceChart = ({ games = [], user }) => {
             else if (winner_id !== 0) dayData.losses++;
         }
     });
-    const wins = games.filter(game => game.winner_id === user.id).length;
-    const progress = wins % 10; // 0 to 9 wins inside this level
-    const xp = wins * 100; // Assuming each win gives 100 XP
-    const level = Math.floor(wins / 10);
+
     return (
-        <div className="h-full flex flex-col justify-between flex-1/2 border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
+        <div className="flex-1/2 flex flex-col justify-between  border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
             {/* Header */}
             <div className="mb-6">
                 <h3 className="flex items-center gap-2 text-xl font-bold text-white mb-2">
@@ -57,7 +54,7 @@ const SimplePerformanceChart = ({ games = [], user }) => {
             </div>
 
             {/* Chart */}
-            <div className="flex-1/2">
+            <div className="h-full sm:h-64 md:h-72 lg:h-80 xl:h-96">
                 <ResponsiveContainer>
                     <LineChart data={last7Days} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -83,28 +80,7 @@ const SimplePerformanceChart = ({ games = [], user }) => {
                 ))}
             </div>
 
-            <div className="flex justify-between items-center text-sm text-gray-300 mt-1">
-                <div className="flex flex-col items-start gap-1">
-                    <span className="bg-[#2121e250]
-                     text-white font-bold px-3 py-1 rounded shadow-md 
-                     border border-white/10 text-sm tracking-wide">
-                        Level {level}
-                    </span>
-                    <span className="text-xs text-gray-400">Level Progress</span>
-                </div>
-
-                <span className="text-gray-100 font-semibold">{xp} XP</span>
-            </div>
-
-            {/* Progress bar */}
-            <div className="relative w-full h-3 mt-3 rounded-full overflow-hidden bg-gray-700/50 shadow-inner">
-                <div
-                    className="absolute top-0 left-0 h-full rounded-full 
-               bg-gradient-to-r from-[#0303ff] to-[#7537fb]
-               transition-all duration-500"
-                    style={{ width: `${progress * 10}%` }}
-                ></div>
-            </div>
+            
 
         </div>
     );
