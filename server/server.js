@@ -69,10 +69,11 @@ db.serialize(() => {
 	db.run(`
 	  CREATE TABLE IF NOT EXISTS skins (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL UNIQUE,
+		name TEXT NOT NULL,
 		type TEXT NOT NULL,
 		price INTEGER,
-		img TEXT NOT NULL
+		img TEXT NOT NULL,
+		UNIQUE(name, type, img)
 	  );
 	`);
 
