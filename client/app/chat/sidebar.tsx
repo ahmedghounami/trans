@@ -39,7 +39,7 @@ export default function Sidebar({
 
     return (
         <div className={` ${isMobile ? "flex-1" : ""} w-[320px] min-w-[280px] border-r border-[#a0a0a0] flex flex-col`}>
-            <div className="flex justify-between items-center p-4 border-b border-[#a0a0a0]">
+            <div className="flex justify-between items-center p-5 border-b border-[#a0a0a0]">
                 <h1 className="text-2xl font-bold">Chatbox</h1>
                 <IoChatboxEllipses size={30} />
             </div>
