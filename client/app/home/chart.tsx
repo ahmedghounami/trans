@@ -54,7 +54,7 @@ const SimplePerformanceChart = ({ games = [], user }) => {
             </div>
 
             {/* Chart */}
-            <div className="h-full sm:h-64 md:h-72 lg:h-80 xl:h-96">
+            <div className="h-full sm:h-40 md:h-72 lg:h-80 xl:h-96">
                 <ResponsiveContainer>
                     <LineChart data={last7Days} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />

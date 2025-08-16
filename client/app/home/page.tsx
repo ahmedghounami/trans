@@ -120,15 +120,13 @@ export default function HomePage() {
         return Math.max(maxStreak, current);
     })();
     return (
-        <div className="flex flex-col p-4 h-screen w-full gap-4">
+        <div className="flex flex-col p-4 h-screen md:h-full w-full gap-4">
             <div className="relative flex-1/2 flex flex-col gap-4 md:flex-row">
                 <PingPongPerformanceChart user={user} games={games} />
                 <PingPongAchievements user={user} games={games} />
             </div>
-            <div className="relative flex-1/2 flex gap-4 flex-col md:flex-row">
-                <div className="overflow-y-hidden flex-1/2">
+            <div className="relative flex-1/2 flex gap-4 flex-col md:flex-row overflow-hidden">
                     <GameHistory user={user} games={games} />
-                </div>
                 <div className="flex-1/2 flex flex-col gap-10 border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
                     <div className="flex items-center gap-2">
                         <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-lg">
