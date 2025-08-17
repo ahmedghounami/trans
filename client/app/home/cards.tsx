@@ -83,9 +83,10 @@ export default function PingPongAchievements({ games, user }) {
         return maxSlot.charAt(0).toUpperCase() + maxSlot.slice(1);
     };
     const wins = games.filter(game => game.winner_id === user.id).length;
-    const progress = wins % 10; // 0 to 9 wins inside this level
-    const xp = wins * 100; // Assuming each win gives 100 XP
-    const level = Math.floor(wins / 10);
+    const draw = games.filter(game => game.winner_id === 0).length;
+    const progress = (wins + (draw / 2)) % 10; // Assuming 10 wins + 5 draws = 1 level
+    const xp = (wins * 100) + draw * 50; // Assuming each win gives 100 XP and each draw gives 50 XP
+    const level = Math.floor((wins + (draw / 2)) / 10); // 10 wins or 5 draws = 1 level
     return (
         <div className="flex-1/2 flex  flex-col gap-6 h-full justify-around border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
             {/* Stats */}
