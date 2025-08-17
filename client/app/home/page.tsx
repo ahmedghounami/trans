@@ -125,9 +125,9 @@ export default function HomePage() {
                 <PingPongPerformanceChart user={user} games={games} />
                 <PingPongAchievements user={user} games={games} />
             </div>
-            <div className="relative flex-1/2 flex gap-4 flex-col md:flex-row ">
+            <div className="relative flex-1/2 flex gap-4 flex-col md:flex-row h-[85%]">
                     <GameHistory user={user} games={games} />
-                <div className="flex-1/2 flex flex-col gap-10 border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
+                <div className="flex-1/2  flex flex-col gap-10 border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
                     <div className="flex items-center gap-2">
                         <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-lg">
                             <Trophy className="w-5 h-5 text-white" />

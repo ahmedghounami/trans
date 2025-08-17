@@ -3,7 +3,7 @@ import HistoryItem from "./historyitem";
 
 export default function GameHistory({ user, games }) {
     return (
-        <div className="flex-1/2 h-[40%] bg-[#2b24423d] rounded-xl flex flex-col gap-2 border border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm overflow-hidden ">
+        <div className="flex-1/2 bg-[#2b24423d] rounded-xl flex flex-col gap-2 border border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm ">
             <h1 className="flex items-center gap-2 text-lg font-extrabold text-white p-4 w-full border-b border-[#7b5ddf44] tracking-wide bg-[#ffffff08] rounded-t-xl">
                 <Gamepad2 className="w-10 h-10 text-white p-2 bg-gradient-to-r from-blue-400 to-[blue] rounded-lg shadow-lg" />
                 Game History
@@ -18,7 +18,7 @@ export default function GameHistory({ user, games }) {
             </div>
 
             {/* Scrollable table body takes all remaining space */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-2 space-y-2 h-100">
+            <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-2 space-y-2 h-100 ">
                 {games.length > 0 ? (
                     games.map((game) => {
                         const isPlayer1 = user.id === game.player1_id;
