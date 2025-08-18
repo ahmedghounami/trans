@@ -1,10 +1,11 @@
 "use client";
 
 import { GoHomeFill } from "react-icons/go";
-import { IoChatbubbleSharp } from "react-icons/io5";
+import { IoChatbubbleSharp, IoGameController } from "react-icons/io5";
 import { FaShoppingCart } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
 import { IoLogOut } from "react-icons/io5";
+// game icon
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Cookie from "js-cookie";
@@ -14,10 +15,10 @@ export default function Leftheader() {
 
     const navItems = [
         { href: "/home", icon: <GoHomeFill size={26} />, label: "Home" },
-        { href: "/games", icon: <GoHomeFill size={26} />, label: "games" },
         { href: "/chat", icon: <IoChatbubbleSharp size={26} />, label: "Chat" },
         { href: "/shop", icon: <FaShoppingCart size={26} />, label: "Shop" },
-        { href: "/settings", icon: <IoMdSettings size={26} />, label: "Settings" },
+        // { href: "/settings", icon: <IoMdSettings size={26} />, label: "Settings" },
+        { href: "/game", icon: <IoGameController size={26} />, label: "Game" },
     ];
 
     return (

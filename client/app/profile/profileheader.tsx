@@ -1,4 +1,4 @@
-import Games_status from "./games_status";
+import Games_status from "../home/games_status";
 
 export default function ProfileHeader({ user, games }: { user: any, games: any[] }) {
 
@@ -21,30 +21,31 @@ export default function ProfileHeader({ user, games }: { user: any, games: any[]
                 <img
                     src={user.picture}
                     alt="Profile"
-                    className="w-22 h-22 rounded-full object-cover border border-purple-600 shrink-0"/>
-                    <div className="flex flex-col ml-4 flex-1/4">
-                        <div className="flex items-center gap-2 mt-1">
-                            <h1 className="text-2xl font-bold text-white">{user.name}</h1>
-                            <div className="flex items-center gap-1">
-                                <span className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm font-semibold px-2 rounded border-1">
-                                    Level {level}
-                                </span>
-                                <span className="text-[#e89454] border-yellow-500/30 font-bold px-2 animate-pulse">
-                                    {goldearned} Gold
-                                </span>
-                            </div>
+                    className="w-22 h-22 rounded-full object-cover border border-purple-600 shrink-0" />
+                <div className="flex flex-col ml-4 flex-1/4">
+                    <div className="flex items-center gap-2 mt-1">
+                        <h1 className="text-2xl font-bold text-white">{user.name}</h1>
+                        <div className="flex items-center gap-1">
+                            <span className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm font-semibold px-2 rounded border-1">
+                                Level {level}
+                            </span>
+                            <span className="text-[#e89454] border-yellow-500/30 font-bold px-2 animate-pulse">
+                                {goldearned} Gold
+                            </span>
                         </div>
-                        <div className="flex justify-between text-sm text-gray-400 mt-1">
-                            <span>Level progress</span>
-                            <span className="text-gray-300 font-bold">{xp} XP</span>
-                        </div>
-                        <progress
-                            className="w-full h-2 bg-[#595757c8] rounded-full mt-2"
-                            value={progress * 10}
-                            max="100"
-                        ></progress>
                     </div>
-                    <Games_status userId={user.id} className="flex-3/4 flex justify-end" />
+                    <div className="flex justify-between text-sm text-gray-400 mt-1">
+                        <span>Level progress</span>
+                        <span className="text-gray-300 font-bold">{xp} XP</span>
+                    </div>
+                    <progress
+                        className="w-full h-2 bg-[#595757c8] rounded-full mt-2"
+                        value={progress * 10}
+                        max="100"
+                    ></progress>
+                    
+                </div>
+                <Games_status userId={user.id} className="flex-3/4 flex justify-end" />
             </div>
         </div>
     );
