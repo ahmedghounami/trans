@@ -120,31 +120,32 @@ export default function HomePage() {
         return Math.max(maxStreak, current);
     })();
     return (
-        <div className="flex flex-col p-4 h-full md:h-full w-full gap-4">
-            <div className="relative flex-1/2 flex flex-col gap-4 md:flex-row">
+        <div className="flex flex-col gap-4 h-full p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <PingPongPerformanceChart user={user} games={games} />
                 <PingPongAchievements user={user} games={games} />
             </div>
-            <div className="relative flex-1/2 flex gap-4 flex-col md:flex-row h-[85%]">
-                    <GameHistory user={user} games={games} />
-                <div className="flex-1/2  flex flex-col gap-10 border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+
+                <div className="flex flex-col gap-6 border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
                     <div className="flex items-center gap-2">
                         <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-lg">
                             <Trophy className="w-5 h-5 text-white" />
                         </div>
                         <h2 className="text-lg font-bold text-white">Achievements</h2>
                     </div>
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <AchievementCard icon={Trophy} name="First Victory" completed={gameCount > 0} />
                         <AchievementCard icon={Flame} name="Streak Master" progress={streak} total={10} completed={streak >= 10} />
                         <AchievementCard icon={Coins} name="Gold Master" progress={totalGold} total={1000} completed={totalGold >= 1000} />
                         <AchievementCard icon={Crown} name="Champion" completed />
-
                     </div>
                 </div>
+                <GameHistory user={user} games={games} />
             </div>
-
         </div>
+
     );
 }
 

@@ -19,7 +19,7 @@ const CustomTooltip = ({ active, payload, label }) =>
     ) : null;
 
 const SimplePerformanceChart = ({ games = [], user }) => {
-    if (!games|| !user) return <Loading />;
+    if (!games || !user) return <Loading />;
 
     const today = new Date();
     const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -54,8 +54,8 @@ const SimplePerformanceChart = ({ games = [], user }) => {
             </div>
 
             {/* Chart */}
-            <div className="h-full sm:h-40 md:h-72 lg:h-80 xl:h-96">
-                <ResponsiveContainer>
+            <div className="flex-1 min-h-[250px]">
+                <ResponsiveContainer width="90%">
                     <LineChart data={last7Days} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis dataKey="day" stroke="#9ca3af" fontSize={12} />
@@ -66,6 +66,7 @@ const SimplePerformanceChart = ({ games = [], user }) => {
                     </LineChart>
                 </ResponsiveContainer>
             </div>
+
 
             {/* Legend */}
             <div className="flex items-center justify-center gap-6 mt-4">
@@ -80,7 +81,7 @@ const SimplePerformanceChart = ({ games = [], user }) => {
                 ))}
             </div>
 
-            
+
 
         </div>
     );

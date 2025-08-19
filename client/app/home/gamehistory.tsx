@@ -3,7 +3,7 @@ import HistoryItem from "./historyitem";
 
 export default function GameHistory({ user, games }) {
     return (
-        <div className="flex-1/2 bg-[#2b24423d] rounded-xl flex flex-col gap-2 border border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm ">
+        <div className="flex-1/2 h-[400px] bg-[#2b24423d] rounded-xl flex flex-col gap-2 border border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm ">
             <h1 className="flex items-center gap-2 text-lg font-extrabold text-white p-4 w-full border-b border-[#7b5ddf44] tracking-wide bg-[#ffffff08] rounded-t-xl">
                 <Gamepad2 className="w-10 h-10 text-white p-2 bg-gradient-to-r from-blue-400 to-[blue] rounded-lg shadow-lg" />
                 Game History
