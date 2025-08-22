@@ -110,6 +110,8 @@ fastify.register(buyRoute, { db });
 const shopRoute = (await import('./routes/shoproute.js')).default;
 fastify.register(shopRoute, { db });
 
+const ProfileRoutes = (await import('./routes/profileroute.js')).default;
+fastify.register(ProfileRoutes, { db });
 // Create raw HTTP server from fastify's internal handler
 const httpServer = fastify.server;
 

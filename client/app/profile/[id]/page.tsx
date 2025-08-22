@@ -5,14 +5,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useUser } from "../../Context/UserContext";
-import HistoryItem from "../../home/historyitem";
 import ProfileHeader from "../profileheader";
 import { useParams, useRouter } from "next/navigation";
-
-
-import PingPongAchievements from "../../home/cards";
-import { Gamepad2 } from "lucide-react";
 import Loading from "@/app/components/loading";
+import EditProfile from "../editProfile";
 
 export default function Profile() {
     const [games, setGames] = useState([]);
@@ -21,6 +17,8 @@ export default function Profile() {
     const { id } = useParams();
     const router = useRouter();
     const { user: currentUser } = useUser();
+    const [editMode, setEditMode] = useState(false);
+
     useEffect(() => {
         console.log("User ID from params:", id);
     }, [id]);
@@ -95,7 +93,14 @@ export default function Profile() {
 
     return (
         <div className="flex flex-col h-full relative">
-            <ProfileHeader user={user} games={games} />
+            {editMode && (
+                <EditProfile
+                    setEditMode={setEditMode}
+                    editMode={editMode}
+                    user={user}
+                />
+            )}
+            <ProfileHeader user={user} games={games} setEditMode={setEditMode} />
             {/* ////////////////////////////////////////////////////////// */}
             <div className="flex-1/5 flex gap-2 m-5">
 
