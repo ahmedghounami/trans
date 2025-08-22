@@ -107,10 +107,10 @@ export default function PingPongAchievements({ games, user }) {
                 <StatCard icon={Clock} label="Peak Hours" value={favoriteTimeSlot()} subtitle="Most active time" color="from-blue-400 to-indigo-600" />
             </div>
             {/* Level and XP */}
-            < div className="flex flex-col  justify-center backdrop-blur-md rounded-lg p-2 border border-purple-500/20 shadow-lg shadow-purple-500/10">
+            < div className="flex flex-col  justify-center p-2">
                 <div className="flex items-center gap-2 mb-4">
                     <div className="p-2 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-lg">
-                        <Crown className="w-4 h-4 text-white" />
+                        <Crown className="w-5 h-5 text-white" />
                     </div>
                     <h2 className="text-lg font-bold text-white">Level & XP</h2>
                 </div>
