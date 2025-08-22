@@ -5,8 +5,6 @@ import Tables from "./Tables";
 import Balls from "./Balls";
 import Paddles from "./Paddles";
 
-// function Button
-
 export default function Shop() {
 	const { user, loading } = useUser();
 	const [category, setCategory] = useState<"table" | "ball" | "paddle">("table");

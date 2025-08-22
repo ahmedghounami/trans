@@ -49,19 +49,25 @@ export default function Balls({ currentUser }: Props) {
 			<div className="mt-20 md:mt-28 md:w-2/3 md:self-start flex flex-col items-center">
 				{selected && (
 					<>
-						<div className="flex-shrink-0 w-full max-w-4xl p-4 border-4 border-blue-500 rounded-lg shadow-lg flex flex-col">
+						<div className="relative bg-gradient-to-br from-black/40 to-purple-900/20 backdrop-blur-md rounded-xl p-4 border border-purple-500/20 shadow-lg shadow-purple-500/10 transition-all duration-300 hover:scale-102 hover:border-purple-400/40">
+							<span className="p-2 text-center flex flex-col justify-center text-3xl font-bold text-gray-900 dark:text-white">{selected.name}</span>
 							{/* Image */}
-							<img src={selected.img} alt={selected.name} className="w-full h-[500px] object-cover rounded-lg mb-4"/>
+							<img src={selected.img} alt={selected.name} className="w-full h-[650px] object-cover rounded-3xl mb-4 md:w-1/3"/>
 							{/* Info */}
-							<div className="p-4 text-center flex flex-col justify-center">
-								<h2 className="text-2xl font-bold truncate">{selected.name}</h2>
-								<p className="text-lg">${selected.price}</p>
-							</div>
+							{/* <div className="p-12 text-center flex flex-col justify-center">
+								{/* <h2 className="text-2xl font-bold truncate">{selected.name}</h2> */}
+								{/* <span className="text-3xl font-bold text-gray-900 dark:text-white">{selected.name}</span> */}
+								{/* <p className="text-lg">${selected.price}</p> */}
+							{/* </div> */}
+								{/* <span className="p-2 text-center flex flex-col justify-center text-3xl font-bold text-gray-900 dark:text-white">{selected.name}</span> */}
+								<div className="p-8 flex items-center justify-between">
+								<span className="text-3xl font-bold text-gray-900 dark:text-white">$599</span>
+								{/* Buy Button */}
+								<button onClick={() => BuyItem(currentUser.id, selected.id, selected.price)} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+									Buy
+								</button>
+        					</div>
 						</div>
-						{/* Buy Button */}
-						<button onClick={() => BuyItem(currentUser.id, selected.id, selected.price)} className="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-colors duration-300">
-							Buy
-						</button>
 					</>
 				)}
 			</div>
