@@ -16,7 +16,7 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const res = await fetch("http://localhost:4000/me", {
+        const res = await fetch("/api/me", {
           headers: {
             Authorization: `Bearer ${Cookies.get("token")}`,
           },

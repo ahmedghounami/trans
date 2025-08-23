@@ -15,7 +15,7 @@ export default function LoginPage() {
         const name = document.querySelector('input[name="name"]')?.value.trim();
         console.log("Login attempt with name:", name);
 
-        const res = await fetch("http://localhost:4000/login", {
+        const res = await fetch("/api/login", {
             method: "POST",
             body: JSON.stringify({ name }),
             headers: { "Content-Type": "application/json" },

@@ -20,7 +20,7 @@ export default function Paddles({ currentUser }: Props) {
 	useEffect(() => {
 		async function fetchPaddles() {
 			try {
-				const res = await fetch("http://localhost:4000/paddles");
+				const res = await fetch("/api/paddles");
 				if (!res.ok)
 					throw new Error("Failed to fetch paddles");
 				const data: Item[] = await res.json();

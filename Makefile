@@ -6,19 +6,19 @@ NC=\033[0m
 
 all:
 	@echo -e "$(BLUE)[+] Starting Docker containers...$(NC)"
-	@docker-compose -f srcs/docker-compose.yml up --build
+	@docker-compose -f docker-compose.yml up --build
 	@echo -e "$(GREEN)[✔] Containers are running!$(NC)"
 
-clean:
+down:
 	@echo -e "$(YELLOW)[-] Stopping and removing containers...$(NC)"
-	@docker-compose -f srcs/docker-compose.yml down -v
+	@docker-compose -f docker-compose.yml down -v
 	@echo -e "$(GREEN)[✔] Containers stopped and removed.$(NC)"
 
-fclean: clean
+clean: down
 	@echo -e "$(RED)[!] Removing volumes...$(NC)"
 	@docker system prune -af --volumes
 	@echo -e "$(GREEN)[✔] Cleanup complete!$(NC)"
 
-restart: clean all
+restart: down all
 
-re: fclean all
+re: clean all

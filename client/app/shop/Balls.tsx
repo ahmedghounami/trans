@@ -20,7 +20,7 @@ export default function Balls({ currentUser }: Props) {
 	useEffect(() => {
 		async function fetchBalls() {
 			try {
-				const res = await fetch("http://localhost:4000/balls");
+				const res = await fetch("/api/balls");
 				if (!res.ok)
 					throw new Error("Failed to fetch balls");
 				const data: Item[] = await res.json();

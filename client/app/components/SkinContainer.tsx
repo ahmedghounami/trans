@@ -29,7 +29,7 @@ export default function SkinContainer({skinType, skins, selected, setselected}){
       console.log("old skin :", selected.types[selected.type]);
       async function postselect(){
       const response = await fetch(
-        'http://localhost:4000/select_skin?player_id=' + skin.player_id + 
+        '/api/select_skin?player_id=' + skin.player_id + 
         "&oldskin="+ selected.types[selected.type].skin_id+
         "&newskin=" + skin.skin_id 
         ,{  method: 'POST',

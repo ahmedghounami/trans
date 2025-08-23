@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+
+  client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    container_name: client
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    env_file:
+      - .env
+    networks:
+      - transcendence
+    image: client:trans
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+
+  server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    container_name: server
+    volumes:
+      - ./server:/var/www/server
+      - /var/www/server/node_modules
+    env_file:
+      - .env
+    networks:
+      - transcendence
+    image: server:trans
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    container_name: nginx
+    ports:
+      - "443:443"
+    depends_on:
+      - client
+      - server
+    volumes:
+      - ./nginx/conf/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - transcendence
+    image: nginx:trans
+    restart: unless-stopped
+
+networks:
+  transcendence:
+    name: transcendence
