@@ -64,11 +64,6 @@ export default function Paddles({ currentUser }: Props) {
         {selected && (
           <>
             <div className="relative bg-gradient-to-br from-black/40 to-purple-900/20 backdrop-blur-md rounded-xl p-4 border border-purple-500/20 shadow-lg shadow-purple-500/10 transition-all duration-300 hover:scale-102 hover:border-purple-400/40 w-230">
-              {/* Name */}
-              {/* <span className="p-2 text-center flex flex-col justify-center text-3xl font-bold text-gray-900 dark:text-white">
-                {selected.name} */}
-              {/* </span> */}
-              {/* Image */}
               <div className="px-8 ">
                 <img
                   src={selected.img}
@@ -78,7 +73,7 @@ export default function Paddles({ currentUser }: Props) {
               </div>
               <div className="p-8 flex items-center justify-between">
                 {/* Name */}
-                <span className="p-2 text-center flex flex-col justify-center text-3xl font-bold text-gray-900 dark:text-white">
+                <span className="p-2 text-center flex flex-col justify-center text-3xl font-bold text-gray-900 dark:text-white transition-all duration-300 hover:scale-110">
                   {selected.name}
                   {/* Price */}
                 </span>

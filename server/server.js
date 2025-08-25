@@ -5,6 +5,7 @@ import { Server } from 'socket.io';
 import { sockethandler } from './socket.js';
 
 import game from './game.js';
+import fastifyMetrics from 'fastify-metrics';
 
 const fastify = Fastify();
 
@@ -14,6 +15,10 @@ await fastify.register(cors, {
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
 
+// register metrics
+await fastify.register(fastifyMetrics, {
+	endpoint: '/metrics',   // Prometheus will scrape here
+  });
 
 // Connect SQLite DB
 const db = new sqlite3.Database('sqlite.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
