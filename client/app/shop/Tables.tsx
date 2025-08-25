@@ -43,7 +43,7 @@ export default function Tables({ currentUser }: Props) {
           <div
             key={item.id}
             onClick={() => setSelected(item)}
-            className={`flex-shrink-0 w-140 p-4 border rounded-lg cursor-pointer hover:shadow-lg flex flex-col items-center relative bg-gradient-to-br 
+            className={`flex-shrink-0 w-120 p-4 border rounded-lg cursor-pointer hover:shadow-lg flex flex-col items-center relative bg-gradient-to-br 
 						from-black/40 to-purple-900/20 backdrop-blur-md rounded-xl p-4 border border-purple-500/20 shadow-lg shadow-purple-500/10 ${
               selected.id === item.id ? "border-purple-500 shadow-lg" : ""
             }`}
@@ -65,9 +65,9 @@ export default function Tables({ currentUser }: Props) {
           <>
             <div className="relative bg-gradient-to-br from-black/40 to-purple-900/20 backdrop-blur-md rounded-xl p-4 border border-purple-500/20 shadow-lg shadow-purple-500/10 transition-all duration-300 hover:scale-102 hover:border-purple-400/40 w-230">
               {/* Name */}
-              <span className="p-2 text-center flex flex-col justify-center text-3xl font-bold text-gray-900 dark:text-white">
-                {selected.name}
-              </span>
+              {/* <span className="p-2 text-center flex flex-col justify-center text-3xl font-bold text-gray-900 dark:text-white">
+                {selected.name} */}
+              {/* </span> */}
               {/* Image */}
               <div className="px-8 ">
                 <img
@@ -80,18 +80,20 @@ export default function Tables({ currentUser }: Props) {
                 {/* Name */}
                 <span className="p-2 text-center flex flex-col justify-center text-3xl font-bold text-gray-900 dark:text-white">
                   {selected.name}
-                {/* Price */}
+                  {/* Price */}
                 </span>
                 <span className="text-3xl font-bold text-gray-900 dark:text-white transition-all duration-300 hover:scale-110">
                   ${selected.price}
                 </span>
                 {/* Buy Button */}
+              </div>
+              <div className="flex justify-center">
                 <button
                   onClick={() =>
                     BuyItem(currentUser.id, selected.id, selected.price)
                   }
-                  className="text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg text-xl px-10 py-2.5 text-center
-									 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-800 transition-all duration-300 hover:scale-110"
+                  className="text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg text-xl px-40 py-2.5 text-center
+                    dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-800 transition-all duration-300 hover:scale-110"
                 >
                   Buy
                 </button>
