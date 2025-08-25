@@ -5,7 +5,7 @@ services:
   client:
     build:
       context: .
-      dockerfile: ./client/Dockerfile
+      dockerfile: ./client/dockerfile
     container_name: client
     volumes:
       - ./client:/app
@@ -14,7 +14,6 @@ services:
       - .env
     networks:
       - transcendence
-    image: client:trans
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -22,7 +21,7 @@ services:
   server:
     build:
       context: .
-      dockerfile: ./server/Dockerfile
+      dockerfile: ./server/dockerfile
     container_name: server
     volumes:
       - ./server:/var/www/server
@@ -31,7 +30,6 @@ services:
       - .env
     networks:
       - transcendence
-    image: server:trans
     restart: unless-stopped
     ports:
       - "4000:4000"
@@ -39,7 +37,7 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: ./nginx/Dockerfile
+      dockerfile: ./nginx/dockerfile
     container_name: nginx
     ports:
       - "443:443"
@@ -51,6 +49,32 @@ services:
     networks:
       - transcendence
     image: nginx:trans
+    restart: unless-stopped
+  
+  prometheus:
+    build:
+      context: ./prometheus
+      dockerfile: dockerfile
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - transcendence
+    restart: unless-stopped
+
+  grafana:
+    build:
+      context: ./grafana
+      dockerfile: dockerfile
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    networks:
+      - transcendence
+    depends_on:
+      - prometheus
     restart: unless-stopped
 
 networks:
