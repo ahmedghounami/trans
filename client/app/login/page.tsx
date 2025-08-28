@@ -31,7 +31,7 @@ export default function LoginPage() {
             });
             
             // router.push("/chat");
-            window.location.href = "/home"; // Redirect to chat page
+            window.location.href = "/chat"; // Redirect to chat page
         }
         
         else {

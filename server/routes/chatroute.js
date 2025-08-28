@@ -44,7 +44,7 @@ const schemalastmessage = {
 export default async function chatRoutes(fastify, opts) {
   const db = opts.db;
 
-  fastify.get("/search",schemasearch, async (req, reply) => {
+  fastify.get("/api/search",schemasearch, async (req, reply) => {
     const { search } = req.query;
     return new Promise((resolve, reject) => {
       db.all(
@@ -103,7 +103,7 @@ export default async function chatRoutes(fastify, opts) {
   });
 
   // Get all messages
-  fastify.get("/messages", async (req, reply) => {
+  fastify.get("/api/messages", async (req, reply) => {
     return new Promise((resolve, reject) => {
       db.all(`SELECT * FROM messages`, [], (err, rows) => {
         if (err) {
@@ -116,7 +116,7 @@ export default async function chatRoutes(fastify, opts) {
   });
 
   // Get messages between two users
-  fastify.get("/messages/:sender_id/:receiver_id",schemagetmessages, async (req, reply) => {
+  fastify.get("/api/messages/:sender_id/:receiver_id",schemagetmessages, async (req, reply) => {
     const { sender_id, receiver_id } = req.params;
     return new Promise((resolve, reject) => {
       db.all(
@@ -134,7 +134,7 @@ export default async function chatRoutes(fastify, opts) {
   });
 
   // Get last message between two users
-  fastify.get("/lastmessage/:sender_id/:receiver_id",schemalastmessage, async (req, reply) => {
+  fastify.get("/api/lastmessage/:sender_id/:receiver_id",schemalastmessage, async (req, reply) => {
     const { sender_id, receiver_id } = req.params;
 
     return new Promise((resolve, reject) => {

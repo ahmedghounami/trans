@@ -47,7 +47,7 @@ export default async function authRoutes(fastify, opts) {
         });
     });
 
-    fastify.get('/me', async (request, reply) => {
+    fastify.get('/api/me', async (request, reply) => {
         const token = request.headers.authorization?.split(' ')[1];
         if (!token) return reply.status(401).send({ error: 'Unauthorized' });
         try {

@@ -28,7 +28,7 @@ export default function Game()
         if(me){
             console.log(me);
             
-        const socket = new WebSocket(`ws://localhost:9090?gametype=${gametype}`);
+        const socket = new WebSocket(`wss://${window.location.host}/ws?gametype=${gametype}`);
         socket.addEventListener('open', ()=>{
             socket.send(JSON.stringify({type:'getpositions',id:me.id}))
         })
@@ -91,18 +91,29 @@ export default function Game()
             style={{background:selected.types[0].img[0] == '#'  ?selected.types[0].img:""}}
             className={` relative ${Positions.host && `transform -scale-x-100`}  bg-[#252525] flex justify-center  border-4 rounded-2xl w-full aspect-[9/5]`}
             >
+            
+            {  selected.types[0].img[0] != '#' ? <Image fill  className=" object-cover object-center" src={selected.types[0].img}  alt="profile"></Image>:<></>}
                 <div className=" border border-dashed h-full "></div>
                 <div
                 id="padle1"
                 className={`h-1/5 -translate-y-1/2  aspect-[1/6] rounded-full bg-[#fff] absolute left-1`}
                  style={{ top: `${Positions.p1}%`,background:selected.types[1].img[0] == '#'  ?selected.types[1].img:"" }}
-                 ></div>
+                 >
+            {  selected.types[1].img[0] != '#' ? <Image fill  className=" object-cover object-center" src={selected.types[1].img}  alt="profile"></Image>:<></>}
+
+                 </div>
                 <div id="padle2" className="h-1/5 -translate-y-1/2 aspect-[1/6] rounded-full bg-green-700 absolute right-1"
-                 style={{ top: `${Positions.p2}%`,background:selected.types[1].img[0] == '#'  ?selected.types[1].img:"" }}></div>
+                 style={{ top: `${Positions.p2}%`,background:selected.types[1].img[0] == '#'  ?selected.types[1].img:"" }}>
+            {  selected.types[1].img[0] != '#' ? <Image fill  className=" object-cover object-center" src={selected.types[1].img}  alt="profile"></Image>:<></>}
+
+                 </div>
                 <div id="ball"
                 style={ {top: `${Positions.bally}%`, left: `${Positions.ballx}%` , background:selected.types[2].img[0] == '#'  ?selected.types[2].img:""} }
                 className=" bg-[#c7c7c7] h-[4%] -translate-1/2 aspect-square   rounded-full absolute"
-                ></div>
+                >
+            {  selected.types[2].img[0] != '#' ? <Image fill  className=" object-cover object-center" src={selected.types[2].img}  alt="profile"></Image>:<></>}
+
+                </div>
             </div>
         </div>
     </div>

@@ -5,20 +5,15 @@ import { Server } from 'socket.io';
 import { sockethandler } from './socket.js';
 
 import game from './game.js';
-import fastifyMetrics from 'fastify-metrics';
 
 const fastify = Fastify();
 
 await fastify.register(cors, {
-  origin: 'http://localhost:3000',
+  origin: 'https://localhost',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
 
-// register metrics
-await fastify.register(fastifyMetrics, {
-	endpoint: '/metrics',   // Prometheus will scrape here
-  });
 
 // Connect SQLite DB
 const db = new sqlite3.Database('sqlite.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
@@ -74,10 +69,11 @@ db.serialize(() => {
 	db.run(`
 	  CREATE TABLE IF NOT EXISTS skins (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL UNIQUE,
+		name TEXT NOT NULL,
 		type TEXT NOT NULL,
 		price INTEGER,
-		img TEXT NOT NULL
+		img TEXT NOT NULL,
+		UNIQUE(name, type, img)
 	  );
 	`);
 
@@ -121,7 +117,7 @@ const httpServer = fastify.server;
 // Setup Socket.IO server on top of the HTTP server
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'https://localhost',
     methods: ['GET', 'POST'],
   },
   connectionStateRecovery: {
