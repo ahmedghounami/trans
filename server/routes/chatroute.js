@@ -62,7 +62,7 @@ export default async function chatRoutes(fastify, opts) {
     });
   });
 
-  fastify.post("/users", async (req, reply) => {
+  fastify.post("/api/users", async (req, reply) => {
     const { name, picture } = req.body;
     console.log("Creating user:", name, picture);
     if (!name || !picture)
@@ -85,7 +85,7 @@ export default async function chatRoutes(fastify, opts) {
   });
 
   // Insert message
-  fastify.post("/messages",schemasendmessage, async (req, reply) => {
+  fastify.post("/api/messages",schemasendmessage, async (req, reply) => {
     const { sender_id, receiver_id, content } = req.body;
     return new Promise((resolve, reject) => {
       db.run(

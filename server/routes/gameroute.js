@@ -14,7 +14,7 @@ export default async function gameRoutes(fastify, opts) {
     });
   });
 
-  fastify.post("/games/:player1_id/:player2_id", async (req, reply) => {
+  fastify.post("/api/games/:player1_id/:player2_id", async (req, reply) => {
     const player1_id = req.params.player1_id;
     const player2_id = req.params.player2_id;
 

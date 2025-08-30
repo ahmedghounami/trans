@@ -15,7 +15,7 @@ export default async function authRoutes(fastify, opts) {
     
 
     // Login route
-    fastify.post('/login', async (req, reply) => {
+    fastify.post('/api/login', async (req, reply) => {
         const { name } = req.body;
         if (!name) return reply.status(400).send({ error: 'Name is required' });
 

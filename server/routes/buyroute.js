@@ -3,7 +3,7 @@ import { handleBuy } from "../handleBuy.js";
 export default async function buySkin(fastify, opts) {
 	const { db } = opts;
 
-	fastify.post("/buy", async (request, reply) => {
+	fastify.post("/api/buy", async (request, reply) => {
 		const { userId, itemId, itemPrice } = request.body;
 
 		try {

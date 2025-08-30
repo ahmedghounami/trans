@@ -103,7 +103,7 @@ export default async function skinsRoutes(fastify, opts) {
             });
         });
     } )
-    fastify.post('/select_skin', async (request, reply) => {
+    fastify.post('/api/select_skin', async (request, reply) => {
         console.log("POST");
 
          return new Promise((resolve, reject) => {
