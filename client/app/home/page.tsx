@@ -75,7 +75,7 @@ export default function HomePage() {
     useEffect(() => {
         const fetch_user = async () => {
             try {
-                const response = await fetch(`/api//games/${user.id}`, {
+                const response = await fetch(`/api/games/${user.id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -120,13 +120,13 @@ export default function HomePage() {
         return Math.max(maxStreak, current);
     })();
     return (
-        <div className="flex flex-col gap-4 h-full p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-10 h-full p-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <PingPongPerformanceChart user={user} games={games} />
                 <PingPongAchievements user={user} games={games} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div className="flex flex-col gap-6 border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
                     <div className="flex items-center gap-2">

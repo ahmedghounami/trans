@@ -77,7 +77,7 @@ export default function EditProfile({ setEditMode, editMode, user }) {
             const data = await res.json();
 
 
-            const update = await fetch('/api//profile', {
+            const update = await fetch('http://localhost:4000/profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
