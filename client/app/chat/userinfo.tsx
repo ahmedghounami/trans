@@ -30,7 +30,7 @@ export default function UserInfo({
   useEffect(() => {  
     const fetchLastMessage = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/lastmessage/${me}/${user.id}`);
+        const res = await fetch(`/api/lastmessage/${me}/${user.id}`);
         if (!res.ok) throw new Error("Response not ok");
 
         const data = await res.json();

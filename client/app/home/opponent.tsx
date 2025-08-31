@@ -11,7 +11,7 @@ export default function OpponentInfo({ id }:
   useEffect(() => {
     const fetchOpponent = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/users/${id}`);
+        const res = await fetch(`/api/users/${id}`);
         const data = await res.json();
         setOpponent(data);
       } catch (err) {

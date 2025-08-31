@@ -103,7 +103,7 @@ if(gametype == "local" || gametype == "localvsbot"){
             let oppid = Curentplayer.id;
             if(Curentplayer.oponent)
                 oppid = Curentplayer.oponent.id
-            const response = await fetch('http://localhost:4000/games/:' + id + '/:' + oppid ,{  method: 'POST',
+            const response = await fetch('/api/games/:' + id + '/:' + oppid ,{  method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },

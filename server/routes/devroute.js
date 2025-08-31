@@ -3,7 +3,7 @@
 export default async function userRoutes(fastify, opts) {
   const db = opts.db;
 
-  fastify.get("/users", async (req, reply) => {
+  fastify.get("/api/users", async (req, reply) => {
     return new Promise((resolve, reject) => {
       db.all(`SELECT * FROM users`, [], (err, rows) => {
         if (err) {
@@ -15,7 +15,7 @@ export default async function userRoutes(fastify, opts) {
     });
   });
 
-  fastify.get("/users/:id", async (req, reply) => {
+  fastify.get("/api/users/:id", async (req, reply) => {
     const userId = req.params.id;
 
     return new Promise((resolve, reject) => {

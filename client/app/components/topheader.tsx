@@ -16,7 +16,7 @@ export default function Topheader() {
   useEffect(() => {
     const fectusers = async () => {
       try {
-        const res = await fetch('http://localhost:4000/search?search=' + value);
+        const res = await fetch('/api/search?search=' + value);
         const data = await res.json();
         setSearchResults(data);
       } catch (error) {

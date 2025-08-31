@@ -73,7 +73,7 @@ export default function Games_status({ userId }: { userId: string }) {
     useEffect(() => {
         const fetchGamesStatus = async () => {
             try {
-                const response = await fetch(`http://localhost:4000/games/${userId}`);
+                const response = await fetch(`/api/games/${userId}`);
                 if (!response.ok) throw new Error("Failed to fetch");
                 const data: Game[] = await response.json();
 

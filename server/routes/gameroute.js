@@ -2,7 +2,7 @@ export default async function gameRoutes(fastify, opts) {
   const db = opts.db;
 
   // Get all games
-  fastify.get("/games", async (req, reply) => {
+  fastify.get("/api/games", async (req, reply) => {
     return new Promise((resolve, reject) => {
       db.all(`SELECT * FROM games`, [], (err, rows) => {
         if (err) {
@@ -14,7 +14,7 @@ export default async function gameRoutes(fastify, opts) {
     });
   });
 
-  fastify.post("/games/:player1_id/:player2_id", async (req, reply) => {
+  fastify.post("/api/games/:player1_id/:player2_id", async (req, reply) => {
     const player1_id = req.params.player1_id;
     const player2_id = req.params.player2_id;
 
@@ -80,7 +80,7 @@ export default async function gameRoutes(fastify, opts) {
 
   // get all games for a specific user
 
-  fastify.get("/games/:userId", async (req, reply) => {
+  fastify.get("/api/games/:userId", async (req, reply) => {
     const userId = req.params.userId;
 
     return new Promise((resolve, reject) => {
@@ -98,7 +98,7 @@ export default async function gameRoutes(fastify, opts) {
     });
   });
   // get all games won by a specific user
-  // fastify.get('/games/won/:userId', async (req, reply) => {
+  // fastify.get('/api/games/won/:userId', async (req, reply) => {
   //     const userId = req.params.userId;
 
   //     return new Promise((resolve, reject) => {
@@ -112,7 +112,7 @@ export default async function gameRoutes(fastify, opts) {
   //     });
   // });
   // // get all games lost by a specific user
-  // fastify.get('/games/lost/:userId', async (req, reply) => {
+  // fastify.get('/api/games/lost/:userId', async (req, reply) => {
   //     const userId = req.params.userId;
 
   //     return new Promise((resolve, reject) => {

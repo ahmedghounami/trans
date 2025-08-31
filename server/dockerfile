@@ -1,0 +1,13 @@
+FROM node:18-alpine
+
+WORKDIR /var/www/server
+
+COPY ./server/package*.json ./
+
+RUN npm install && npm install fastify-metrics prom-client
+
+COPY ./server ./
+
+EXPOSE 4000
+
+CMD ["npm", "start"]

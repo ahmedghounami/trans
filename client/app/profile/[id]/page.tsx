@@ -26,7 +26,7 @@ export default function Profile() {
     useEffect(() => {
         const fetch_user = async () => {
             try {
-                const response = await fetch(`http://localhost:4000/users/${id}`, {
+                const response = await fetch(`/api/users/${id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -54,7 +54,7 @@ export default function Profile() {
     useEffect(() => {
         const fetch_games = async () => {
             try {
-                const response = await fetch(`http://localhost:4000/games/${id}`, {
+                const response = await fetch(`/api/games/${id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",

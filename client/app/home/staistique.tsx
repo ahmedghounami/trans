@@ -17,7 +17,7 @@ export default function Statistics() {
     useEffect(() => {
         const fetch_games = async () => {
             try {
-                const response = await fetch(`http://localhost:4000/games/${user.id}`, {
+                const response = await fetch(`/api/games/${user.id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
