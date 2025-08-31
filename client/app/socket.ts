@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:4000", {
+const socket = io("/api/", {
   transports: ["websocket"], // optional, but can prevent polling bugs
   autoConnect: true,
   withCredentials: true,

@@ -1,6 +1,6 @@
 server/node_modules
 server/package-lock.json
 client/package-lock.json
-
+client/node_modules
 server/*.db
 

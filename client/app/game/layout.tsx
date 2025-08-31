@@ -24,7 +24,7 @@ export default function Home({
   useEffect(() => {
     async function fetchme() {
       try {
-        const response = await fetch('http://localhost:4000/me', {
+        const response = await fetch('/api//me', {
           method: 'GET',
           headers: {
             'authorization': `Bearer ${Cookies.get('token')}`,
@@ -50,7 +50,7 @@ export default function Home({
       console.log(me);
       async function fetchOwnedSkins() {
         try {
-          const res = await fetch('http://localhost:4000/player_skins?player_id=' + me.id)
+          const res = await fetch('/api//player_skins?player_id=' + me.id)
           if (res.error) {
             throw new Error(res.error)
           }
