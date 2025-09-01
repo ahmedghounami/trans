@@ -43,8 +43,10 @@ export default function Paddles({ currentUser }: Props) {
           <div
             key={item.id}
             onClick={() => setSelected(item)}
-            className={`flex-shrink-0 w-120 p-4 border rounded-lg cursor-pointer hover:shadow-lg flex flex-col items-center relative bg-gradient-to-br 
-						from-black/40 to-purple-900/20 backdrop-blur-md rounded-xl p-4 border border-purple-500/20 shadow-lg shadow-purple-500/10 ${
+            className={`flex-shrink-0 w-120 p-4 border rounded-lg cursor-pointer hover:shadow-lg flex flex-col items-center 
+            relative bg-gradient-to-br 
+						from-black/40 to-purple-900/20 backdrop-blur-md rounded-xl p-4 border 
+            border-purple-500/20 shadow-lg shadow-purple-500/10 ${
               selected.id === item.id ? "border-purple-500 shadow-lg" : ""
             }`}
           >
@@ -68,7 +70,9 @@ export default function Paddles({ currentUser }: Props) {
                 <img
                   src={selected.img}
                   alt={selected.name}
-                  className="w-full h-[550px] object-cover rounded-3xl mb-4 relative bg-gradient-to-br from-black/40 to-purple-900/20 backdrop-blur-md border border-purple-500/20 shadow-lg shadow-purple-500/10 transition-all duration-300 hover:scale-102 hover:border-purple-400/40"
+                  className="w-full h-[550px] object-cover rounded-3xl mb-4 relative bg-gradient-to-br 
+                  from-black/40 to-purple-900/20 backdrop-blur-md border border-purple-500/20 shadow-lg 
+                  shadow-purple-500/10 transition-all duration-300 hover:scale-102 hover:border-purple-400/40"
                 />
               </div>
               <div className="p-8 flex items-center justify-between">

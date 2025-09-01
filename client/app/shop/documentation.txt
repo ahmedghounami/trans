@@ -1,53 +1,29 @@
-##public
-rounded-xl : l7awaf
-shadow-lg : for shadow
-bg-white: back-ground color
+container : Tailwind’s container class gives your content a maximum width depending on the screen size.
 
-##############Write Container#################
+mx-auto : m = margin, x = horizontal (left + right), auto = automatic. So it sets margin-left: auto; margin-right: auto;. This centers the whole container horizontally in the page.
 
-#Entire Conatiner
-mt-20 → Adds top margin (5rem = 80px).
-md:mt-28 → On medium+ screens, increase top margin to 7rem (112px).
-md:w-2/3 → On medium+ screens, width is 2/3 of the parent container.
-md:self-start → On medium+ screens, aligns this div to the start (top/left depending on flex direction of parent).
-flex flex-col → Makes the container a flexbox with vertical (column) direction.
-items-center → Centers items horizontally inside this flex column.
+p-4 : p = padding (inside spacing). 4 = Tailwind spacing unit → by default, 1rem (16px). So p-4 means padding: 1rem; on all sides (top, right, bottom, left).
 
-# Product Card
-flex-shrink-0 → Prevents the card from shrinking in a flex container.
-w-full → Takes up full available width.
-max-w-4xl → Maximum width capped at 64rem (~1024px).
-p-4 → Padding inside (1rem = 16px).
-border-4 border-blue-500 → 4px border, blue color.
-rounded-lg → Rounded corners.
-shadow-lg → Adds a large shadow (floating look).
-flex flex-col → Inside layout is also a vertical flex column.
+grid : Turns the inner div into a CSS Grid container. That means its children (items.map(...)) become grid items. Grid lets us control rows, columns, and gaps easily.
 
-# Product Image
-w-full → Image spans full card width.
-h-[500px] → Fixed height of 500px.
-object-cover → Crop image to cover without stretching.
-rounded-lg → Rounded corners.
-mb-4 → Bottom margin (1rem)
+grid-cols-4 :Defines how many columns the grid should have. grid-cols-4 → exactly 4 equal-width columns.
 
-# Prodcut Infos
-p-4 → Padding.
-text-center → Centers text horizontally.
-flex flex-col justify-center → Info stacked vertically, centered.
-text-2xl font-bold → Big bold title.
-truncate → If the name is too long, cut it with ....
-text-lg → Slightly larger text for the price.
+Żgp-4 : Adds space between grid items (both rows and columns). gap-4 = 1rem (16px) of space.
 
-#Buy Button
-mt-6 → Margin-top for spacing above button.
-bg-blue-500 → Default blue background.
-hover:bg-blue-600 → Darker blue on hover.
-text-white → White text.
-font-semibold → Medium-bold font.
-py-3 px-8 → Padding: top/bottom 0.75rem, left/right 2rem.
-rounded-lg → Rounded corners.
-shadow-lg → Button shadow.
-transition-colors duration-300 → Smooth hover color animation (300ms).
+border : Adds a 1px border around the card. Default color is a light gray (you can change later with border-gray-300 etc.).
 
-##################Left Container#####################
+rounded-lg Rounds the corners of the card. lg = large radius → smoother corners. You could use rounded-md (medium), rounded-xl (extra large), etc.
 
+flex flex-col : Turns the card into a flexbox container. flex-col → stacks child elements vertically (image on top, name/price in middle, button at bottom).
+
+flex-shrink-0 means: “don’t allow this item to shrink smaller than its natural size.”
+
+cursor-pointer : Changes the mouse cursor to a hand (pointer) when hovering over the element.
+
+transition-all : Enables CSS transitions for all properties (colors, shadows, transforms, etc.).
+
+duration-300 : Controls how long the transition takes.
+
+hover:scale-102 : Scales the element to 102% of its original size when hovered.
+
+hover:border-purple-400/40 : Changes the border color on hover.
