@@ -126,7 +126,7 @@ export default function HomePage() {
                 <PingPongAchievements user={user} games={games} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
                 <div className="flex flex-col gap-6 border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
                     <div className="flex items-center gap-2">
