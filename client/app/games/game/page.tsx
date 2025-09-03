@@ -56,7 +56,7 @@ export default function Game()
     }
     if (Positions.win) {
         setTimeout(() => {
-            router.push("/home")
+            router.push("/games")
         }, 500);
         console.log("Victory");
         console.log(Positions.win);
