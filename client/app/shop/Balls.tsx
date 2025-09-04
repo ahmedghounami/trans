@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import BuyItem from "./BuyFunction";
+import { ShoppingCart } from "lucide-react";
 
 interface Item {
   id: number;
@@ -33,69 +34,51 @@ export default function Balls({ currentUser }: Props) {
   }, []);
 
   return (
-    <div className="flex flex-col md:flex-row md:space-x-10 relative">
-      {/* left bar */}
-      <div
-        className="flex space-x-4 overflow-x-auto pb-4 md:flex-col md:space-x-0 md:space-y-4 md:w-1/3 ml-60 md:overflow-y-auto max-h-[85vh] md:pr-2 [scrollbar-width:thin] [scrollbar-color:#3B82F6_#E5E7EB] [&::-webkit-scrollbar]:w-2
-			 [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:bg-purple-950 "
-      >
+    <div className="mx-auto p-4 sm:p-10">
+      <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {items.map((item) => (
           <div
             key={item.id}
-            onClick={() => setSelected(item)}
-            className={`flex-shrink-0 w-120 p-4 border rounded-lg cursor-pointer hover:shadow-lg flex flex-col items-center relative bg-gradient-to-br 
-						from-black/40 to-purple-900/20 backdrop-blur-md rounded-xl p-4 border border-purple-500/20 shadow-lg shadow-purple-500/10 ${
-              selected.id === item.id ? "border-purple-500 shadow-lg" : ""
-            }`}
+            className="border-4 border-purple-500/20 rounded-xl shadow-lg flex flex-col
+            relative bg-gradient-to-br from-black/40 to-purple-900/20 backdrop-blur-md cursor-pointer
+            transition-all duration-300 hover:scale-102 hover:border-purple-400/40 justify-between items-start"
           >
-            <img
-              src={item.img}
-              alt={item.name}
-              className="w-120 h-75 object-cover rounded-xl mb-2 transition-all duration-300 hover:scale-102"
-            />
-            <div className="text-lg font-semibold transition-all duration-300 hover:scale-120">
-              ${item.price}
+            {/* Image */}
+            <div className="w-full">
+              <img
+                src={item.img}
+                alt={item.name}
+                className="w-full h-auto sm:h-60 md:h-72 lg:h-75 object-cover mb-4
+                border-purple-500/20 shadow-lg shadow-purple-500/10"
+              />
+            </div>
+            <div className="w-full flex flex-col items-start p-4 gap-4">
+              {/* Name */}
+              <span className="text-left text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white break-words">
+                {item.name}
+              </span>
+              {/* Description */}
+              <span className="text-left text-base sm:text-xl text-gray-500 break-words">
+                This is a Description of the Table, it is very good and you should buy it, trust me.
+              </span>
+              {/* Price */}
+              <span className="text-left text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                ${item.price}
+              </span>
+            </div>
+            {/* Buy Button */}
+            <div className="w-full px-4 pb-4">
+              <button
+                onClick={() => BuyItem(currentUser.id, item.id, item.price)}
+                className="w-full text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:outline-none focus:ring-purple-300
+                  font-medium rounded-lg text-xl py-2.5 flex items-center gap-2 justify-center
+                  dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-800 transition-all duration-300 hover:scale-105"
+              >
+                <ShoppingCart /> Buy
+              </button>
             </div>
           </div>
         ))}
-      </div>
-      {/* right bar */}
-      <div className="mt-20 md:mt-28 md:w-2/3 md:self-start flex flex-col items-center">
-        {selected && (
-          <>
-            <div className="relative bg-gradient-to-br from-black/40 to-purple-900/20 backdrop-blur-md rounded-xl p-4 border border-purple-500/20 shadow-lg shadow-purple-500/10 transition-all duration-300 hover:scale-102 hover:border-purple-400/40 w-230">
-              <div className="px-8 ">
-                <img
-                  src={selected.img}
-                  alt={selected.name}
-                  className="w-full h-[550px] object-cover rounded-3xl mb-4 relative bg-gradient-to-br from-black/40 to-purple-900/20 backdrop-blur-md border border-purple-500/20 shadow-lg shadow-purple-500/10 transition-all duration-300 hover:scale-102 hover:border-purple-400/40"
-                />
-              </div>
-              <div className="p-8 flex items-center justify-between">
-                {/* Name */}
-                <span className="p-2 text-center flex flex-col justify-center text-3xl font-bold text-gray-900 dark:text-white transition-all duration-300 hover:scale-110">
-                  {selected.name}
-                  {/* Price */}
-                </span>
-                <span className="text-3xl font-bold text-gray-900 dark:text-white transition-all duration-300 hover:scale-110">
-                  ${selected.price}
-                </span>
-                {/* Buy Button */}
-              </div>
-              <div className="flex justify-center">
-                <button
-                  onClick={() =>
-                    BuyItem(currentUser.id, selected.id, selected.price)
-                  }
-                  className="text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg text-xl px-40 py-2.5 text-center
-                    dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-800 transition-all duration-300 hover:scale-110"
-                >
-                  Buy
-                </button>
-              </div>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );
