@@ -1,5 +1,7 @@
+/** @format */
+
 export default async function skinsRoutes(fastify, opts) {
-	const db = opts.db
+	const db = opts.db;
 	await db.run(`
     INSERT OR IGNORE INTO skins (name, type, price, img) VALUES
     ('Pastel Blue', 'ball', 0, '#ff7300'),
@@ -18,132 +20,163 @@ export default async function skinsRoutes(fastify, opts) {
     ('Pastel Blue', 'table', 0, '#252525'),
     ('Pastel Blue', 'paddle', 0, '#fff')
     `);
-    // await db.run(`DROP TABLE skins;`)
-    await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
+	// await db.run(`DROP TABLE skins;`)
+	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
     SELECT id, 1, 1 FROM users
     WHERE id NOT IN (
         SELECT player_id FROM player_skins WHERE skin_id = 1
     );`);
-    await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
+	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
     SELECT id, 2, 1 FROM users
     WHERE id NOT IN (
         SELECT player_id FROM player_skins WHERE skin_id = 2
     );`);
-    await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
+	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
     SELECT id, 3, 1 FROM users
     WHERE id NOT IN (
         SELECT player_id FROM player_skins WHERE skin_id = 3
     );`);
-    await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
+	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
     SELECT id, 4 FROM users
     WHERE id NOT IN (
         SELECT player_id FROM player_skins WHERE skin_id = 4
     );`);
-    await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
+	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
     SELECT id, 5 FROM users
     WHERE id NOT IN (
         SELECT player_id FROM player_skins WHERE skin_id = 5
     );`);
-    await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
+	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
     SELECT id, 6 FROM users
     WHERE id NOT IN (
         SELECT player_id FROM player_skins WHERE skin_id = 6
     );`);
-    fastify.get('/player_skins', async (request, reply) => {
-         return new Promise((resolve, reject) => {
-            const {player_id} = request.query
-            if (!player_id)
-            {
-                reply.status(400).send({ error: 'Missing player_id in query' });
-                return reject(new Error('Missing player_id in query'));
-            }
-            db.all(`SELECT *  FROM player_skins
+	fastify.get("/player_skins", async (request, reply) => {
+		return new Promise((resolve, reject) => {
+			const { player_id } = request.query;
+			if (!player_id) {
+				reply.status(400).send({ error: "Missing player_id in query" });
+				return reject(new Error("Missing player_id in query"));
+			}
+			db.all(
+				`SELECT *  FROM player_skins
                     JOIN skins ON player_skins.skin_id = skins.id
-                  WHERE player_id = ?;`, [player_id], (err, rows) => {
-                if (err) {
-                    reply.status(500).send({ error: 'Database error' });
-                    return reject(err);
-                }
-                resolve(rows);
-            });
-        });
-    } )
-    fastify.get('/selected_paddle', async (request, reply) => {
-         return new Promise((resolve, reject) => {
-            const {player_id} = request.query
-            if (!player_id)
-            {
-                reply.status(400).send({ error: 'Missing player_id in query' });
-                return reject(new Error('Missing player_id in query'));
-            }
-            db.get(`SELECT * , skins.* FROM player_skins
-                    JOIN skins ON player_skins.skin_id = skins.id
-                  WHERE player_id = ? AND selected = 1 AND type='paddle'
-                  LIMIT 1;`, [player_id], (err, row) => {
-                if (err) {
-                    reply.status(500).send({ error: 'Database error' });
-                    return reject(err);
-                }
-                resolve(row);
-            });
-        });
-    } )
-    fastify.post('/select_skin', async (request, reply) => {
-        console.log("POST");
+                  WHERE player_id = ?;`,
+				[player_id],
+				(err, rows) => {
+					if (err) {
+						reply.status(500).send({ error: "Database error" });
+						return reject(err);
+					}
+					resolve(rows);
+				}
+			);
+		});
+	});
+	fastify.get("/selected_skins", async (request, reply) => {
+		return new Promise((resolve, reject) => {
+			const { player_id } = request.query;
+			if (!player_id) {
+				reply.status(400).send({ error: "Missing player_id in query" });
+				return reject(new Error("Missing player_id in query"));
+			}
 
-         return new Promise((resolve, reject) => {
-            const {player_id, oldskin, newskin} = request.query
-            if (!player_id || !oldskin || !newskin)
-            {
-                reply.status(400).send({ error: 'Missing player_id in query' });
-                return reject(new Error('Missing player_id in query'));
-            }
-            db.all(
-            `SELECT player_skins.* , skins.type
+			db.all(
+				`SELECT player_skins.*, skins.* 
+       FROM player_skins
+       JOIN skins ON player_skins.skin_id = skins.id
+       WHERE player_id = ? AND selected = 1;`,
+				[player_id],
+				(err, rows) => {
+					if (err) {
+						reply.status(500).send({ error: "Database error" });
+						return reject(err);
+					}
+
+					// ✅ Must have exactly 3 selected skins
+					if (!rows || rows.length !== 3) {
+						reply
+							.status(400)
+							.send({ error: "Player must have exactly 3 selected skins" });
+						return reject(new Error("Invalid skin count"));
+					}
+
+					// ✅ Check that we have 1 of each type
+					const requiredTypes = ["table", "paddle", "ball"];
+					const types = rows.map((r) => r.type);
+
+					for (const type of requiredTypes) {
+						if (!types.includes(type)) {
+							reply
+								.status(400)
+								.send({ error: `Missing required skin type: ${type}` });
+							return reject(new Error(`Missing skin type: ${type}`));
+						}
+					}
+
+					// ✅ Sort rows in order: table → paddle → ball
+					const order = { table: 1, paddle: 2, ball: 3 };
+					rows.sort((a, b) => order[a.type] - order[b.type]);
+
+					resolve(rows);
+				}
+			);
+		});
+	});
+
+	fastify.post("/select_skin", async (request, reply) => {
+		console.log("POST");
+
+		return new Promise((resolve, reject) => {
+			const { player_id, oldskin, newskin } = request.query;
+			if (!player_id || !oldskin || !newskin) {
+				reply.status(400).send({ error: "Missing player_id in query" });
+				return reject(new Error("Missing player_id in query"));
+			}
+			db.all(
+				`SELECT player_skins.* , skins.type
              FROM player_skins
              JOIN skins ON player_skins.skin_id = skins.id
              WHERE player_id = ?
                AND (skin_id = ? OR skin_id = ?)`,
-            [player_id, oldskin, newskin], (err, rows) => {
-                if (err) {
-                    reply.status(500).send({ error: 'Database error' });
-                    return reject(err);
-                }
-                else if(rows.length != 2 || rows[0].type != rows[1].type)
-                {
-                    reply.status(500).send({ error: 'Database error' });
-                    return reject(new Error('diferent skin type'));
-                }
-                else
-                {
-                    db.run(
-                      `UPDATE player_skins
+				[player_id, oldskin, newskin],
+				(err, rows) => {
+					if (err) {
+						reply.status(500).send({ error: "Database error" });
+						return reject(err);
+					} else if (rows.length != 2 || rows[0].type != rows[1].type) {
+						reply.status(500).send({ error: "Database error" });
+						return reject(new Error("diferent skin type"));
+					} else {
+						db.run(
+							`UPDATE player_skins
                        SET selected = 0
                        WHERE player_id = ? AND skin_id = ?`,
-                      [player_id, oldskin],
-                      function(err) {
-                        if (err) {
-                          console.error("Error updating row:", err);
-                        }
-                      }
-                    );
-                    db.run(
-                      `UPDATE player_skins
+							[player_id, oldskin],
+							function (err) {
+								if (err) {
+									console.error("Error updating row:", err);
+								}
+							}
+						);
+						db.run(
+							`UPDATE player_skins
                        SET selected = 1
                        WHERE player_id = ? AND skin_id = ?`,
-                      [player_id, newskin],
-                      function(err) {
-                        if (err) {
-                          console.error("Error updating row:", err);
-                        }
-                      }
-                    );
-                }
+							[player_id, newskin],
+							function (err) {
+								if (err) {
+									console.error("Error updating row:", err);
+								}
+							}
+						);
+					}
 
-                resolve(rows);
-            })
-        });
-    } )
+					resolve(rows);
+				}
+			);
+		});
+	});
 	// db.serialize(() => {
 	// 	// db.run("DELETE FROM skins");
 	// 	// Paddles

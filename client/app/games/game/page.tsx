@@ -10,7 +10,7 @@ import Loading from "@/app/components/loading";
 import { Homecontext } from "../layout";
 
 export default function Game() {
-	const { selected } = Homecontext();
+	const { selected, setselected } = Homecontext();
 	const { me } = Homecontext();
 	const router = useRouter();
 	const [Positions, setPositions] = useState({});
@@ -65,20 +65,35 @@ export default function Game() {
 			}
 		};
 	}, [me]);
+	 useEffect(() => {
+    async function fetchSkin() {
+      try {
+        const res = await fetch(`http://localhost:4000/selected_skins?player_id=${me.id}`)
+        const data = await res.json()
+		console.log(data);
+		
+        setselected({types:data, type:0})
+      } catch (err) {
+        console.error("Error fetching skin:", err)
+      }
+    }
+	if (me) {
+    fetchSkin()}
+  }, [me])
 	if (gametype == "tournament") {
 		gametype = "local";
 		tournament = true;
 	}
 	console.log(selected);
 
-	if (!me || !selected.types || !selected.types[0]) {
-		router.push("/games");
-		return (
-			<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
-				<Loading />
-			</div>
-		);
-	}
+	// if (!me || !selected.types || !selected.types[0]) {
+	// 	router.push("/games");
+	// 	return (
+	// 		<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
+	// 			<Loading />
+	// 		</div>
+	// 	);
+	// }
 	if (!Positions.score || !selected.types || !selected.types[0]) {
 		// console.log("loading");
 		return (

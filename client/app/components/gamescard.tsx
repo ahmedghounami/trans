@@ -37,13 +37,13 @@ export default function GamesCard({
 					alt="profile"></Image>
 				<div className="z-10 absolute  rounded-2xl top-3/4 bottom-0 transition-all duration-1000  group-hover:top-0 w-full flex flex-col justify-center items-center bg-black/50 backdrop-blur-xs ">
 					<h3
-						className={` text-[2.5vh] group-hover:text-[3vh] transition-all duration-700 group-hover:rotate-y-180 group-hover:text-blue-500 ${
+						className={` text-[clamp(20px,2.5vh,3vh)] group-hover:text-[clamp(24px,2.5vh,3vh)] transition-all duration-700 group-hover:rotate-y-180 group-hover:text-blue-500 ${
 							GameType == type ? "text-blue-500" : "text-white"
 						}  font-semibold mb-1`}>
 						{title}
 					</h3>
 					<p
-						className={`text-[1.5vh] group-hover:text-[2vh] transition-all duration-700 group-hover:rotate-y-180 group-hover:text-blue-300  ${
+						className={`text-[clamp(14px,1.5vh,3vh)] group-hover:text-[clamp(16px,2vh,3vh)] transition-all duration-700 group-hover:rotate-y-180 group-hover:text-blue-300  ${
 							GameType == type ? "text-blue-300" : "text-gray-300"
 						} text-center`}>
 						{description}
