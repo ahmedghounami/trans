@@ -1,7 +1,7 @@
 "use client";
 
 import { UserX, Star, MessageCircle, Gamepad2, Trophy, TrendingDown } from "lucide-react";
-
+import { useEffect } from "react";
 type UserType = {
   id: number;
   name: string;
