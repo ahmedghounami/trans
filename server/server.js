@@ -3,7 +3,7 @@ import cors from '@fastify/cors';
 import sqlite3 from 'sqlite3';
 import { Server } from 'socket.io';
 import { sockethandler } from './socket.js';
-
+// import friendsRoutes from './routes/friendsroute.js';
 import game from './game.js';
 
 const fastify = Fastify();
@@ -33,6 +33,16 @@ db.serialize(() => {
 		picture TEXT NOT NULL,
 		gold INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	  );
+	`);
+
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS friends (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		friend_id INTEGER NOT NULL,
+		is_favorite BOOLEAN DEFAULT 0,
+		is_request BOOLEAN DEFAULT 0
 	  );
 	`);
 
@@ -89,6 +99,7 @@ db.serialize(() => {
 	`);
 });
 
+
 // Register routes on fastify
 const devRoute = (await import('./routes/devroute.js')).default;
 fastify.register(devRoute, { db });
@@ -113,6 +124,10 @@ fastify.register(shopRoute, { db });
 
 const ProfileRoutes = (await import('./routes/profileroute.js')).default;
 fastify.register(ProfileRoutes, { db });
+
+const friendsRoute = (await import('./routes/friendsroute.js')).default;
+fastify.register(friendsRoute, { db });
+
 // Create raw HTTP server from fastify's internal handler
 const httpServer = fastify.server;
 

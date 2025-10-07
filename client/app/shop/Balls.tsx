@@ -35,7 +35,7 @@ export default function Balls({ currentUser }: Props) {
 
   return (
     <div className="mx-auto p-4 sm:p-10">
-      <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         {items.map((item) => (
           <div
             key={item.id}

@@ -4,6 +4,7 @@ import { useUser } from "../Context/UserContext";
 import Tables from "./Tables";
 import Balls from "./Balls";
 import Paddles from "./Paddles";
+import Loading from "../components/loading";
 
 export default function Shop() {
   const { user, loading } = useUser();
@@ -12,11 +13,7 @@ export default function Shop() {
   );
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen text-white">
-        Loading...
-      </div>
-    );
+    return <Loading />;
   }
   if (!user) {
     return (
