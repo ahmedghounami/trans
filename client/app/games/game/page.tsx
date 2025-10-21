@@ -207,7 +207,7 @@ export default function Game() {
 		);
 	}
 
-	if (Positions.win) {
+	if (Positions.win != 0) {
 		if (tournament) {
 			setTimeout(() => {
 				router.push(

@@ -79,7 +79,7 @@ function botmouvement(keysPressed, positions) {
 function game(gametype, socket, keysPressed, session) {
 	// const Curentplayer = players.find((p) => p.id == playerData.id);
 	// console.log("cuuuuuuuurernt",Curentplayer);
-	
+
 	// if (gametype == "local" || gametype == "localvsbot") {
 	// 	Curentplayer.startgame = 1;
 	// 	if (gametype == "localvsbot")
@@ -90,11 +90,13 @@ function game(gametype, socket, keysPressed, session) {
 	// }
 
 	// let post = 0;
-		let Curentplayer;
-		
-		if (session.players_info.p1_id == socket.playerId)
-			 Curentplayer = 1;
-		else Curentplayer = 2;
+	let Curentplayer;
+
+	if (session.players_info.p1_id == socket.playerId) Curentplayer = 1;
+	else {
+		Curentplayer = 2;
+	}
+
 	const intervalId = setInterval(() => {
 		// const player = players.find((p) => {
 		// 	return p.id != Curentplayer.id && p.startgame == 0;
@@ -145,7 +147,11 @@ function game(gametype, socket, keysPressed, session) {
 		// 	return;
 		// }
 		if (session.p1_ready && session.p2_ready) session.startgame = 1;
-
+		if (session.positions.win) {
+			socket.emit("gameState", { ...session, Curentplayer: Curentplayer });
+			socket.disconnect();
+			// session.positions.win = 0;
+		}
 		if (session.startgame && !session.positions.win) {
 			let { vx, vy } = CalculateballVelocity(
 				session.positions,
@@ -234,9 +240,9 @@ function game(gametype, socket, keysPressed, session) {
 				}
 			} else {
 				// if (Curentplayer == 1) {
-					session.positions.direction == 1
-						? session.positions.score.p1++
-						: session.positions.score.p2++;
+				session.positions.direction == 1
+					? session.positions.score.p1++
+					: session.positions.score.p2++;
 				// }
 
 				// if (Curentplayer.oponent)
@@ -251,15 +257,8 @@ function game(gametype, socket, keysPressed, session) {
 					session.positions.win = 2;
 					if (session.positions.score.p1 > session.positions.score.p2)
 						session.positions.win = 1;
-					console.log("WIN", session);
+					console.log("WIN", Curentplayer, session);
 
-					postresult(
-						session.positions.score.p1,
-						session.positions.score.p2,
-						session.players_info.p1_id,
-						session.players_info.p2_id,
-						session.positions.win
-					);
 					// if (Curentplayer.oponent != null) {
 					// 	Curentplayer.oponent.positions.win =
 					// 		-1 * session.positions.win;
@@ -274,11 +273,12 @@ function game(gametype, socket, keysPressed, session) {
 				session.positions.speed = 1;
 			}
 			// session.positions.Curentplayer = Curentplayer;
-			socket.emit("gameState", {...session, Curentplayer:Curentplayer});
-			if (session.positions.win)
-				setTimeout(() => {
-					socket.disconnect();
-				}, 300);
+			socket.emit("gameState", { ...session, Curentplayer: Curentplayer });
+			// if (session.positions.win && session.gametype != "online")
+			// 	setTimeout(() => {
+			// if(session.positions.win)
+			// 	socket.disconnect();
+			// 	}, 300);
 			// If online and we have an opponent, send them the updated state
 			// if (
 			// 	gametype === "online" &&
@@ -348,7 +348,7 @@ export function setupGameSocketIO(io) {
 			p2: 50,
 			host: 0,
 			ballx: 50,
-			score: { p1: 0, p2: 0 },
+			score: { p1: 10, p2: 10 },
 			bally: 50,
 			angle: 0,
 			direction: 1,
@@ -362,7 +362,7 @@ export function setupGameSocketIO(io) {
 		if (session.gametype == "localvsbot")
 			botmouvement(keysPressed, session.positions);
 
-		game(session.gametype, socket, keysPressed, session);
+		const intervalID = game(session.gametype, socket, keysPressed, session);
 		// const playeringame = players.find((p) => p.id == currentPlayerId);
 		// if (!playeringame) {
 		// const playerData = {
@@ -402,7 +402,33 @@ export function setupGameSocketIO(io) {
 
 		socket.on("disconnect", () => {
 			console.log("Client disconnected from game:", socket.id);
+			if (
+				socket.session.positions.win == 0 &&
+				socket.playerId == socket.session.players_info.p1_id
+			) {
+				socket.session.positions.win = 2;
+				session.positions.score.p1 = 0;
+				session.positions.score.p2 = 12;
+			} else if (
+				socket.session.positions.win == 0 &&
+				socket.playerId == socket.session.players_info.p2_id
+			) {
+				socket.session.positions.win = 1;
+				session.positions.score.p1 = 12;
+				session.positions.score.p2 = 0;
+			}
+			if (socket.playerId == socket.session.players_info.p2_id && session.gametype == 'online') {
+				postresult(
+					session.positions.score.p1,
+					session.positions.score.p2,
+					session.players_info.p1_id,
+					session.players_info.p2_id,
+					session.positions.win
+				);
+			}
 			sessionsmap.delete(socket.sessionId);
+			clearInterval(intervalID);
+
 			// if (currentPlayerId) {
 			// 	const playerIndex = players.findIndex((p) => p.id === currentPlayerId);
 			// 	if (playerIndex !== -1) {
