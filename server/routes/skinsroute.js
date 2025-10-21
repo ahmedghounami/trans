@@ -2,25 +2,25 @@
 
 export default async function skinsRoutes(fastify, opts) {
 	const db = opts.db;
-	await db.run(`
-    INSERT OR IGNORE INTO skins (name, type, price, img) VALUES
-    ('Pastel Blue', 'ball', 0, '#ff7300'),
-    ('Pastel Blue', 'table', 0, '/table1.png'),
-    ('Pastel Blue', 'paddle', 0, '#388E3C'),
-    ('Pastel Blue', 'table', 0, '#d181b0'),
-    ('Pastel Blue', 'paddle', 0, '#a73276'),
-    ('Pastel Blue', 'ball', 0, '#ff0095'),
-    ('Pastel Blue', 'paddle', 0, '#7c7c7c'),
-    ('Pastel Blue', 'ball', 0, '#5e5e5e'),
-    ('Pastel Blue', 'table', 0, '#a7c7cb'),
-    ('Pastel Blue', 'paddle', 0, '#658b91'),
-    ('Pastel Blue', 'ball', 0, '#0093a7'),
-    ('Pastel Blue', 'table', 0, '#74c578'),
-    ('Pastel Blue', 'ball', 0, '#007406'),
-    ('Pastel Blue', 'table', 0, '#252525'),
-    ('Pastel Blue', 'paddle', 0, '#fff')
-    `);
 	// await db.run(`DROP TABLE skins;`)
+	await db.run(`
+    INSERT OR IGNORE INTO skins (name, type, price, color, img) VALUES
+    ('Pastel Blue', 'ball'   , 0, '#ff7300', '#ff7300'),
+    ('Pastel Blue', 'table'  , 0, '#ff7380', '/table1.png'),
+    ('Pastel Blue', 'paddle' , 0, '#388E3C', '#388E3C'),
+    ('Pastel Blue', 'table'  , 0, '#d181b0', '#d181b0'),
+    ('Pastel Blue', 'paddle' , 0, '#a73276', '#a73276'),
+    ('Pastel Blue', 'ball'   , 0, '#ff0095', '#ff0095'),
+    ('Pastel Blue', 'paddle' , 0, '#7c7c7c', '#7c7c7c'),
+    ('Pastel Blue', 'ball'   , 0, '#5e5e5e', '#5e5e5e'),
+    ('Pastel Blue', 'table'  , 0, '#a7c7cb', '#a7c7cb'),
+    ('Pastel Blue', 'paddle' , 0, '#658b91', '#658b91'),
+    ('Pastel Blue', 'ball'   , 0, '#0093a7', '#0093a7'),
+    ('Pastel Blue', 'table'  , 0, '#74c578', '#74c578'),
+    ('Pastel Blue', 'ball'   , 0, '#007406', '#007406'),
+    ('Pastel Blue', 'table'  , 0, '#252525', '#252525'),
+    ('Pastel Blue', 'paddle' , 0, '#ffffff', '#ffffff')
+    `);
 	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
     SELECT id, 1, 1 FROM users
     WHERE id NOT IN (

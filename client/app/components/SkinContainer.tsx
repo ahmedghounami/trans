@@ -79,12 +79,8 @@ export default function SkinContainer({
 							style={{
 								background: `${
 									skinType == "table"
-										? skin.img[0] == "#"
-											? skin.img
-											: ""
-										: selected.types[0].img[0] == "#"
-										? selected.types[0].img
-										: ""
+										? skin.color
+										: selected.types[0].color
 								}`,
 							}}
 							className={`relative group    cursor-pointer flex  
@@ -92,7 +88,7 @@ export default function SkinContainer({
                   shadow-md
                   transition hover:scale-105 
                   `}>
-							{skinType == "table" && skin.img[0] != "#" ? (
+							{/* {skinType == "table" && skin.img[0] != "#" ? (
 								<Image
 									fill
 									className=" object-cover object-center"
@@ -109,24 +105,20 @@ export default function SkinContainer({
 									alt="profile"></Image>
 							) : (
 								<></>
-							)}
+							)} */}
 							<div className=" absolute border left-1/2 border-dashed h-full "></div>
 							<div
 								id="paddle1"
 								style={{
 									background: `${
 										skinType == "paddle"
-											? skin.img[0] == "#"
-												? skin.img
-												: ""
-											: selected.types[1].img[0] == "#"
-											? selected.types[1].img
-											: ""
+											? skin.color
+											: selected.types[1].color
 									}`,
 								}}
 								className={`h-1/3 top-1/4 -translate-y-1/2  aspect-[1/6] rounded-full 
                     absolute left-1`}>
-								{skinType == "paddle" && skin.img[0] != "#" ? (
+								{/* {skinType == "paddle" && skin.img[0] != "#" ? (
 									<Image
 										fill
 										className=" object-cover object-center"
@@ -143,24 +135,20 @@ export default function SkinContainer({
 										alt="profile"></Image>
 								) : (
 									<></>
-								)}
+								)} */}
 							</div>
 							<div
 								id="paddle2"
 								style={{
 									background: `${
 										skinType == "paddle"
-											? skin.img[0] == "#"
-												? skin.img
-												: ""
-											: selected.types[1].img[0] == "#"
-											? selected.types[1].img
-											: ""
+											? skin.color
+											: selected.types[1].color
 									}`,
 								}}
 								className={`h-1/3 top-1/2 -translate-y-1/2 aspect-[1/6]
                      rounded-full absolute right-1`}>
-								{skinType == "paddle" && skin.img[0] != "#" ? (
+								{/* {skinType == "paddle" && skin.img[0] != "#" ? (
 									<Image
 										fill
 										className=" object-cover object-center"
@@ -177,33 +165,25 @@ export default function SkinContainer({
 										alt="profile"></Image>
 								) : (
 									<></>
-								)}
+								)} */}
 							</div>
 							<div
 								id="ball"
 								style={{
 									background: `${
 										skinType == "ball"
-											? skin.img[0] == "#"
-												? skin.img
-												: ""
-											: selected.types[2].img[0] == "#"
-											? selected.types[2].img
-											: ""
+											? skin.color
+											: selected.types[2].color
 									}`,
 								}}
 								className={` top-1/3 left-3/5 h-[10%]
                     ${
 											skinType == "ball"
-												? skin.img[0] == "#"
-													? "bg-[" + skin.img + "]"
-													: ""
-												: selected.types[2].img[0] == "#"
-												? "bg-[" + selected.types[2].img + "]"
-												: ""
+												? skin.color
+												: selected.types[2].color
 										}
                     -translate-1/2 aspect-square   rounded-full absolute`}>
-								{skinType == "ball" && skin.img[0] != "#" ? (
+								{/* {skinType == "ball" && skin.img[0] != "#" ? (
 									<Image
 										fill
 										className=" object-cover object-center"
@@ -220,7 +200,7 @@ export default function SkinContainer({
 										alt="profile"></Image>
 								) : (
 									<></>
-								)}
+								)} */}
 							</div>
 							<div className="absolute  h-full w-full ">
 								<div

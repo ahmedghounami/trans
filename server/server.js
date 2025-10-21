@@ -4,7 +4,7 @@ import sqlite3 from 'sqlite3';
 import { Server } from 'socket.io';
 import { sockethandler } from './socket.js';
 
-import game from './game.js';
+import { setupGameSocketIO } from './game.js';
 
 const fastify = Fastify();
 
@@ -73,6 +73,7 @@ db.serialize(() => {
 		type TEXT NOT NULL,
 		price INTEGER,
 		img TEXT NOT NULL,
+		color TEXT NOT NULL,
 		UNIQUE(name, type, img)
 	  );
 	`);
@@ -111,6 +112,8 @@ fastify.register(buyRoute, { db });
 const shopRoute = (await import('./routes/shoproute.js')).default;
 fastify.register(shopRoute, { db });
 
+const gameApiRoute = (await import('./routes/gameapiroute.js')).default;
+fastify.register(gameApiRoute, { db });
 // Create raw HTTP server from fastify's internal handler
 const httpServer = fastify.server;
 
@@ -129,6 +132,7 @@ const io = new Server(httpServer, {
 });
 
 sockethandler(io, db);
+setupGameSocketIO(io);
 
 await fastify.ready();
 const PORT = 4000;
