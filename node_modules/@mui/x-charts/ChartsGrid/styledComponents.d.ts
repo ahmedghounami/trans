@@ -1,0 +1,2 @@
+export declare const GridRoot: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material/styles").Theme>, Pick<import("react").SVGProps<SVGGElement>, keyof import("react").SVGProps<SVGGElement>>, {}>;
+export declare const GridLine: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material/styles").Theme>, Pick<import("react").SVGLineElementAttributes<SVGLineElement>, keyof import("react").SVGLineElementAttributes<SVGLineElement>>, {}>;

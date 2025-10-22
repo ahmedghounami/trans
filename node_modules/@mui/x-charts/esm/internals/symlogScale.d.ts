@@ -1,0 +1,2 @@
+import { NumberValue, ScaleSymLog } from '@mui/x-charts-vendor/d3-scale';
+export declare function scaleSymlog<Range, Output = Range, Unknown = never>(_domain: Iterable<NumberValue>, _range: Iterable<Range>): ScaleSymLog<Range, Output, Unknown>;
