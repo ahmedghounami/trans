@@ -30,7 +30,9 @@ db.serialize(() => {
 	  CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
-		picture TEXT NOT NULL,
+		email TEXT UNIQUE,
+		password TEXT,
+		picture TEXT,
 		gold INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	  );
