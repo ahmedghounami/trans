@@ -18,8 +18,8 @@ export default function GamesCard({
 		<div className="h-full group ">
 			<div
 				onClick={() => {
-					if (type == "tournament") router.push("/games/tournament");
-					else router.push("/games/game?gametype=" + type);
+					// if (type == "tournament") router.push("/games/tournament");
+					router.push("/games/game?gametype=" + type);
 					setGameType(type);
 				}}
 				className={`relative   overflow-hidden  cursor-pointer flex  h-full

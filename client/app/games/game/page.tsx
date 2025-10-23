@@ -10,22 +10,45 @@ import Loading from "@/app/components/loading";
 import { Homecontext } from "../layout";
 import { io } from "socket.io-client";
 import { randomUUID } from "crypto";
+import Tournament from "@/app/components/Tournament";
 
 export default function Game() {
 	const { selected, setselected } = Homecontext();
 	const { me } = Homecontext();
 	const router = useRouter();
 	const [Positions, setPositions] = useState({});
-	const [playersdata, setplayersdata] = useState({p1_name:"Player 1", p1_img:"", p2_name:"Player 1", p2_img:""});
+	const [tournamentplayers, settournamentplayers] = useState({
+		p1: "",
+		p1_id: 0,
+		p2: "",
+		p2_id: 0,
+		winer: 0,
+		gamestatus: 0,
+	});
+
+	const [playersdata, setplayersdata] = useState({
+		p1_name: "Player 1",
+		p1_img: "",
+		p2_name: "Player 1",
+		p2_img: "",
+	});
 	const serchParams = useSearchParams();
-	let gametype = serchParams.get("gametype");
+	let [gametype, setgametype] = useState(serchParams.get("gametype"));
 	let oppid = Number(serchParams.get("oppid"));
 
 	let tournament = false;
 	if (!oppid) oppid = 0;
 
 	useEffect(() => {
-		if (!me) return;
+		console.log(gametype, Positions, tournamentplayers);
+
+		if (gametype == "tournament" && tournamentplayers.gamestatus == 1) {
+			console.log("touuurlocal");
+
+			setgametype("local");
+			return;
+		}
+		if (!me || gametype == "tournament") return;
 		async function newgame() {
 			try {
 				const sessionid = crypto.randomUUID();
@@ -36,7 +59,10 @@ export default function Game() {
 					},
 					body: JSON.stringify({
 						player_id: me.id,
-						player_name: me.name,
+						player_name: tournamentplayers.p1 ? tournamentplayers.p1 : me.name,
+						player2_name: tournamentplayers.p2
+							? tournamentplayers.p2
+							: "Player 2",
 						player_img: me.picture,
 						game_type: gametype,
 						sessionId: sessionid,
@@ -44,7 +70,7 @@ export default function Game() {
 				});
 				const res = await response.json();
 				if (response.ok) {
-					console.log( res); // "player added successfully"
+					// console.log(res); // "player added successfully"
 					sessionStorage.setItem("gameSessionId", sessionid);
 					const socket = io("http://localhost:4000/game", {
 						auth: {
@@ -54,9 +80,12 @@ export default function Game() {
 					});
 
 					socket.on("gameState", (data) => {
-						console.log(data);
-						setplayersdata(data.players_info)
-						setPositions({...data.positions, Curentplayer:data.Curentplayer});
+						// console.log(data);
+						setplayersdata(data.players_info);
+						setPositions({
+							...data.positions,
+							Curentplayer: data.Curentplayer,
+						});
 					});
 					function handleKeyDown(event) {
 						const key = event.key;
@@ -84,6 +113,13 @@ export default function Game() {
 
 					document.addEventListener("keydown", handleKeyDown);
 					document.addEventListener("keyup", handleKeyUp);
+
+					// Cleanup function
+					return () => {
+						document.removeEventListener("keydown", handleKeyDown);
+						document.removeEventListener("keyup", handleKeyUp);
+						socket.disconnect();
+					};
 				} else {
 					// router.push("/games")
 					console.log(res.error); // "missing data" or "player already exists"
@@ -92,9 +128,14 @@ export default function Game() {
 				console.log(error);
 			}
 		}
-		newgame();
+		const cleanup = newgame();
+		return () => {
+			if (cleanup && typeof cleanup === "function") {
+				cleanup();
+			}
+		};
 		// name picture
-		console.log(me);
+		// console.log(me);
 		// const oppdata = {}
 		// // Connect to Socket.IO game namespace
 		// const socket = io('http://localhost:4000/game', {
@@ -173,7 +214,7 @@ export default function Game() {
 		// 	document.removeEventListener("keyup", handleKeyUp);
 		// 	socket.disconnect();
 		// };
-	}, []);
+	}, [gametype, tournamentplayers]);
 
 	useEffect(() => {
 		async function fetchSkin() {
@@ -192,13 +233,39 @@ export default function Game() {
 			fetchSkin();
 		}
 	}, [me]);
+	async function tournamentstates() {
+		console.log("tournament win", playersdata, Positions, tournamentplayers);
 
-	if (gametype == "tournament") {
-		gametype = "local";
-		tournament = true;
+		setPositions({});
+		setgametype("tournament");
+		settournamentplayers({
+			...tournamentplayers,
+			gamestatus: 0,
+			winer: Positions.win,
+		});
 	}
+	// if (gametype == "tournament") {
+	// 	gametype = "local";
+	// 	tournament = true;
+	// }
 	// console.log(selected);
 
+	if (gametype == "tournament") {
+		tournament = true;
+		if (
+			!tournamentplayers.p1 ||
+			!tournamentplayers.p1_id ||
+			!tournamentplayers.p2 ||
+			!tournamentplayers.p2_id ||
+			!tournamentplayers.gamestatus
+		) {
+			return (
+				<Tournament
+					settournamentplayers={settournamentplayers}
+					tournamentplayers={tournamentplayers}></Tournament>
+			);
+		}
+	}
 	if (!Positions.score || !selected.types || !selected.types[0]) {
 		return (
 			<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
@@ -208,30 +275,38 @@ export default function Game() {
 	}
 
 	if (Positions.win != 0) {
-		if (tournament) {
-			setTimeout(() => {
-				router.push(
-					`/games/tournament?winer=${Positions.win == 1 ? p1 : p2}&id=${
-						Positions.win == 1 ? p1id : p2id
-					}`
-				);
-			}, 100);
-			return ;
+		if (
+			tournamentplayers.p1 != playersdata.p1_name ||
+			tournamentplayers.p2 != playersdata.p2_name
+		) {
+			setgametype("local");
+			setPositions({});
+			return;
 		}
-
-		setTimeout(() => {
-			router.push("/games");
-		}, 500);
-
-		return (
-			<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
-				{Positions.win == 1 ? (
-					<Loader word={"Victory!"}></Loader>
-				) : (
-					<Loader word={"Defeat"}></Loader>
-				)}
-			</div>
-		);
+		if (tournamentplayers.p1_id != 0 && tournamentplayers.winer == 0) {
+			tournamentstates();
+			// setTimeout(() => {
+			// 	// router.push(
+			// 	// 	`/games/tournament?winer=${Positions.win == 1 ? p1 : p2}&id=${
+			// 	// 		Positions.win == 1 ? p1id : p2id
+			// 	// 	}`
+			// 	// );
+			// }, 100);
+			return <></>;
+		} else {
+			setTimeout(() => {
+				router.push("/games");
+			}, 500);
+			return (
+				<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
+					{Positions.win == 1 ? (
+						<Loader word={"Victory!"}></Loader>
+					) : (
+						<Loader word={"Defeat"}></Loader>
+					)}
+				</div>
+			);
+		}
 	}
 
 	return (
@@ -242,20 +317,46 @@ export default function Game() {
 						<div className="rounded-full w-14 overflow-hidden h-14 border  ">
 							<Image
 								className="w-full h-full object-cover object-center "
-								src={"/"+ (Positions.Curentplayer == 1?playersdata.p1_img :playersdata.p2_img) }
+								src={
+									"/" +
+									(Positions.Curentplayer == 1
+										? playersdata.p1_img
+										: playersdata.p2_img)
+								}
 								width={60}
 								height={60}
 								alt="profile"></Image>
 						</div>
-						<p>{Positions.Curentplayer == 1?playersdata.p1_name:playersdata.p2_name}</p>
+						<p>
+							{Positions.Curentplayer == 1
+								? playersdata.p1_name
+								: playersdata.p2_name}
+						</p>
 					</div>
-					<div>{`${Positions.Curentplayer == 1? Positions.score?.p1 : Positions.score?.p2} - ${Positions.Curentplayer == 1? Positions.score?.p2 : Positions.score?.p1}`}</div>
+					<div>{`${
+						Positions.Curentplayer == 1
+							? Positions.score?.p1
+							: Positions.score?.p2
+					} - ${
+						Positions.Curentplayer == 1
+							? Positions.score?.p2
+							: Positions.score?.p1
+					}`}</div>
 					<div className="flex items-center gap-5">
-						<p>{Positions.Curentplayer == 1?playersdata.p2_name:playersdata.p1_name}</p>
+						<p>
+							{Positions.Curentplayer == 1
+								? playersdata.p2_name
+								: playersdata.p1_name}
+						</p>
 						<div className="rounded-full w-14 overflow-hidden h-14 border  ">
 							<Image
 								className="w-full h-full object-cover object-center "
-								src={"/"+ (Positions.Curentplayer == 1?playersdata.p2_img :playersdata.p1_img) }
+								src={
+									"/" +
+									(Positions.Curentplayer == 1
+										? playersdata.p2_img
+										: playersdata.p1_img)
+								}
 								width={60}
 								height={60}
 								alt="profile"></Image>

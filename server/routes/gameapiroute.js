@@ -12,7 +12,7 @@ const gameApiRoute = async (fastify, options) => {
 	// Start a new game session
 	fastify.post("/api/games/start", async (request, reply) => {
 		try {
-			const { player_id, player_name, player_img, game_type, sessionId } =
+			const { player_id, player2_name, player_name, player_img, game_type, sessionId } =
 				request.body;
 
 			if (
@@ -67,7 +67,7 @@ const gameApiRoute = async (fastify, options) => {
 					p2_id: 0,
 					p1_name: player_name,
 					p1_img: player_img,
-					p2_name: "player 2",
+					p2_name: player2_name ? player2_name: "player 2",
 					p2_img: player_img,
 				},
 				p1_ready: true,

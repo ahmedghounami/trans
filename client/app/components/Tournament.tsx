@@ -5,7 +5,7 @@ import LocalTournamentSetings from "@/app/components/LocalTournamentSetings";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Homecontext } from "../layout";
+import { Homecontext } from "../games/layout";
 
 function win(id, name, finals, setfinals) {
 	const res = Math.floor(id / 10) + 1;
@@ -16,6 +16,7 @@ function win(id, name, finals, setfinals) {
 		[...finals, { name: name, id: winerid }].sort((a, b) => a.id - b.id)
 	);
 }
+
 function Tournamentbracket({
 	player,
 	setplayers,
@@ -24,6 +25,7 @@ function Tournamentbracket({
 	players,
 	size,
 	playerbox,
+	settournamentplayers,
 }) {
 	const router = useRouter();
 	const [play, setplay] = useState(true);
@@ -87,9 +89,9 @@ function Tournamentbracket({
 			// console.log("win");
 			setTimeout(() => {
 				router.push("/games");
+				setfinals([]);
+				setplayers([]);
 			}, 500);
-			setfinals([]);
-			setplayers([]);
 		}
 	}
 	if (box % 2 != 0 && box != size) return <></>;
@@ -111,13 +113,23 @@ function Tournamentbracket({
 						onClick={() => {
 							if (index == 2 && box % 2 != 1 && box <= players.length) {
 								const nextbox = count + "" + Math.floor((box + 1) / 2);
-								setTimeout(() => {
-									router.push(
-										`/games/game?gametype=tournament&p1=${
-											players[box - 1].name
-										}&p1id=${box}&p2=${players[box - 2].name}&p2id=${box - 1}`
-									);
-								}, 100);
+								// setTimeout(() => {
+
+								settournamentplayers({
+									p1: players[box - 1].name,
+									p1_id: box,
+									p2: players[box - 2].name,
+									p2_id: box - 1,
+									winer: 0,
+									gamestatus: 1,
+								});
+
+								// router.push(
+								// 	`/games/game?gametype=tournament&p1=${
+								// 		players[box - 1].name
+								// 	}&p1id=${box}&p2=${players[box - 2].name}&p2id=${box - 1}`
+								// );
+								// }, 100);
 							}
 							if (index > 2 && box <= size) {
 								const nextbox = count + "" + Math.floor((box + 1) / 2);
@@ -127,11 +139,19 @@ function Tournamentbracket({
 								const p2 = finals.find((f) => f.id == count - 1 + "" + box);
 
 								if (finals.find((f) => f.id == nextbox) || !p1 || !p2) return;
-								setTimeout(() => {
-									router.push(
-										`/games/game?gametype=tournament&p1=${p1.name}&p1id=${p1.id}&p2=${p2.name}&p2id=${p2.id}`
-									);
-								}, 100);
+								// setTimeout(() => {
+								settournamentplayers({
+									p1: p1.name,
+									p1_id: p1.id,
+									p2: p2.name,
+									p2_id: p2.id,
+									winer: 0,
+									gamestatus: 1,
+								});
+								// router.push(
+								// 	`/games/game?gametype=tournament&p1=${p1.name}&p1id=${p1.id}&p2=${p2.name}&p2id=${p2.id}`
+								// );
+								// }, 100);
 							}
 						}}
 						className="absolute -translate-1/2 top-1/2 left-1/2 ">
@@ -156,6 +176,7 @@ function Tournamentbracket({
 						</div>
 						<Tournamentbracket
 							setplayers={setplayers}
+							settournamentplayers={settournamentplayers}
 							finals={finals}
 							setfinals={setfinals}
 							players={players}
@@ -170,6 +191,7 @@ function Tournamentbracket({
 
 	return <>{items}</>;
 }
+
 function Localtournament({
 	players,
 	started,
@@ -177,8 +199,62 @@ function Localtournament({
 	finals,
 	setfinals,
 	setplayers,
+	settournamentplayers,
 }) {
 	const [name, setname] = useState("");
+	const [message, setMessage] = useState("");
+	
+	// Function to shuffle players array
+	const shufflePlayers = (playerList) => {
+		const shuffled = [...playerList];
+		for (let i = shuffled.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+		}
+		return shuffled;
+	};
+
+	// Check if player count is valid for tournament
+	const validPlayerCounts = [2, 4, 8];
+	const canStartTournament = validPlayerCounts.includes(players.length);
+
+	// Handle form submission
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		addPlayer();
+	};
+
+	// Add player function
+	const addPlayer = () => {
+		// Check if maximum players reached
+		if (players.length == 8) {
+			setMessage("Maximum 8 players allowed for tournament");
+			return;
+		}
+		
+		// Check if player already exists
+		const existingPlayer = players.find(
+			(p) => p.name.toLowerCase() == name.toLowerCase()
+		);
+		if (existingPlayer) {
+			setMessage("Player name already exists");
+			return;
+		}
+		
+		// Add new player and shuffle
+		if (name != "") {
+			const newPlayers = [
+				...players,
+				{ name: name, index: 1, id: players.length + 1 },
+			];
+			const shuffledPlayers = shufflePlayers(newPlayers);
+			setplayers(shuffledPlayers);
+			setname("");
+			setMessage(""); // Clear message on successful add
+		}
+		setfinals([]);
+	};
+
 	return (
 		<div className="w-full mx-4 flex flex-col gap-4 ">
 			{started ? (
@@ -186,7 +262,7 @@ function Localtournament({
 			) : (
 				<>
 					<div className="flex gap-4">
-						<div className="border rounded-md">
+						<form onSubmit={handleSubmit} className="border rounded-md flex">
 							<input
 								type="text"
 								value={name}
@@ -194,79 +270,78 @@ function Localtournament({
 								onChange={(e) => {
 									if (e.target.value.length <= 10) {
 										setname(e.target.value.trim());
+										setMessage(""); // Clear message when typing
 									}
 								}}
-								className={`  focus:outline-0 px-2 h-full  py-2 `}
+								className={`focus:outline-0 px-2 h-full py-2`}
 							/>
 							<button
-								onClick={() => {
-									if (players.length == 8) {
-										alert("you cant add more than 8 players");
-										return;
-									}
-									const existingPlayer = players.find(
-										(p) => p.name.toLowerCase() == name.toLowerCase()
-									);
-									if (existingPlayer) {
-										alert("Player already exists!");
-										return;
-									}
-									if (name != "") {
-										setplayers([
-											...players,
-											{ name: name, index: 1, id: players.length + 1 },
-										]);
-									}
-									setfinals([]);
-								}}
-								className=" py-2 px-4 border-l cursor-pointer">
+								type="submit"
+								className="py-2 px-4 border-l cursor-pointer">
 								+
 							</button>
-						</div>
-						{/* <button onClick={()=>{
-          
-          win(2, players[1].name, finals, setfinals);
-        }}>test</button> */}
-						<button
-							onClick={() => {
-								const shuffled = [...players];
-
-								for (let i = shuffled.length - 1; i > 0; i--) {
-									const j = Math.floor(Math.random() * (i + 1));
-									[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // swap
-								}
-								setplayers(shuffled);
-								setfinals([]);
-							}}
-							className="border rounded-md px-4 py-2 w-fit">
-							shuffle
-						</button>
+						</form>
 					</div>
+					
+					{/* Show message if exists */}
+					{message && (
+						<div className="text-red-500 font-medium">
+							{message}
+						</div>
+					)}
+					
+					{/* Show message about valid player counts */}
+					{players.length > 0 && !canStartTournament && (
+						<div className="text-red-500 font-medium">
+							Tournament requires exactly 2, 4, or 8 players (currently: {players.length})
+						</div>
+					)}
+					
+					{canStartTournament && (
+						<div className="text-green-500 font-medium">
+							Ready to start tournament! Click on game controllers to begin matches.
+						</div>
+					)}
 				</>
 			)}
-			<div className="flex flex-col gap-4 w-fit">
-				{players.map((player, index) => {
-					return (
-						<div
-							className="border  relative px-4 py-2 w-32 h-10 "
-							key={index}>
-							{player.name}
-							<Tournamentbracket
-								setplayers={setplayers}
-								setfinals={setfinals}
-								finals={finals}
-								players={players}
-								size={size}
-								playerbox={index + 1}
-								player={player}></Tournamentbracket>
-						</div>
-					);
-				})}
-			</div>
+			
+			{/* Only show bracket if player count is valid */}
+			{canStartTournament ? (
+				<div className="flex flex-col gap-4 w-fit">
+					{players.map((player, index) => {
+						return (
+							<div
+								className="border relative px-4 py-2 w-32 h-10"
+								key={index}>
+								{player.name}
+								<Tournamentbracket
+									setplayers={setplayers}
+									setfinals={setfinals}
+									finals={finals}
+									players={players}
+									size={size}
+									playerbox={index + 1}
+									settournamentplayers={settournamentplayers}
+									player={player}></Tournamentbracket>
+							</div>
+						);
+					})}
+				</div>
+			) : (
+				players.length > 0 && (
+					<div className="text-gray-500 italic">
+						Add more players to make 2, 4, or 8 total players
+					</div>
+				)
+			)}
 		</div>
 	);
 }
-export default function Tournament() {
+
+export default function Tournament({
+	tournamentplayers,
+	settournamentplayers,
+}) {
 	const router = useRouter();
 
 	const { selected } = Homecontext();
@@ -301,29 +376,45 @@ export default function Tournament() {
 
 	const serchParams = useSearchParams();
 
-	const winer = serchParams.get("winer");
-	const id = serchParams.get("id");
+	const winer =
+		tournamentplayers.winer == 1 ? tournamentplayers.p1 : tournamentplayers.p2;
+
+	const id =
+		tournamentplayers.winer == 1
+			? tournamentplayers.p1_id
+			: tournamentplayers.p2_id;
 	useEffect(() => {
 		if (winer && id) {
 			setstarted(true);
 			win(id, winer, finals, setfinals);
-			router.push("/games/tournament");
+			// router.push("/games/tournament");
 		}
 	}, []);
 	return (
-		<div className="bg-gray-400/30   backdrop-blur-sm flex justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
-			<div className="h-screen w-screen p-10 ">
-				<button
-					onClick={() => {
-						setfinals([]);
-						setplayers([]);
-						setstarted(false);
-						router.push("/games");
-					}}
-					className="bg-red-700 cursor-pointer px-4 py-2 rounded-sm mx-4 mb-8">
-					exit
-				</button>
+		<div className="bg-gray-400/30 backdrop-blur-sm flex justify-center items-center z-50 absolute top-0 bottom-0 left-0 right-0">
+			<div className="h-screen w-screen p-10 overflow-auto">
+				<div className="flex gap-4 mb-8">
+					<button
+						onClick={() => {
+							router.push("/games");
+						}}
+						className="bg-gray-600 cursor-pointer px-4 py-2 rounded-sm">
+						Go Back
+					</button>
+					<button
+						onClick={() => {
+							setfinals([]);
+							setplayers([]);
+							setstarted(false);
+							settournamentplayers({});
+							router.push("/games");
+						}}
+						className="bg-red-700 cursor-pointer px-4 py-2 rounded-sm">
+						Exit Tournament
+					</button>
+				</div>
 				<Localtournament
+					settournamentplayers={settournamentplayers}
 					started={started}
 					finals={finals}
 					setfinals={setfinals}
