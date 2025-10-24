@@ -2,6 +2,12 @@ import { Pencil, X, Globe, Upload, Lock, Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 
 export default function EditProfile({ setEditMode, editMode, user }) {
+    // stores the new uploaded img, initially set to user.picture
+    // which is the current picture supplied by server
+    const [previewPic , setPreviewPic ] = useState( user.picture )
+
+
+
     const [formData, setFormData] = useState({
         name: user.name || '',
         email: user.email || '',
@@ -93,7 +99,10 @@ export default function EditProfile({ setEditMode, editMode, user }) {
             //     return;
             // }
 
+
             console.log("✅ Uploaded successfully:", data.url);
+
+            setPreviewPic ( data.url );
         } catch (err) {
             console.error("❌ Network/Fetch error:", err);
         }
@@ -120,7 +129,7 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                 <div className="flex flex-col items-center gap-4">
                     <div className="relative">
                         <img
-                            src={user.picture}
+                            src={previewPic}
                             alt="Profile"
                             className="w-24 h-24 rounded-full object-cover border-4 border-gradient-to-r from-purple-500 to-blue-500 shadow-xl ring-4 ring-purple-500/20"
                         />
