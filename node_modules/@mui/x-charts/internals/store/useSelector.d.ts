@@ -1,0 +1,4 @@
+import { ChartAnyPluginSignature } from "../plugins/models/index.js";
+import { ChartsSelector } from "../plugins/utils/selectors.js";
+import { ChartStore } from "../plugins/utils/ChartStore.js";
+export declare const useSelector: <TSignatures extends readonly ChartAnyPluginSignature[], TOptionalSignatures extends readonly ChartAnyPluginSignature[], TArgs extends readonly any[], TResult = unknown>(store: ChartStore<TSignatures, TOptionalSignatures>, selector: ChartsSelector<TSignatures, TOptionalSignatures, TResult, TArgs>, args?: [TArgs] extends [never] ? [] : TArgs, equals?: (a: TResult, b: TResult) => boolean) => TResult;

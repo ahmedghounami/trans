@@ -1,7 +1,7 @@
 import { Gamepad2 } from "lucide-react";
 import Loading from "../components/loading";
 import HistoryItem from "./historyitem";
-import PingPongAchievements from "./achievement";
+import PingPongAchievements from "./cards";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ export default function Statistics() {
     const [games, setGames] = useState([]);
     const [loading, setLoading] = useState(true);
     const { user } = useUser();
-    
+
     useEffect(() => {
         const fetch_games = async () => {
             try {
@@ -44,7 +44,7 @@ export default function Statistics() {
         }
     }
         , [user]);
-    
+
     if (loading || !user) {
         return (
             <div className="flex items-center justify-center h-screen text-white animate-pulse">

@@ -21,7 +21,7 @@ export const LayoutComp = ({ children }: { children: React.ReactNode }) => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    const shouldShowLayout = path !== '/' && path !== '/login';
+    const shouldShowLayout = path !== '/' && path !== '/login' && path !== '/register';
 
     return (
         <div className="h-screen bg-[#00000070] relative">

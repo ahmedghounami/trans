@@ -1,0 +1,1 @@
+export declare const eventList: Record<keyof GlobalEventHandlersEventMap, true>;

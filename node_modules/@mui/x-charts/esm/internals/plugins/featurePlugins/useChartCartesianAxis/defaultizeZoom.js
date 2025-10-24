@@ -1,0 +1,36 @@
+import _extends from "@babel/runtime/helpers/esm/extends";
+import { DEFAULT_ZOOM_SLIDER_PREVIEW_SIZE, DEFAULT_ZOOM_SLIDER_SHOW_TOOLTIP, DEFAULT_ZOOM_SLIDER_SIZE } from "../../../constants.js";
+export const defaultZoomOptions = {
+  minStart: 0,
+  maxEnd: 100,
+  step: 5,
+  minSpan: 10,
+  maxSpan: 100,
+  panning: true,
+  filterMode: 'keep',
+  slider: {
+    enabled: false,
+    preview: false,
+    size: DEFAULT_ZOOM_SLIDER_SIZE,
+    showTooltip: DEFAULT_ZOOM_SLIDER_SHOW_TOOLTIP
+  }
+};
+export const defaultizeZoom = (zoom, axisId, axisDirection) => {
+  if (!zoom) {
+    return undefined;
+  }
+  if (zoom === true) {
+    return _extends({
+      axisId,
+      axisDirection
+    }, defaultZoomOptions);
+  }
+  return _extends({
+    axisId,
+    axisDirection
+  }, defaultZoomOptions, zoom, {
+    slider: _extends({}, defaultZoomOptions.slider, {
+      size: zoom.slider?.preview ?? defaultZoomOptions.slider.preview ? DEFAULT_ZOOM_SLIDER_PREVIEW_SIZE : DEFAULT_ZOOM_SLIDER_SIZE
+    }, zoom.slider)
+  });
+};
