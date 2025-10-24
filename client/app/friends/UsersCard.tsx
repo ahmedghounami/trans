@@ -10,7 +10,7 @@ export default function UsersCard({
   friends: any[];
   setUsers: (users: any[]) => void;
 }) {
-  const { user: currentUser } = useUser(); // get logged-in user
+  const { user: currentUser } = useUser();
 
   return (
     <div className="flex-1 space-y-3 mb-6 p-4 pr-2">
@@ -18,7 +18,7 @@ export default function UsersCard({
         <UserInfo
           key={friend.id}
           user={friend}
-          currentUser={currentUser} // pass current user
+          currentUser={currentUser}
           setUsers={setUsers}
         />
       ))}
