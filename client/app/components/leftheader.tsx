@@ -15,11 +15,9 @@ export default function Leftheader() {
 
     const navItems = [
         { href: "/home", icon: <GoHomeFill size={26} />, label: "Home" },
-        { href: "/games", icon: <GoHomeFill size={26} />, label: "games" },
+        { href: "/games", icon: <IoGameController size={26} />, label: "games" },
         { href: "/chat", icon: <IoChatbubbleSharp size={26} />, label: "Chat" },
         { href: "/shop", icon: <FaShoppingCart size={26} />, label: "Shop" },
-        // { href: "/settings", icon: <IoMdSettings size={26} />, label: "Settings" },
-        { href: "/game", icon: <IoGameController size={26} />, label: "Game" },
     ];
 
     return (
