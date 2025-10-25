@@ -1,0 +1,16 @@
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault").default;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.defaultSlotsMaterial = void 0;
+var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));
+var _IconButton = _interopRequireDefault(require("@mui/material/IconButton"));
+var _Button = _interopRequireDefault(require("@mui/material/Button"));
+const baseSlots = {
+  baseButton: _Button.default,
+  baseIconButton: _IconButton.default
+};
+const iconSlots = {};
+const defaultSlotsMaterial = exports.defaultSlotsMaterial = (0, _extends2.default)({}, baseSlots, iconSlots);

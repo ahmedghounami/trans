@@ -1,0 +1,1 @@
+export declare function findMinMax(data: readonly number[]): [number, number];

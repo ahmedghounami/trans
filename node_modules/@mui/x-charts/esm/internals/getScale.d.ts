@@ -1,0 +1,2 @@
+import { ContinuousScaleName, D3ContinuousScale } from "../models/axis.js";
+export declare function getScale(scaleType: ContinuousScaleName, domain: readonly any[], range: readonly any[]): D3ContinuousScale;

@@ -1,0 +1,30 @@
+export declare const selectorChartsInteractionIsInitialized: import("reselect").Selector<import("../../corePlugins/useChartId/useChartId.types.js").UseChartIdState & import("../../corePlugins/useChartExperimentalFeature/useChartExperimentalFeature.types.js").UseChartExperimentalFeaturesState & import("../../corePlugins/useChartDimensions/useChartDimensions.types.js").UseChartDimensionsState & import("../../corePlugins/useChartSeries/useChartSeries.types.js").UseChartSeriesState<keyof import("../../../index.js").ChartsSeriesConfig> & import("../../corePlugins/useChartAnimation/useChartAnimation.types.js").UseChartAnimationState & import("../../../index.js").UseChartInteractionListenerState & Partial<import("./useChartInteraction.types.js").UseChartInteractionState> & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+} & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+}, boolean, any[]>;
+export declare const selectorChartsInteractionItem: import("reselect").Selector<import("../../corePlugins/useChartId/useChartId.types.js").UseChartIdState & import("../../corePlugins/useChartExperimentalFeature/useChartExperimentalFeature.types.js").UseChartExperimentalFeaturesState & import("../../corePlugins/useChartDimensions/useChartDimensions.types.js").UseChartDimensionsState & import("../../corePlugins/useChartSeries/useChartSeries.types.js").UseChartSeriesState<keyof import("../../../index.js").ChartsSeriesConfig> & import("../../corePlugins/useChartAnimation/useChartAnimation.types.js").UseChartAnimationState & import("../../../index.js").UseChartInteractionListenerState & Partial<import("./useChartInteraction.types.js").UseChartInteractionState> & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+} & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+}, import("../../../../index.js").ScatterItemIdentifier | import("../../../../index.js").LineItemIdentifier | import("../../../../index.js").BarItemIdentifier | import("../../../../index.js").PieItemIdentifier | import("../../../../index.js").RadarItemIdentifier | null, any[]>;
+export declare const selectorChartsInteractionPointer: import("reselect").Selector<import("../../corePlugins/useChartId/useChartId.types.js").UseChartIdState & import("../../corePlugins/useChartExperimentalFeature/useChartExperimentalFeature.types.js").UseChartExperimentalFeaturesState & import("../../corePlugins/useChartDimensions/useChartDimensions.types.js").UseChartDimensionsState & import("../../corePlugins/useChartSeries/useChartSeries.types.js").UseChartSeriesState<keyof import("../../../index.js").ChartsSeriesConfig> & import("../../corePlugins/useChartAnimation/useChartAnimation.types.js").UseChartAnimationState & import("../../../index.js").UseChartInteractionListenerState & Partial<import("./useChartInteraction.types.js").UseChartInteractionState> & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+} & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+}, import("./useChartInteraction.types.js").Coordinate | null, any[]>;
+export declare const selectorChartsInteractionPointerX: import("reselect").Selector<import("../../corePlugins/useChartId/useChartId.types.js").UseChartIdState & import("../../corePlugins/useChartExperimentalFeature/useChartExperimentalFeature.types.js").UseChartExperimentalFeaturesState & import("../../corePlugins/useChartDimensions/useChartDimensions.types.js").UseChartDimensionsState & import("../../corePlugins/useChartSeries/useChartSeries.types.js").UseChartSeriesState<keyof import("../../../index.js").ChartsSeriesConfig> & import("../../corePlugins/useChartAnimation/useChartAnimation.types.js").UseChartAnimationState & import("../../../index.js").UseChartInteractionListenerState & Partial<import("./useChartInteraction.types.js").UseChartInteractionState> & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+} & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+}, number | null, any[]>;
+export declare const selectorChartsInteractionPointerY: import("reselect").Selector<import("../../corePlugins/useChartId/useChartId.types.js").UseChartIdState & import("../../corePlugins/useChartExperimentalFeature/useChartExperimentalFeature.types.js").UseChartExperimentalFeaturesState & import("../../corePlugins/useChartDimensions/useChartDimensions.types.js").UseChartDimensionsState & import("../../corePlugins/useChartSeries/useChartSeries.types.js").UseChartSeriesState<keyof import("../../../index.js").ChartsSeriesConfig> & import("../../corePlugins/useChartAnimation/useChartAnimation.types.js").UseChartAnimationState & import("../../../index.js").UseChartInteractionListenerState & Partial<import("./useChartInteraction.types.js").UseChartInteractionState> & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+} & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+}, number | null, any[]>;
+export declare const selectorChartsInteractionItemIsDefined: import("reselect").Selector<import("../../corePlugins/useChartId/useChartId.types.js").UseChartIdState & import("../../corePlugins/useChartExperimentalFeature/useChartExperimentalFeature.types.js").UseChartExperimentalFeaturesState & import("../../corePlugins/useChartDimensions/useChartDimensions.types.js").UseChartDimensionsState & import("../../corePlugins/useChartSeries/useChartSeries.types.js").UseChartSeriesState<keyof import("../../../index.js").ChartsSeriesConfig> & import("../../corePlugins/useChartAnimation/useChartAnimation.types.js").UseChartAnimationState & import("../../../index.js").UseChartInteractionListenerState & Partial<import("./useChartInteraction.types.js").UseChartInteractionState> & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+} & {
+  cacheKey: import("../../models/index.js").ChartStateCacheKey;
+}, boolean, any[]>;
