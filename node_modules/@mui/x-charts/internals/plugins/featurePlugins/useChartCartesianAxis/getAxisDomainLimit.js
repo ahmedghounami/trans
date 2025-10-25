@@ -1,0 +1,21 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getAxisDomainLimit = void 0;
+const getAxisDomainLimit = (axis, axisDirection, axisIndex, formattedSeries) => {
+  if (axis.domainLimit !== undefined) {
+    return axis.domainLimit;
+  }
+  if (axisDirection === 'x') {
+    for (const seriesId of formattedSeries.line?.seriesOrder ?? []) {
+      const series = formattedSeries.line.series[seriesId];
+      if (series.xAxisId === axis.id || series.xAxisId === undefined && axisIndex === 0) {
+        return 'strict';
+      }
+    }
+  }
+  return 'nice';
+};
+exports.getAxisDomainLimit = getAxisDomainLimit;

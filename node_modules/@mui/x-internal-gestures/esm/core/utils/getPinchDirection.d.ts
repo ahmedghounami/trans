@@ -1,0 +1,1 @@
+export declare const getPinchDirection: (velocity: number) => 0 | 1 | -1;
