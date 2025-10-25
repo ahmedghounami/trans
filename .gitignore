@@ -2,8 +2,4 @@ server/node_modules
 server/package-lock.json
 client/package-lock.json
 
-<<<<<<< HEAD
 server/*.db
-=======
-server/*.db
->>>>>>> aghounam
