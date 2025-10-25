@@ -14,7 +14,7 @@ export default function Games() {
 	// const [GameType, setGameType] = useState("localvsbot")
 	// const [skinType, setSkinType] = useState('table');
 	// const [selected, setselected] = useState({})
-	const { skins, me, selected, setSkins, setselected } = Homecontext();
+	const { skins, selected, setSkins, setselected } = Homecontext();
 	const router = useRouter();
 	const [GameType, setGameType] = useState("localvsbot");
 	const [skinType, setSkinType] = useState("table");
