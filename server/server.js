@@ -4,7 +4,7 @@ import sqlite3 from 'sqlite3';
 import { Server } from 'socket.io';
 import { sockethandler } from './socket.js';
 
-import game from './game.js';
+import { setupGameSocketIO } from './game.js';
 
 const fastify = Fastify();
 
@@ -30,7 +30,9 @@ db.serialize(() => {
 	  CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
-		picture TEXT NOT NULL,
+		email TEXT UNIQUE,
+		password TEXT,
+		picture TEXT,
 		gold INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	  );
@@ -69,10 +71,12 @@ db.serialize(() => {
 	db.run(`
 	  CREATE TABLE IF NOT EXISTS skins (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL UNIQUE,
+		name TEXT NOT NULL,
 		type TEXT NOT NULL,
 		price INTEGER,
-		img TEXT NOT NULL
+		img TEXT NOT NULL,
+		color TEXT NOT NULL,
+		UNIQUE(name, type, img)
 	  );
 	`);
 
@@ -110,6 +114,10 @@ fastify.register(buyRoute, { db });
 const shopRoute = (await import('./routes/shoproute.js')).default;
 fastify.register(shopRoute, { db });
 
+const gameApiRoute = (await import('./routes/gameapiroute.js')).default;
+fastify.register(gameApiRoute, { db });
+const ProfileRoutes = (await import('./routes/profileroute.js')).default;
+fastify.register(ProfileRoutes, { db });
 // Create raw HTTP server from fastify's internal handler
 const httpServer = fastify.server;
 
@@ -128,6 +136,7 @@ const io = new Server(httpServer, {
 });
 
 sockethandler(io, db);
+setupGameSocketIO(io);
 
 await fastify.ready();
 const PORT = 4000;

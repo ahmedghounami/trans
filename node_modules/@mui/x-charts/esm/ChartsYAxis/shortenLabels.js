@@ -1,0 +1,41 @@
+'use client';
+
+import { clampAngle } from "../internals/clampAngle.js";
+import { doesTextFitInRect, ellipsize } from "../internals/ellipsize.js";
+import { getStringSize } from "../internals/domUtils.js";
+export function shortenLabels(visibleLabels, drawingArea, maxWidth, isRtl, tickLabelStyle) {
+  const shortenedLabels = new Map();
+  const angle = clampAngle(tickLabelStyle?.angle ?? 0);
+  let topBoundFactor = 1;
+  let bottomBoundFactor = 1;
+  if (tickLabelStyle?.textAnchor === 'start') {
+    topBoundFactor = Infinity;
+    bottomBoundFactor = 1;
+  } else if (tickLabelStyle?.textAnchor === 'end') {
+    topBoundFactor = 1;
+    bottomBoundFactor = Infinity;
+  } else {
+    topBoundFactor = 2;
+    bottomBoundFactor = 2;
+  }
+  if (angle > 180) {
+    [topBoundFactor, bottomBoundFactor] = [bottomBoundFactor, topBoundFactor];
+  }
+  if (isRtl) {
+    [topBoundFactor, bottomBoundFactor] = [bottomBoundFactor, topBoundFactor];
+  }
+  for (const item of visibleLabels) {
+    if (item.formattedValue) {
+      // That maximum height of the tick depends on its proximity to the axis bounds.
+      const height = Math.min((item.offset + item.labelOffset) * topBoundFactor, (drawingArea.top + drawingArea.height + drawingArea.bottom - item.offset - item.labelOffset) * bottomBoundFactor);
+      const doesTextFit = text => doesTextFitInRect(text, {
+        width: maxWidth,
+        height,
+        angle,
+        measureText: string => getStringSize(string, tickLabelStyle)
+      });
+      shortenedLabels.set(item, ellipsize(item.formattedValue.toString(), doesTextFit));
+    }
+  }
+  return shortenedLabels;
+}

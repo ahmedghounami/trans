@@ -5,14 +5,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useUser } from "../../Context/UserContext";
-import HistoryItem from "../../home/historyitem";
 import ProfileHeader from "../profileheader";
 import { useParams, useRouter } from "next/navigation";
-
-
-import PingPongAchievements from "../../home/achievement";
-import { Gamepad2 } from "lucide-react";
 import Loading from "@/app/components/loading";
+import EditProfile from "../editProfile";
 
 export default function Profile() {
     const [games, setGames] = useState([]);
@@ -21,6 +17,8 @@ export default function Profile() {
     const { id } = useParams();
     const router = useRouter();
     const { user: currentUser } = useUser();
+    const [editMode, setEditMode] = useState(false);
+
     useEffect(() => {
         console.log("User ID from params:", id);
     }, [id]);
@@ -28,7 +26,7 @@ export default function Profile() {
     useEffect(() => {
         const fetch_user = async () => {
             try {
-                const response = await fetch(`http://localhost:4000/users/${id}`, {
+                const response = await fetch(`/api/users/${id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -56,7 +54,7 @@ export default function Profile() {
     useEffect(() => {
         const fetch_games = async () => {
             try {
-                const response = await fetch(`http://localhost:4000/games/${id}`, {
+                const response = await fetch(`/api/games/${id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -95,15 +93,22 @@ export default function Profile() {
 
     return (
         <div className="flex flex-col h-full relative">
-            <ProfileHeader user={user} games={games} />
+            {editMode && (
+                <EditProfile
+                    setEditMode={setEditMode}
+                    editMode={editMode}
+                    user={user}
+                />
+            )}
+            <ProfileHeader user={user} games={games} setEditMode={setEditMode} />
             {/* ////////////////////////////////////////////////////////// */}
             <div className="flex-1/5 flex gap-2 m-5">
-                
+
 
                 <div className="flex-1/2 flex flex-col gap-2">
-                    <div className="flex-1 bg-[#2b24423d] rounded-lg p-4 flex gap-2 border border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm">
+                    {/* <div className="flex-1 bg-[#2b24423d] rounded-lg p-4 flex gap-2 border border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm">
                         <PingPongAchievements className="text-purple-400 w-6 h-6" games={games} user={user} />
-                    </div>
+                    </div> */}
 
                 </div>
             </div>

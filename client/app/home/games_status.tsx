@@ -26,7 +26,7 @@ const StatusCard = ({
                 boxShadow: "0 0 30px rgba(123,93,223,0.5)",
                 rotate: 1,
             }}
-            className="relative w-6 sm:w-30 p-1 rounded-2xl shadow-lg border border-[#7b5ddf44] 
+            className="relative sm:w-30 rounded-2xl shadow-lg border border-[#7b5ddf44] 
       text-white flex flex-col items-center overflow-hidden 
       backdrop-blur-md bg-gradient-to-b from-[#2a2340aa] to-[#1a142ccc]
       group transition-all duration-300 ease-in-out"

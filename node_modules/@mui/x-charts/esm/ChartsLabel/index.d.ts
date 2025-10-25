@@ -1,0 +1,9 @@
+export * from "./ChartsLabel.js";
+export type { ChartsLabelMarkProps, ChartsLabelCustomMarkProps } from "./ChartsLabelMark.js";
+export { ChartsLabelMark } from "./ChartsLabelMark.js";
+export { labelClasses } from "./labelClasses.js";
+export type { ChartsLabelClasses } from "./labelClasses.js";
+export { labelMarkClasses } from "./labelMarkClasses.js";
+export type { ChartsLabelMarkClasses } from "./labelMarkClasses.js";
+export { labelGradientClasses } from "./labelGradientClasses.js";
+export type { ChartsLabelGradientClasses } from "./labelGradientClasses.js";
