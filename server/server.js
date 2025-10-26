@@ -34,6 +34,9 @@ db.serialize(() => {
 		password TEXT,
 		picture TEXT,
 		gold INTEGER DEFAULT 0,
+		games INTEGER DEFAULT 0,
+		win INTEGER DEFAULT 0,
+		lose INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	  );
 	`);
