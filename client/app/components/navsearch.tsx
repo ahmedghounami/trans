@@ -1,3 +1,5 @@
+import { FaUserPlus } from 'react-icons/fa';
+
 export default function NavSearch({ searchResults, me, value, setValue }: {
     searchResults: { id: number; name: string; picture?: string }[];
     me: number;
@@ -6,26 +8,43 @@ export default function NavSearch({ searchResults, me, value, setValue }: {
 }
 ) {
     return (
-        <div className="absolute  left-[5%] top-12 w-[90%] z-20 max-h-[300px] overflow-y-auto bg-[#1a1a1a] border border-[#3d008d] shadow-xl rounded-xl px-2 py-3 space-y-2 custom-scroll">
+        <div className="absolute left-[5%] top-12 w-[90%] z-20 max-h-[300px] overflow-y-auto bg-[#020007c5] border border-[#3d008d] shadow-xl rounded-xl px-2 py-3 space-y-2 custom-scroll">
             {searchResults
                 .filter((user) => user.id !== me)
                 .map((user) => (
                     <div
                         key={user.id}
-                        className="flex items-center gap-3 px-4 py-2 rounded-lg bg-[#2a2a2a] hover:bg-purple-800/30 transition-colors cursor-pointer"
-                        onClick={() => {
-                            setValue("");
-                            window.location.href = `/profile/${user.id}`;
-                        }}
+                        className="flex items-center justify-between gap-3 px-4 py-2 rounded-lg bg-purple-800/30 transition-colors"
                     >
-                        <img
-                            src={user.picture || "/profile.jpg"}
-                            alt="Profile"
-                            className="w-10 h-10 rounded-full border-2 border-purple-600 shadow-md object-cover"
-                        />
-                        <span className="text-white font-medium text-sm tracking-wide">
-                            {user.name}
-                        </span>
+                        <div
+                            className="flex items-center gap-3 cursor-pointer min-w-0"
+                            onClick={() => {
+                                setValue("");
+                                window.location.href = `/profile/${user.id}`;
+                            }}
+                        >
+                            <img
+                                src={user.picture || "/profile.jpg"}
+                                alt="Profile"
+                                className="w-10 h-10 rounded-full border-2 border-purple-600 shadow-md object-cover"
+                            />
+                            <span className="text-white font-bold text-base tracking-wide truncate">
+                                {user.name}
+                            </span>
+                        </div>
+                        <div className="flex items-center">
+                            <button
+                                aria-label={`Add ${user.name} as friend`}
+                                className="ml-2 flex items-center gap-2 px-3 py-1 rounded-md text-sm font-semibold text-white shadow-md bg-gradient-to-r from-purple-700 via-blue-700 to-black border border-purple-900 hover:from-purple-500 hover:via-blue-600 hover:to-black hover:scale-105 transition-all duration-150"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    // TODO: wire up friend request API
+                                    alert(`Friend request sent to ${user.name}`);
+                                }}
+                            >
+                                <FaUserPlus className="text-lg" />
+                            </button>
+                        </div>
                     </div>
                 ))}
 
