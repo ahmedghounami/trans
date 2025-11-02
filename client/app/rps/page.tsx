@@ -11,8 +11,8 @@ export default function rps() {
 
 
     return (
-        <div className="flex" >
-            <div className="min-h-screen flex flex-col items-center pt-10">
+        <div className="flex flex-col" >
+            <div className="flex flex-col items-center pt-10">
                 <div className="w-full p-8 rounded-lg">
                     <h1 className="text-6xl font-bold text-white mb-4 text-center w-full">Rocky Papery Scissory :)</h1>
                     <p className="text-xl text-gray-300 text-center w-full mb-8">Enjoy</p>
@@ -52,6 +52,17 @@ export default function rps() {
                 </div>
 
 
+            </div>
+
+            <div className="flex flex-col items-center justify-center mt-8 gap-2">
+                <input 
+                    type="text" 
+                    placeholder="Room code"
+                    className="px-4 py-2 rounded border"
+                />
+                <button className="cursor-pointer px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                    Join
+                </button>
             </div>
         </div>
     )
