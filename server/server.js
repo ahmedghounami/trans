@@ -34,6 +34,9 @@ db.serialize(() => {
 		password TEXT,
 		picture TEXT,
 		gold INTEGER DEFAULT 0,
+		rps_wins INTEGER DEFAULT 0
+		rps_losses INTEGER DEFAULT 0
+		rps_draws INTEGER DEFAULT 0
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	  );
 	`);
@@ -88,6 +91,16 @@ db.serialize(() => {
 		FOREIGN KEY (skin_id) REFERENCES skins(id)
 	  );
 	`);
+
+	// db.run(`
+	// 	CREATE TABLE IF NOT EXISTS rps (
+	// 		player1_id INTEGER,
+
+			
+	// 	);
+	// `)
+
+	
 });
 
 // Register routes on fastify

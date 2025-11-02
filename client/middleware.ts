@@ -11,6 +11,7 @@ const protectedRoutes = [
   "/settings",
   "/cart",
   "/orders",
+  "/rps",
 ];
 
 export function middleware(request: NextRequest) {
