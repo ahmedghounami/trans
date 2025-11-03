@@ -6,6 +6,9 @@ import { sockethandler } from './socket.js';
 
 import game from './game.js';
 
+// rps
+import rps from './rps.js'
+
 const fastify = Fastify();
 
 await fastify.register(cors, {
