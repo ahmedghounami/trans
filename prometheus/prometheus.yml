@@ -6,16 +6,13 @@ scrape_configs:
   - job_name: "prometheus"
     static_configs:
       - targets: ["prometheus:9090"]
+    metrics_path: /prometheus/metrics
+
+  - job_name: "node_exporter"
+    static_configs:
+      - targets: ["node_exporter:9100"]
 
   - job_name: "server"
+    static_configs:
+      - targets: ["server:4000"]
     metrics_path: /metrics
-    static_configs:
-      - targets: ["server:${SERVER_METRICS_PORT}"]
-
-  - job_name: "nginx"
-    static_configs:
-      - targets: ["nginx-exporter:9113"]
-
-  - job_name: "cadvisor"
-    static_configs:
-      - targets: ["cadvisor:8080"]

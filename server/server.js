@@ -147,6 +147,38 @@ const io = new Server(httpServer, {
 
 sockethandler(io, db);
 
+
+// --- Prometheus Metrics Setup ---
+import client from "prom-client";
+
+// Create a Registry to register metrics
+const register = new client.Registry();
+
+// Collect default Node.js metrics (CPU, memory, event loop, etc.)
+client.collectDefaultMetrics({ register });
+
+// Optional: Add a custom metric for HTTP requests count
+const httpRequestsTotal = new client.Counter({
+  name: "http_requests_total",
+  help: "Total number of HTTP requests handled",
+  labelNames: ["method", "route", "status"],
+});
+register.registerMetric(httpRequestsTotal);
+
+// Middleware to track request counts
+fastify.addHook("onResponse", (request, reply, done) => {
+  const route = request.routerPath || request.url;
+  httpRequestsTotal.inc({ method: request.method, route, status: reply.statusCode });
+  done();
+});
+
+// Metrics endpoint for Prometheus
+fastify.get("/metrics", async (req, reply) => {
+  reply.header("Content-Type", register.contentType);
+  return register.metrics();
+});
+
+
 await fastify.ready();
 const PORT = 4000;
 httpServer.listen(PORT, (err) => {

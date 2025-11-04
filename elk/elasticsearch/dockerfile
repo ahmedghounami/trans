@@ -1,0 +1,15 @@
+# --------------------------------------------
+# Elasticsearch 8.15.x – single node, no security
+# --------------------------------------------
+FROM docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+
+# JVM memory options (quote as one string)
+ENV ES_JAVA_OPTS="-Xms512m -Xmx512m"
+
+# Run as single-node cluster and disable security
+ENV discovery.type=single-node
+ENV xpack.security.enabled=false
+
+# NOTE:
+# Do NOT include index.number_of_replicas or any other index-level setting here.
+# Those must be applied via API or templates later.

@@ -10,7 +10,13 @@ type UserType = {
   level?: number;
 };
 
-export default function Requests({ onClose }: { onClose: () => void }) {
+export default function Requests({
+  onClose,
+  onFriendAccepted,
+}: {
+  onClose: () => void;
+  onFriendAccepted?: () => void;
+}) {
   const [requests, setRequests] = React.useState<UserType[]>([]);
   const [loadingRequests, setLoadingRequests] = React.useState(true);
   const { user, loading } = useUser();
@@ -26,7 +32,6 @@ export default function Requests({ onClose }: { onClose: () => void }) {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         if (isMounted) {
-          console.log("Fetched requests:", data); // debug here
           setRequests(data.data || []);
         }
       } catch (err) {
@@ -39,10 +44,10 @@ export default function Requests({ onClose }: { onClose: () => void }) {
 
     fetchRequests();
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
-
-
 
   const handleAccept = async (friendId: number) => {
     if (!user) return;
@@ -54,6 +59,7 @@ export default function Requests({ onClose }: { onClose: () => void }) {
       });
       if (res.ok) {
         setRequests((prev) => prev.filter((r) => r.id !== friendId));
+        onFriendAccepted?.(); // 🔄 notify parent to re-fetch friends
       }
     } catch (err) {
       console.error(err);

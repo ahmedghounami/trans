@@ -54,16 +54,16 @@ const LeaderboardSection = () => {
   if (loading) return <Loading />;
 
   return (
-    <div className="w-full max-w-6xl p-2 relative flex flex-col h-screen max-h-screen">
+   <div className="w-full max-w-7xl p-2 relative flex flex-col h-screen max-h-screen">
       <BottomButtons
         onAddFriends={() => setShowAddFriends(true)}
         onRequests={() => setShowRequests(true)}
+        onRefreshFriends={() => setRefreshToggle(prev => !prev)}
       />
 
       <UsersCard
         friends={friends}
         setUsers={setFriends}
-        // Optional: pass refresh function to child to trigger re-fetch
       />
     </div>
   );

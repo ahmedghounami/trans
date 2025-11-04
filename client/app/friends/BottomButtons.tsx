@@ -4,7 +4,11 @@ import { useState } from "react";
 import AddFriends from "./AddFriend";
 import Requests from "./Requests";
 
-export default function BottomButtons() {
+export default function BottomButtons({
+  onRefreshFriends, // 👈 receive this from parent
+}: {
+  onRefreshFriends?: () => void;
+}) {
   const [showAddFriends, setShowAddFriends] = useState(false);
   const [showRequests, setShowRequests] = useState(false);
 
@@ -26,12 +30,13 @@ export default function BottomButtons() {
         </button>
       </div>
 
-      {showAddFriends && (
-        <AddFriends onClose={() => setShowAddFriends(false)} />
-      )}
+      {showAddFriends && <AddFriends onClose={() => setShowAddFriends(false)} />}
 
       {showRequests && (
-        <Requests onClose={() => setShowRequests(false)} />
+        <Requests
+          onClose={() => setShowRequests(false)}
+          onFriendAccepted={onRefreshFriends} // 👈 call parent refresh when accepted
+        />
       )}
     </>
   );
