@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import sqlite3 from 'sqlite3';
@@ -114,6 +115,10 @@ fastify.register(shopRoute, { db });
 
 const ProfileRoutes = (await import('./routes/profileroute.js')).default;
 fastify.register(ProfileRoutes, { db });
+
+// Register Google OAuth
+const googleAuth = (await import('./google-auth.js')).default;
+fastify.register(googleAuth, { db });
 // Create raw HTTP server from fastify's internal handler
 const httpServer = fastify.server;
 

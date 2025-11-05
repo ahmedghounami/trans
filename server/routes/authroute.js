@@ -1,5 +1,3 @@
-
-
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 const SECRET = 'your_jwt_secret';
@@ -61,17 +59,21 @@ export default async function authRoutes(fastify, opts) {
     });
 
     fastify.get('/me', async (request, reply) => {
-        const token = request.headers.authorization?.split(' ')[1];
+        // Try to get token from Authorization header, then from cookies
+        let token = request.headers.authorization?.split(' ')[1];
+        if (!token && request.cookies) {
+            token = request.cookies.token;
+        }
+        console.log('JWT token received in /me:', token);
         if (!token) return reply.status(401).send({ error: 'Unauthorized' });
         try {
             const decoded = jwt.verify(token, SECRET);
             return new Promise((resolve, reject) => {
-                db.get(`SELECT * FROM users WHERE id = ?`, [decoded.userId], (err, row) => {
+                db.get(`SELECT * FROM users WHERE id = ?`, [decoded.userId || decoded.id], (err, row) => {
                     if (err) {
                         reply.status(500).send({ error: 'Database error' });
                         return reject(err);
                     }
-                    // console.log('User data:', row)
                     if (row) {
                         reply.send({
                             id: row.id,
@@ -100,15 +102,15 @@ export default async function authRoutes(fastify, opts) {
         console.log("Request body:", req.body);
         return new Promise((resolve, reject) => {
             db.run(
-                `INSERT OR IGNORE INTO users (name, email, password) VALUES (?, ?, ?)`,
-                [name, email, hashedPassword],
+                `INSERT OR IGNORE INTO users (name, email, password, gold) VALUES (?, ?, ?, ?)`,
+                [name, email, hashedPassword, 1000],
                 function (err) {
                     if (err) {
                         console.error("Insert user error:", err.message);
                         reply.status(500).send({ error: "Database error" });
                         return reject(err);
                     }
-                    resolve({ id: this.lastID, name, email, hashedPassword });
+                    resolve({ id: this.lastID, name, email });
                 }
             );
         });

@@ -16,9 +16,13 @@ const protectedRoutes = [
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   const pathname = request.nextUrl.pathname;
+  
+  // Check if there's a token in the URL query params (from OAuth redirect)
+  const urlToken = request.nextUrl.searchParams.get("token");
 
   if (protectedRoutes.includes(pathname)) {
-    if (!token) {
+    // Allow access if there's a token in cookie OR in URL params
+    if (!token && !urlToken) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       return NextResponse.redirect(url);
