@@ -24,8 +24,8 @@ export default function LoginForm() {
             if (response.ok) {
                 const data = await response.json();
                 Cookies.set("token", data.token, {
-                    expires: 1,
-                    secure: true,
+                    expires: 7,
+                    secure: false, // Set to false for localhost (use true in production with HTTPS)
                     sameSite: "lax",
                 });
 
@@ -99,6 +99,7 @@ export default function LoginForm() {
 
                     <button
                         type="button"
+                        onClick={() => window.location.href = 'http://localhost:4000/auth/google'}
                         className="w-full bg-white hover:bg-gray-100 text-gray-800 font-medium py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-3"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">

@@ -16,19 +16,36 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const fetchMe = async () => {
       try {
+        const token = Cookies.get("token");
+        
+        // If no token, just set loading to false and return
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
         const res = await fetch("http://localhost:4000/me", {
           headers: {
-            Authorization: `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${token}`,
           },
+          credentials: 'include',
         });
-        // if (!res.ok) {
-        //   throw new Error("Failed to fetch user data");
-        // }
+        
+        if (!res.ok) {
+          // If unauthorized, remove invalid token
+          if (res.status === 401) {
+            Cookies.remove("token");
+          }
+          setLoading(false);
+          return;
+        }
+        
         const data = await res.json();
         console.log("User data fetched:", data);
         setUser(data);
       } catch (error) {
         console.error("Error fetching me:", error);
+        // Don't show error to user, just log it
       } finally {
         setLoading(false);
       }
