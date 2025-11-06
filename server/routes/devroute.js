@@ -33,6 +33,9 @@ export default async function userRoutes(fastify, opts) {
           name: row.name,
           picture: row.picture,
           gold: row.gold,
+          games: row.games,
+          win: row.win,
+          lose: row.lose
         });
         resolve(row);
       });

@@ -13,8 +13,8 @@ import { randomUUID } from "crypto";
 import Tournament from "@/app/components/Tournament";
 
 export default function Game() {
-	const { selected, setselected } = Homecontext();
-	const { me } = Homecontext();
+	const { selected, user, setselected } = Homecontext();
+	// const { me } = Homecontext();
 	const router = useRouter();
 	const [Positions, setPositions] = useState({});
 	const [tournamentplayers, settournamentplayers] = useState({
@@ -48,7 +48,7 @@ export default function Game() {
 			setgametype("local");
 			return;
 		}
-		if (!me || gametype == "tournament") return;
+		if (!user || gametype == "tournament") return;
 		async function newgame() {
 			try {
 				const sessionid = crypto.randomUUID();
@@ -58,12 +58,14 @@ export default function Game() {
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify({
-						player_id: me.id,
-						player_name: tournamentplayers.p1 ? tournamentplayers.p1 : me.name,
+						player_id: user.id,
+						player_name: tournamentplayers.p1
+							? tournamentplayers.p1
+							: user.name,
 						player2_name: tournamentplayers.p2
 							? tournamentplayers.p2
 							: "Player 2",
-						player_img: me.picture,
+						player_img: user.picture ? user.picture : user.name,
 						game_type: gametype,
 						sessionId: sessionid,
 					}),
@@ -75,7 +77,7 @@ export default function Game() {
 					const socket = io("http://localhost:4000/game", {
 						auth: {
 							sessionId: res.sessionId,
-							playerId: me.id,
+							playerId: user.id,
 						},
 					});
 
@@ -220,7 +222,7 @@ export default function Game() {
 		async function fetchSkin() {
 			try {
 				const res = await fetch(
-					`http://localhost:4000/selected_skins?player_id=${me.id}`
+					`http://localhost:4000/selected_skins?player_id=${user.id}`
 				);
 				const data = await res.json();
 				// console.log(data);
@@ -229,10 +231,10 @@ export default function Game() {
 				console.error("Error fetching skin:", err);
 			}
 		}
-		if (me) {
+		if (user) {
 			fetchSkin();
 		}
-	}, [me]);
+	}, [user]);
 	async function tournamentstates() {
 		console.log("tournament win", playersdata, Positions, tournamentplayers);
 
@@ -275,15 +277,17 @@ export default function Game() {
 	}
 
 	if (Positions.win != 0) {
-		if (
-			tournamentplayers.p1 != playersdata.p1_name ||
-			tournamentplayers.p2 != playersdata.p2_name
-		) {
-			setgametype("local");
-			setPositions({});
-			return;
-		}
 		if (tournamentplayers.p1_id != 0 && tournamentplayers.winer == 0) {
+			console.log("HEERE");
+			if (
+				tournamentplayers.p1 != playersdata.p1_name ||
+				tournamentplayers.p2 != playersdata.p2_name
+			) {
+				setgametype("local");
+				setPositions({});
+				return;
+			}
+
 			tournamentstates();
 			// setTimeout(() => {
 			// 	// router.push(

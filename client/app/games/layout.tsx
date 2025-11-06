@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { createContext, useContext, useEffect, useState } from "react";
 import SkinContainer from "../components/SkinContainer";
+import { useUser } from "../Context/UserContext";
 
 const HomeContext = createContext({});
 export default function Games({
@@ -18,35 +19,14 @@ export default function Games({
 	// useEffect(()=>{
 	//     setSkins(data)
 	// },[skinType])
-	const [me, setMe] = useState(0);
+	const {user} = useUser();
+	console.log(user);
 	useEffect(() => {
-		async function fetchme() {
-			try {
-				const response = await fetch("http://localhost:4000/me", {
-					method: "GET",
-					headers: {
-						authorization: `Bearer ${Cookies.get("token")}`,
-						"Content-Type": "application/json",
-					},
-				});
-				if (!response.ok) {
-					throw new Error(`HTTP error! status: ${response.status}`);
-				}
-				const data = await response.json();
-				console.log("Fetched user data:", data);
-				setMe(data);
-			} catch (error) {
-				console.error("Error fetching user data:", error);
-			}
-		}
-		fetchme();
-	}, []);
-	useEffect(() => {
-		if (me) {
+		if (user) {
 			async function fetchOwnedSkins() {
 				try {
 					const res = await fetch(
-						"http://localhost:4000/player_skins?player_id=" + me.id
+						"http://localhost:4000/player_skins?player_id=" + user.id
 					);
 					if (res.error) {
 						throw new Error(res.error);
@@ -59,11 +39,11 @@ export default function Games({
 			}
 			fetchOwnedSkins();
 		}
-	}, [me]);
+	}, [user]);
 
 	return (
 		<HomeContext.Provider
-			value={{ skins, me, selected, setSkins, setselected }}>
+			value={{ skins, user, selected, setSkins, setselected }}>
 			{children}
 		</HomeContext.Provider>
 	);
