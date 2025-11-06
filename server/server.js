@@ -5,7 +5,7 @@ import sqlite3 from 'sqlite3';
 import { Server } from 'socket.io';
 import { sockethandler } from './socket.js';
 
-import { setupGameSocketIO } from './game.js';
+import game from './game.js';
 
 const fastify = Fastify();
 
@@ -35,9 +35,6 @@ db.serialize(() => {
 		password TEXT,
 		picture TEXT,
 		gold INTEGER DEFAULT 0,
-		games INTEGER DEFAULT 0,
-		win INTEGER DEFAULT 0,
-		lose INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	  );
 	`);
@@ -94,6 +91,16 @@ db.serialize(() => {
 		FOREIGN KEY (skin_id) REFERENCES skins(id)
 	  );
 	`);
+
+	// db.run(`
+	// 	CREATE TABLE IF NOT EXISTS rps (
+	// 		player1_id INTEGER,
+
+			
+	// 	);
+	// `)
+
+	
 });
 
 // Register routes on fastify

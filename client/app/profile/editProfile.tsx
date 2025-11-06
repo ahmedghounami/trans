@@ -2,6 +2,13 @@ import { Pencil, X, Globe, Upload, Lock, Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 
 export default function EditProfile({ setEditMode, editMode, user }) {
+    // stores the new uploaded img, initially set to user.picture
+    // which is the current picture supplied by server
+    const [previewPic , setPreviewPic ] = useState( user.picture )
+    const [uploadedImageUrl, setUploadedImageUrl] = useState(null) // Store uploaded image URL
+
+
+
     const [formData, setFormData] = useState({
         name: user.name || '',
         email: user.email || '',
@@ -44,11 +51,47 @@ export default function EditProfile({ setEditMode, editMode, user }) {
         return true
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         if (!validatePassword()) return
-        console.log('Form submitted:', formData)
-        setEditMode(false)
+        
+        try {
+            // Prepare data to send
+            const updateData = {
+                userid: user.id,
+                name: formData.name,
+                email: formData.email,
+                language: formData.language,
+                picture: uploadedImageUrl || user.picture, // Use uploaded image or keep current
+                currentPassword: formData.currentPassword,
+                newPassword: formData.newPassword
+            }
+
+            console.log("📤 Sending update data:", updateData)
+
+            const response = await fetch('http://localhost:4000/profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updateData),
+            })
+
+            if (!response.ok) {
+                const errorText = await response.text()
+                console.error("Update failed:", errorText)
+                alert('Failed to update profile')
+                return
+            }
+
+            const result = await response.json()
+            console.log('✅ Profile updated successfully:', result)
+            alert('Profile updated successfully!')
+            setEditMode(false)
+        } catch (err) {
+            console.error("❌ Error updating profile:", err)
+            alert('An error occurred while updating profile')
+        }
     }
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,25 +118,11 @@ export default function EditProfile({ setEditMode, editMode, user }) {
             }
 
             const data = await res.json();
+            console.log("✅ Image uploaded successfully:", data.url);
 
-
-            const update = await fetch('http://localhost:4000/profile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    picture: data.url, // Use the URL returned from the upload
-                    userid: user.id, // Assuming you have the user ID available
-                }),
-            });
-            // if (!update.ok) {
-            //     const errorText = await res.text();
-            //     console.error("Upload failed. Server said:", errorText);
-            //     return;
-            // }
-
-            console.log("✅ Uploaded successfully:", data.url);
+            // Only update preview and store the URL, don't save to DB yet
+            setPreviewPic(data.url);
+            setUploadedImageUrl(data.url);
         } catch (err) {
             console.error("❌ Network/Fetch error:", err);
         }
@@ -120,7 +149,7 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                 <div className="flex flex-col items-center gap-4">
                     <div className="relative">
                         <img
-                            src={user.picture}
+                            src={previewPic}
                             alt="Profile"
                             className="w-24 h-24 rounded-full object-cover border-4 border-gradient-to-r from-purple-500 to-blue-500 shadow-xl ring-4 ring-purple-500/20"
                         />
