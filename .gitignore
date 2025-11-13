@@ -3,3 +3,5 @@ server/package-lock.json
 client/package-lock.json
 
 server/*.db
+client/node_modules
+server/sqlite.db
