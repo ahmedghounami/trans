@@ -1,4 +1,21 @@
 FROM docker.elastic.co/kibana/kibana:8.15.0
 
-# Copy configuration (no ENV overrides)
+# Switch to root to copy and set permissions
+USER root
+
+# Copy configuration
 COPY kibana.yml /usr/share/kibana/config/kibana.yml
+
+# Copy dashboard
+COPY dashboard.ndjson /usr/share/kibana/config/dashboard_template.ndjson
+
+# Copy the startup script
+COPY docker-entrypoint.sh /opt/scripts/docker-entrypoint.sh
+
+# Change ownership instead of chmod (Kibana runs as kibana user)
+RUN chown kibana:kibana /opt/scripts/docker-entrypoint.sh
+
+# Switch back to kibana user
+USER kibana
+
+ENTRYPOINT ["/opt/scripts/docker-entrypoint.sh"]
