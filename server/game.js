@@ -27,7 +27,7 @@ async function postresult(p1_score, p2_score, p1_id, p2_id, winer) {
 			}
 		);
 		const res = await response.json();
-		console.log("Game result posted:", res);
+		// console.log("Game result posted:", res);
 	} catch (error) {
 		console.error("Error posting game result:", error);
 	}
@@ -257,7 +257,7 @@ function game(gametype, socket, keysPressed, session) {
 					session.positions.win = 2;
 					if (session.positions.score.p1 > session.positions.score.p2)
 						session.positions.win = 1;
-					console.log("WIN", Curentplayer, session);
+					// console.log("WIN", Curentplayer, session);
 
 					// if (Curentplayer.oponent != null) {
 					// 	Curentplayer.oponent.positions.win =
@@ -301,7 +301,7 @@ export function setupGameSocketIO(io) {
 	io.of("/game").use((socket, next) => {
 		const sessionId = socket.handshake.auth.sessionId;
 		const playerId = socket.handshake.auth.playerId;
-		console.log(sessionsmap);
+		// console.log(sessionsmap);
 
 		const session = sessionsmap.get(sessionId);
 		if (!session) return next(new Error("Invalid session ID"));
@@ -314,6 +314,10 @@ export function setupGameSocketIO(io) {
 		socket.sessionId = sessionId;
 		socket.playerId = playerId;
 		socket.session = session;
+		if (session.startgame)
+			return next(new Error("Game has already started"));
+		console.log(session);
+		
 		next();
 	});
 	io.of("/game").on("connection", (socket) => {
@@ -401,7 +405,7 @@ export function setupGameSocketIO(io) {
 		});
 
 		socket.on("disconnect", () => {
-			console.log("Client disconnected from game:", socket.id);
+			// console.log("Client disconnected from game:", socket.id);
 			if (
 				socket.session.positions.win == 0 &&
 				socket.playerId == socket.session.players_info.p1_id

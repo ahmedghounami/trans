@@ -35,6 +35,7 @@ export default function Game() {
 	const serchParams = useSearchParams();
 	let [gametype, setgametype] = useState(serchParams.get("gametype"));
 	let oppid = Number(serchParams.get("oppid"));
+	const invited_player = serchParams.get("invited_player");
 
 	let tournament = false;
 	if (!oppid) oppid = 0;
@@ -62,6 +63,8 @@ export default function Game() {
 						player_name: tournamentplayers.p1
 							? tournamentplayers.p1
 							: user.name,
+						player2_id: oppid,
+						invited_player: invited_player ? true : false,
 						player2_name: tournamentplayers.p2
 							? tournamentplayers.p2
 							: "Player 2",

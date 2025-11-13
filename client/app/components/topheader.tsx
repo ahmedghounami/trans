@@ -155,7 +155,7 @@ export default function Topheader() {
                             {notification.type === "game_invite" && (
                               <div className="flex gap-2 mt-2">
                                 <Link
-                                  href={`/games/game`}
+                                  href={`/games/game?gametype=online&oppid=${notification.sender_id}&invited_player=true`}
                                   className="flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all"
                                   onClick={(e) => e.stopPropagation()}
                                 >

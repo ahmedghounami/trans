@@ -1,6 +1,7 @@
 /** @format */
 
 // Import the GameAPI and gameResults from your existing game module
+// import { log } from "console";
 import { sessionsmap } from "../game.js";
 import { randomUUID } from "crypto";
 
@@ -14,6 +15,8 @@ const gameApiRoute = async (fastify, options) => {
 		try {
 			const {
 				player_id,
+				player2_id,
+				invited_player,
 				player2_name,
 				player_name,
 				player_img,
@@ -33,6 +36,27 @@ const gameApiRoute = async (fastify, options) => {
 					error: "missing data",
 				});
 			}
+			if(invited_player){
+				console.log("invited player flow");
+				
+				const invitedSession = Array.from(sessionsmap.entries()).find(
+					([sessionId, session]) =>
+						session.gametype == "online" && session.players_info.p1_id == player2_id
+				);
+				if (invitedSession) {
+					const [sessionId, session] = invitedSession;
+					session.players_info.p2_id = player_id;
+					session.players_info.p2_name = player_name;
+					session.players_info.p2_img = player_img;
+					session.p2_ready = true;
+					// console.log("player 2", sessionsmap);
+					return reply.status(201).send({
+						success: true,
+						message: "player added successfully",
+						sessionId: sessionId,
+					});
+				}
+			}
 			const ingame = Array.from(sessionsmap.values()).some(
 				(player) =>
 					player.players_info.p1_id == player_id ||
@@ -46,7 +70,7 @@ const gameApiRoute = async (fastify, options) => {
 					error: "player already exists",
 				});
 			}
-			if (game_type == "online") {
+			if (game_type == "online" && !player2_id) {
 				const onlineSession = Array.from(sessionsmap.entries()).find(
 					([sessionId, session]) =>
 						session.gametype == "online" && session.players_info.p2_id == 0
@@ -57,7 +81,7 @@ const gameApiRoute = async (fastify, options) => {
 					session.players_info.p2_name = player_name;
 					session.players_info.p2_img = player_img;
 					session.p2_ready = true;
-					console.log("player 2", sessionsmap);
+					// console.log("player 2", sessionsmap);
 
 					return reply.status(201).send({
 						success: true,
@@ -66,11 +90,12 @@ const gameApiRoute = async (fastify, options) => {
 					});
 				}
 			}
-
+			console.log("new session flow");
+			
 			sessionsmap.set(sessionId, {
 				players_info: {
 					p1_id: player_id,
-					p2_id: 0,
+					p2_id: player2_id ? player2_id : 0,
 					p1_name: player_name,
 					p1_img: player_img,
 					p2_name: player2_name ? player2_name : "player 2",

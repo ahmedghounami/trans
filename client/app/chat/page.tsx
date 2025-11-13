@@ -9,6 +9,7 @@ import Sidebar from "./sidebar";
 import Loading from "../components/loading";
 import { FaTableTennisPaddleBall } from "react-icons/fa6";
 import socket from "../socket";
+import { useRouter } from "next/navigation";
 
 type User = {
     id: number;
@@ -18,6 +19,7 @@ type User = {
 };
 
 export default function Chat() {
+    const rout =  useRouter();
     const [users, setUsers] = useState<User[]>([]);
     const [selected, setSelected] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
@@ -59,7 +61,9 @@ export default function Chat() {
     const handleSendGameInvite = () => {
         const recipient = users.find(user => user.id === selected);
         if (!recipient) return;
-
+        rout.push(`/games/game?gametype=online&oppid=${selected}`);
+        console.log(selected, user.id);
+        
         // Emit Socket.io event to send game invite
         socket.emit("send_game_invite", {
             recipientId: selected,
