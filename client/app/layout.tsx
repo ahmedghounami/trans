@@ -9,6 +9,7 @@ import { console } from "inspector";
 import { Chakra_Petch } from "next/font/google";
 import { LayoutComp } from "./components/layoutnavbar";
 import { UserProvider } from "./Context/UserContext";
+import { NotificationProvider } from "./Context/NotificationContext";
 import { Suspense } from "react";
 
 const chakra = Chakra_Petch({
@@ -44,16 +45,18 @@ export default function RootLayout({
       <body className="font-chakra h-screen" >
       {/* <Suspense fallback={<div className="flex justify-center items-center h-screen text-white">Loading...</div>}> */}
         <UserProvider>
-          <img
-            src="/back.webp"
-            alt="Logo"
-            className="absolute w-full h-full object-cover -z-10"
-            style={{ filter: "brightness(0.5) blur(10px)" }}
-          />
-          {/* Ensure children is rendered */}
-            <LayoutComp>
-              {children}
-            </LayoutComp>
+          <NotificationProvider>
+            <img
+              src="/back.webp"
+              alt="Logo"
+              className="absolute w-full h-full object-cover -z-10"
+              style={{ filter: "brightness(0.5) blur(10px)" }}
+            />
+            {/* Ensure children is rendered */}
+              <LayoutComp>
+                {children}
+              </LayoutComp>
+          </NotificationProvider>
         </UserProvider>
       {/* </Suspense> */}
       </body>

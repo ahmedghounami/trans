@@ -8,6 +8,7 @@ import { useUser } from "../Context/UserContext";
 import Sidebar from "./sidebar";
 import Loading from "../components/loading";
 import { FaTableTennisPaddleBall } from "react-icons/fa6";
+import socket from "../socket";
 
 type User = {
     id: number;
@@ -54,6 +55,24 @@ export default function Chat() {
         return <div className="flex items-center justify-center h-screen text-white">Failed to load user.</div>;
     }
     const me = user.id;
+
+    const handleSendGameInvite = () => {
+        const recipient = users.find(user => user.id === selected);
+        if (!recipient) return;
+
+        // Emit Socket.io event to send game invite
+        socket.emit("send_game_invite", {
+            recipientId: selected,
+            gameType: "Pingpong"
+        });
+
+        // Listen for confirmation
+        socket.once("game_invite_sent", (data) => {
+            if (data.success) {
+                alert(`Game invite sent to ${recipient.name}! 🎮`);
+            }
+        });
+    };
 
 
     const showSidebar = !isMobile || (isMobile && selected === 0);
@@ -109,11 +128,9 @@ export default function Chat() {
                                             {users.find(user => user.id === selected)?.name}
                                         </h2>
                                     </button>
-                                    <button
+                                                                        <button
                                         className="ml-4 flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-white shadow-lg bg-gradient-to-r from-blue-700 via-purple-700 to-black border border-blue-900 hover:from-blue-500 hover:via-purple-600 hover:to-black hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                        onClick={() => {
-                                            alert(`Pingpong match requested with ${users.find(user => user.id === selected)?.name}`);
-                                        }}
+                                        onClick={handleSendGameInvite}
                                     >
                                         <span className="flex items-center justify-center text-xl">
                                             <FaTableTennisPaddleBall />

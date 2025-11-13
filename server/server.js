@@ -92,6 +92,21 @@ db.serialize(() => {
 	  );
 	`);
 
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS notifications (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		sender_id INTEGER,
+		type TEXT NOT NULL,
+		message TEXT NOT NULL,
+		data TEXT,
+		is_read BOOLEAN DEFAULT 0,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		FOREIGN KEY (sender_id) REFERENCES users(id)
+	  );
+	`);
+
 	// db.run(`
 	// 	CREATE TABLE IF NOT EXISTS rps (
 	// 		player1_id INTEGER,
@@ -129,6 +144,9 @@ const gameApiRoute = (await import('./routes/gameapiroute.js')).default;
 fastify.register(gameApiRoute, { db });
 const ProfileRoutes = (await import('./routes/profileroute.js')).default;
 fastify.register(ProfileRoutes, { db });
+
+const notificationRoute = (await import('./routes/notificationroute.js')).default;
+fastify.register(notificationRoute, { db });
 
 // Register Google OAuth
 const googleAuth = (await import('./google-auth.js')).default;
