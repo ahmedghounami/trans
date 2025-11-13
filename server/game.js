@@ -314,8 +314,8 @@ export function setupGameSocketIO(io) {
 		socket.sessionId = sessionId;
 		socket.playerId = playerId;
 		socket.session = session;
-		if (session.startgame)
-			return next(new Error("Game has already started"));
+		// if (session.startgame)
+		// 	return next(new Error("Game has already started"));
 		console.log(session);
 		
 		next();

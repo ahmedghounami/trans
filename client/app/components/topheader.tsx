@@ -55,6 +55,12 @@ export default function Topheader() {
     e.stopPropagation();
     deleteNotification(notificationId);
   };
+
+  const handleAcceptGameInvite = (e: React.MouseEvent, notificationId: number) => {
+    // Delete the notification when user accepts the game
+    deleteNotification(notificationId);
+    // Link will navigate to the game
+  };
   return (
     <div className="flex w-full justify-between items-center p-4 shadow-md rounded-lg">
 
@@ -157,7 +163,10 @@ export default function Topheader() {
                                 <Link
                                   href={`/games/game?gametype=online&oppid=${notification.sender_id}&invited_player=true`}
                                   className="flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all"
-                                  onClick={(e) => e.stopPropagation()}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAcceptGameInvite(e, notification.id);
+                                  }}
                                 >
                                   <IoCheckmark size={14} />
                                   Accept

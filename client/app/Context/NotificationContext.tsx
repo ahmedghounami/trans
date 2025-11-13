@@ -90,11 +90,26 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       console.log("🔔 New notification received:", notification);
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
+      
+      // Show browser notification if supported
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('New Game Invite!', {
+          body: notification.message,
+          icon: notification.sender_picture || '/profile.png'
+        });
+      }
     };
 
+    console.log("🎧 Setting up notification listener for user:", user.id);
     socket.on("new_notification", handleNewNotification);
 
+    // Request notification permission if not granted
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
     return () => {
+      console.log("🔇 Cleaning up notification listener");
       socket.off("new_notification", handleNewNotification);
     };
   }, [user?.id]);

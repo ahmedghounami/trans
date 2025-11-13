@@ -3,6 +3,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import socket from "../socket";
 
 export const UserContext = createContext({
   user: null,
@@ -43,6 +44,12 @@ export const UserProvider = ({ children }) => {
         const data = await res.json();
         console.log("User data fetched:", data);
         setUser(data);
+        
+        // Join socket room for this user
+        if (data?.id) {
+          socket.emit("join", data.id);
+          console.log("🔗 Joined socket room for user:", data.id);
+        }
       } catch (error) {
         console.error("Error fetching me:", error);
         // Don't show error to user, just log it
