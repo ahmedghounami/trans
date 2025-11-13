@@ -8,7 +8,8 @@ import PingPongAchievements from "./cards";
 import GameHistory from "./gamehistory";
 import PingPongPerformanceChart from "./chart";
 import { Coins, Crown, Flame, Trophy } from "lucide-react";
-
+import Cookies from 'js-cookie';
+import { useSearchParams } from 'next/navigation';
 
 
 const AchievementCard = ({ icon: Icon, name, progress, total, completed = false, tier = "bronze" }) => {
@@ -71,6 +72,24 @@ const AchievementCard = ({ icon: Icon, name, progress, total, completed = false,
 export default function HomePage() {
     const { user, loading } = useUser();
     const [games, setGames] = useState([]);
+    const searchParams = useSearchParams();
+
+    // Handle token from Google OAuth redirect
+    useEffect(() => {
+        const token = searchParams.get('token');
+        if (token) {
+            // Store token in cookie
+            Cookies.set("token", token, {
+                expires: 7,
+                secure: false, // Set to false for localhost (use true in production with HTTPS)
+                sameSite: "lax",
+            });
+            // Remove token from URL
+            window.history.replaceState({}, '', '/home');
+            // Reload to fetch user data with new token
+            window.location.reload();
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         const fetch_user = async () => {
@@ -107,11 +126,13 @@ export default function HomePage() {
     }
 
     const gameCount = games.length;
-    const totalGold = user.gold || 0;
+    const totalGold = (user as any)?.gold ?? 0;
     const streak = (() => {
+        // If we don't have a user yet, there's no streak to compute
+        if (!(user as any)?.id) return 0;
         let maxStreak = 0, current = 0;
         for (let i = 0; i < games.length; i++) {
-            if (games[i].winner_id === user.id) current++;
+            if ((games[i] as any)?.winner_id === (user as any).id) current++;
             else {
                 maxStreak = Math.max(maxStreak, current);
                 current = 0;
@@ -136,10 +157,10 @@ export default function HomePage() {
                         <h2 className="text-lg font-bold text-white">Achievements</h2>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <AchievementCard icon={Trophy} name="First Victory" completed={gameCount > 0} />
+                        <AchievementCard icon={Trophy} name="First Victory" progress={gameCount} total={1} completed={gameCount > 0} />
                         <AchievementCard icon={Flame} name="Streak Master" progress={streak} total={10} completed={streak >= 10} />
                         <AchievementCard icon={Coins} name="Gold Master" progress={totalGold} total={1000} completed={totalGold >= 1000} />
-                        <AchievementCard icon={Crown} name="Champion" completed />
+                        <AchievementCard icon={Crown} name="Champion" progress={0} total={0} completed />
                     </div>
                 </div>
                 <GameHistory user={user} games={games} />
