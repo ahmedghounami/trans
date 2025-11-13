@@ -29,9 +29,14 @@ export default function ProfileHeader({ user, games, setEditMode }: { user: any,
                 {/* LEFT SIDE : Profile Info */}
                 <div className="flex items-center gap-4 w-full md:w-1/2">
                     <img
-                        src={user.picture}
+                        src={user.picture || "/profile.png"}
                         alt="Profile"
                         className="w-20 h-20 rounded-full object-cover border-2 border-purple-600 shadow-lg"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "/profile.png";
+                        }}
                     />
                     <div className="flex flex-col gap-2 flex-1 ">
                         <div className="flex items-center gap-2 justify-between">

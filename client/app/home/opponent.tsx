@@ -29,9 +29,14 @@ export default function OpponentInfo({ id }:
       }
       }>
       <img
-        src={opponent.picture}
+        src={opponent.picture || "/profile.png"}
         alt="opponent"
         className="w-6 h-6 rounded-full"
+        referrerPolicy="no-referrer"
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.src = "/profile.png";
+        }}
       />
       {opponent.name}
     </div>

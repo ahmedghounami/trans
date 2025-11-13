@@ -24,9 +24,14 @@ export default function NavSearch({ searchResults, me, value, setValue }: {
                             }}
                         >
                             <img
-                                src={user.picture || "/profile.jpg"}
-                                alt="Profile"
-                                className="w-10 h-10 rounded-full border-2 border-purple-600 shadow-md object-cover"
+                                src={user.picture || "/profile.png"}
+                                alt={user.name}
+                                className="w-10 h-10 rounded-full border border-purple-500 object-cover"
+                                referrerPolicy="no-referrer"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = "/profile.png";
+                                }}
                             />
                             <span className="text-white font-bold text-base tracking-wide truncate">
                                 {user.name}

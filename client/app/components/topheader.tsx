@@ -13,6 +13,7 @@ export default function Topheader() {
   const [value, setValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
+  console.log("User in Topheader:", user);
   useEffect(() => {
     const fectusers = async () => {
       try {
@@ -81,11 +82,16 @@ export default function Topheader() {
             <Skeleton className="w-12 h-12 rounded-full ml-6 bg-[#3a3a3a]" />
           ) : (
             <img
-              src={user.picture || "/back.webp"}
+              src={user?.picture || "/profile.png"}
               alt="User"
-                className="w-12 h-12 rounded-full ml-6 border border-purple-600 shadow-lg object-cover bg-center"
+              className="w-12 h-12 rounded-full ml-6 border border-purple-600 shadow-lg object-cover bg-center"
               width={48}
               height={48}
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/profile.png";
+              }}
             />
           )}
         </button>

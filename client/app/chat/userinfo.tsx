@@ -56,9 +56,14 @@ export default function UserInfo({
       onClick={selectedhandler}
     >
       <img
-        src={user.picture}
+        src={user.picture || "/profile.png"}
         alt={user.name}
         className="w-12 h-12 rounded-full m-2 border-2 border-purple-600 shadow-md object-cover"
+        referrerPolicy="no-referrer"
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.src = "/profile.png";
+        }}
       />
       <div className="flex flex-col">
         <h3 className="text-white font-semibold">{user.name}</h3>
