@@ -27,7 +27,7 @@ export default function rps(  ) {
 
     useEffect( () => {
         // connect to rps socket
-        const ws: WebSocket = new WebSocket ('ws://localhost:8090')
+        const ws: WebSocket = new WebSocket ('ws://localhost:8090') //possible memory leak
 
         ws.onopen = () => {
             console.log("connected to rps socket")
@@ -54,8 +54,22 @@ export default function rps(  ) {
                 
             } ) )
 
-            console.log ("rps socket message sent")
+            console.log ("create_or_join_room away!")
 
+        }
+    }
+
+    const handleChoice = ( choice: number ) => {
+        if ( ws && ws.readyState == WebSocket.OPEN ) {
+            ws.send( JSON.stringify(
+                {
+                    type: 'rps',
+                    roomId: roomId,
+                    choice: choice
+                }
+            ) )
+
+            console.log( "rps away!" )
         }
     }
 
@@ -71,11 +85,11 @@ export default function rps(  ) {
                 {/* buttons */}
                 <div className="flex gap-4 justify-center">
                     <button className="px-8 py-4 rounded-lg text-2-xl hover:bg-amber-800
-                    cursor-pointer border" >ROCK</button>
+                    cursor-pointer border" onClick={ () => handleChoice(0) } >ROCK</button>
                     <button className="px-8 py-4 rounded-lg text-2-xl hover:bg-amber-200
-                    cursor-pointer border hover:text-black" >PAPER</button>
+                    cursor-pointer border hover:text-black" onClick={ () => handleChoice(1) } >PAPER</button>
                     <button className="px-8 py-4 rounded-lg text-2-xl hover:bg-slate-600
-                    cursor-pointer border hover:text-black" >SCISSOR</button>
+                    cursor-pointer border hover:text-black" onClick={ () => handleChoice(2) } >SCISSOR</button>
 
                     
                 </div>
