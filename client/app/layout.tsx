@@ -41,13 +41,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-chakra h-screen" >
+      <body className="font-chakra min-h-screen" >
       {/* <Suspense fallback={<div className="flex justify-center items-center h-screen text-white">Loading...</div>}> */}
         <UserProvider>
           <img
             src="/back.webp"
             alt="Logo"
-            className="absolute w-full h-full object-cover -z-10"
+            className="fixed inset-0 w-full h-full object-cover -z-10"
             style={{ filter: "brightness(0.5) blur(10px)" }}
           />
           {/* Ensure children is rendered */}
