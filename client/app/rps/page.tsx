@@ -18,7 +18,8 @@ export default function rps(  ) {
     // roomId is for the current room
     // joinedRoomId is for the joined room
     const [ roomId , setRoomId ] = useState<string>('')
-    const [ joinedRoomId , setJoinedRoomId ] = useState<string>('')
+    // const [ joinedRoomId , setJoinedRoomId ] = useState<string>('')
+    const [ result , setResult ] = useState<string>('')
 
     // for keeping the same socket
     const [ ws , setWs ] = useState<WebSocket | null>(null)
@@ -32,6 +33,17 @@ export default function rps(  ) {
         ws.onopen = () => {
             console.log("connected to rps socket")
             setWs(ws)
+        }
+        ws.onmessage = (msg) => {
+            console.log(`received ${msg.data}`)
+
+            if ( msg.data === "1" )
+                setResult("WIN")
+            else if ( msg.data === "-1" )
+                setResult("LOSE")
+            else
+                setResult("DRAW")
+
         }
         // generate 12 character alpha-numeric code
         const chars: string = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -132,6 +144,24 @@ export default function rps(  ) {
                     Join
                 </button>
             </div>
+
+            {/* result */}
+            { result &&
+                (
+                    <div className="mt-10 flex justify-center" >
+                        <div className={`px-8 py-4 rounded-xl text-3xl font-bold shadow-xl transition-all duration-300
+                            ${result === 'WIN' ? 'bg-green-700 text-white' : ''}
+                            ${result === 'LOSE' ? 'bg-red-700 text-white' : ''}
+                            ${result === 'DRAW' ? 'bg-gray-700 text-white' : ''}
+                            `} >
+                                {result === 'WIN' && 'YOU WIN! :)'}
+                                {result === 'LOSE' && 'YOU LOSE :('}
+                                {result === 'DRAW' && 'ITS A DRAW!'}
+
+                        </div>
+                    </div>
+                )
+            }
         </div>
     )
 }

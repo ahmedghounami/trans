@@ -101,10 +101,11 @@ ws.on('connection' , ( ws , req ) => {
                     break
                 }
 
-            if ( ws == room.half_soc )
+            if ( !half_turn && ws == room.half_soc )
             {
                 ws.close()
                 room.half_soc.close()
+                // remove room from array
                 return
             }
             if ( room && !half_turn )
@@ -114,6 +115,7 @@ ws.on('connection' , ( ws , req ) => {
                 room.half_soc.send( -result )
                 room.half_soc = null
                 room.half_choice = NO_CHOICE
+                // remove room from array
             }
             
 
