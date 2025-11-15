@@ -32,25 +32,6 @@ services:
     ports:
       - "4000:4000"
 
-  nginx:
-    build:
-      context: .
-      dockerfile: ./nginx/dockerfile
-    container_name: nginx
-    ports:
-      - "443:443"
-    depends_on:
-      - client
-      - server
-      - prometheus
-      - grafana
-    volumes:
-      - ./nginx/conf/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    networks:
-      - transcendence
-    image: nginx:trans
-    restart: unless-stopped
-  
   prometheus:
     build:
       context: ./prometheus
@@ -107,10 +88,34 @@ services:
   elasticsearch:
     build:
       context: ./elk/elasticsearch
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
+    networks:
+      - transcendence
+    restart: unless-stopped
+
+  kibana:
+    build:
+      context: ./elk/kibana
+      dockerfile: dockerfile
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+    ports:
+      - "5601:5601"
     networks:
       - transcendence
     restart: unless-stopped
@@ -122,26 +127,38 @@ services:
     container_name: logstash
     depends_on:
       - elasticsearch
-    volumes:
-      - /var/log:/var/log
-    expose:
-      - "5044"
+    environment:
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+    ports:
+      - "5044:5044"
     networks:
       - transcendence
     restart: unless-stopped
 
-  kibana:
+  filebeat:
     build:
-      context: ./elk/kibana
-      dockerfile: Dockerfile
-    container_name: kibana
+      context: ./elk/filebeat
+      dockerfile: dockerfile
+    container_name: filebeat
     depends_on:
-      - elasticsearch
+      - logstash
+    user: root
     volumes:
-      - ./elk/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
-      - ./elk/kibana/dashboard.ndjson:/usr/share/kibana/config/dashboard_template.ndjson:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - transcendence
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/dockerfile
+    container_name: nginx
     ports:
-      - "5601:5601"
+      - "443:443"
     networks:
       - transcendence
     restart: unless-stopped
@@ -152,3 +169,4 @@ networks:
 
 volumes:
   grafana_data:
+  elasticsearch_data:

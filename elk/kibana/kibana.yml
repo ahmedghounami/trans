@@ -1,13 +1,12 @@
-server:
-  name: kibana
-  host: "0.0.0.0"
-  port: 5601
-  basePath: "/kibana"
-  rewriteBasePath: true
-  publicBaseUrl: "https://localhost/kibana"
+server.name: kibana
+server.host: "0.0.0.0"
 
-elasticsearch:
-  hosts: ["http://elasticsearch:9200"]
+server.basePath: "/kibana"
+server.rewriteBasePath: true
 
-telemetry:
-  enabled: false
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "changeme"
+
+telemetry.enabled: false
+telemetry.optIn: false
