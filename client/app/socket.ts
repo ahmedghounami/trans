@@ -11,6 +11,7 @@ const socket = io("http://localhost:4000", {
 // Add connection logging
 socket.on("connect", () => {
   console.log("✅ Socket connected:", socket.id);
+  
 });
 
 socket.on("disconnect", (reason) => {

@@ -1,4 +1,5 @@
 import { FaUserPlus } from 'react-icons/fa';
+import AvatarWithPresence from './AvatarWithPresence';
 
 export default function NavSearch({ searchResults, me, value, setValue }: {
     searchResults: { id: number; name: string; picture?: string }[];
@@ -23,32 +24,10 @@ export default function NavSearch({ searchResults, me, value, setValue }: {
                                 window.location.href = `/profile/${user.id}`;
                             }}
                         >
-                            <img
-                                src={user.picture || "/profile.png"}
-                                alt={user.name}
-                                className="w-10 h-10 rounded-full border border-purple-500 object-cover"
-                                referrerPolicy="no-referrer"
-                                onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src = "/profile.png";
-                                }}
-                            />
+                            <AvatarWithPresence userId={user.id} src={user.picture || "/profile.png"} alt={user.name} sizeClass="w-10 h-10" imgClass="border border-purple-500" />
                             <span className="text-white font-bold text-base tracking-wide truncate">
                                 {user.name}
                             </span>
-                        </div>
-                        <div className="flex items-center">
-                            <button
-                                aria-label={`Add ${user.name} as friend`}
-                                className="ml-2 flex items-center gap-2 px-3 py-1 rounded-md text-sm font-semibold text-white shadow-md bg-gradient-to-r from-purple-700 via-blue-700 to-black border border-purple-900 hover:from-purple-500 hover:via-blue-600 hover:to-black hover:scale-105 transition-all duration-150"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    // TODO: wire up friend request API
-                                    alert(`Friend request sent to ${user.name}`);
-                                }}
-                            >
-                                <FaUserPlus className="text-lg" />
-                            </button>
                         </div>
                     </div>
                 ))}

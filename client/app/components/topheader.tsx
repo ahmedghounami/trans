@@ -8,7 +8,9 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Search from '../chat/serach';
 import NavSearch from './navsearch';
+import AvatarWithPresence from './AvatarWithPresence';
 import { formatDistanceToNow } from 'date-fns';
+import { useOnlineStatus } from './useOnlineStatus';
 
 export default function Topheader() {
   const { user } = useUser();
@@ -18,6 +20,7 @@ export default function Topheader() {
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
 
+  const isOnline = useOnlineStatus();
   console.log("User in Topheader:", user);
 
   useEffect(() => {
@@ -122,61 +125,35 @@ export default function Topheader() {
                 {notifications.length === 0 ? (
                   <div className="text-center py-8 px-4">
                     <div className="text-gray-400 text-sm">No notifications yet</div>
-                    <p className="text-gray-500 text-xs mt-1">
-                      You'll see game invites here
-                    </p>
+                    <p className="text-gray-500 text-xs mt-1">You'll see game invites here</p>
                   </div>
                 ) : (
                   <div className="py-2">
                     {notifications.slice(0, 10).map((notification) => (
                       <div
                         key={notification.id}
-                        className={`relative px-4 py-3 border-b border-gray-800 hover:bg-[#1e1e3e] cursor-pointer transition-colors ${!notification.is_read ? 'bg-[#1a1a3e]' : ''
-                          }`}
+                        className={`relative px-4 py-3 border-b border-gray-800 hover:bg-[#1e1e3e] cursor-pointer transition-colors ${!notification.is_read ? 'bg-[#1a1a3e]' : ''}`}
                         onClick={() => handleNotificationClick(notification.id, notification.is_read)}
                       >
                         <div className="flex items-start gap-3">
                           {/* Sender Profile Picture */}
-                          <img
-                            src={notification.sender_picture || "/profile.png"}
-                            alt={notification.sender_name || "User"}
-                            className="w-10 h-10 rounded-full border-2 border-purple-600 shadow-md object-cover flex-shrink-0"
-                            referrerPolicy="no-referrer"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = "/profile.png";
-                            }}
-                          />
+                          <div className="flex-shrink-0">
+                            <AvatarWithPresence userId={notification.sender_id} src={notification.sender_picture || "/profile.png"} sizeClass="w-10 h-10" imgClass="rounded-full border-2 border-purple-600 shadow-md" />
+                          </div>
 
                           {/* Notification Content */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-white font-medium mb-1 line-clamp-2">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-400">
-                              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                            </p>
+                            <p className="text-sm text-white font-medium mb-1 line-clamp-2">{notification.message}</p>
+                            <p className="text-xs text-gray-400">{formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}</p>
 
                             {/* Action Buttons for Game Invites */}
-                            {notification.type === "game_invite" && (
+                            {notification.type === 'game_invite' && (
                               <div className="flex gap-2 mt-2">
-                                <Link
-                                  href={`/games/game?gametype=online&oppid=${notification.sender_id}&invited_player=true`}
-                                  className="flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleAcceptGameInvite(e, notification.id);
-                                  }}
-                                >
-                                  <IoCheckmark size={14} />
-                                  Accept
+                                <Link href={`/games/game?gametype=online&oppid=${notification.sender_id}&invited_player=true`} className="flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all" onClick={(e) => { e.stopPropagation(); handleAcceptGameInvite(e, notification.id); }}>
+                                  <IoCheckmark size={14} /> Accept
                                 </Link>
-                                <button
-                                  onClick={(e) => handleDeleteNotification(e, notification.id)}
-                                  className="flex items-center gap-1 bg-gradient-to-r from-red-500 to-pink-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all"
-                                >
-                                  <IoClose size={14} />
-                                  Decline
+                                <button onClick={(e) => handleDeleteNotification(e, notification.id)} className="flex items-center gap-1 bg-gradient-to-r from-red-500 to-pink-600 text-white px-3 py-1 rounded-lg text-xs font-semibold hover:shadow-lg transition-all">
+                                  <IoClose size={14} /> Decline
                                 </button>
                               </div>
                             )}
@@ -190,11 +167,7 @@ export default function Topheader() {
                           )}
 
                           {/* Delete Button */}
-                          <button
-                            onClick={(e) => handleDeleteNotification(e, notification.id)}
-                            className="flex-shrink-0 p-1 text-gray-500 hover:text-red-500 transition-colors"
-                            title="Delete notification"
-                          >
+                          <button onClick={(e) => handleDeleteNotification(e, notification.id)} className="flex-shrink-0 p-1 text-gray-500 hover:text-red-500 transition-colors" title="Delete notification">
                             <IoClose size={16} />
                           </button>
                         </div>
@@ -241,18 +214,28 @@ export default function Topheader() {
           {!user ? (
             <Skeleton className="w-12 h-12 rounded-full ml-6 bg-[#3a3a3a]" />
           ) : (
-            <img
-              src={user?.picture || "/profile.png"}
-              alt="User"
-              className="w-12 h-12 rounded-full ml-6 border border-purple-600 shadow-lg object-cover bg-center"
-              width={48}
-              height={48}
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "/profile.png";
-              }}
-            />
+            <div className="ml-6">
+              <div className="relative w-12 h-12">
+                <img
+                  src={user?.picture || "/profile.png"}
+                  alt="User"
+                  className="w-12 h-12 rounded-full border border-purple-600 shadow-lg object-cover bg-center"
+                  width={48}
+                  height={48}
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/profile.png";
+                  }}
+                />
+
+                <span
+                  className={`absolute bottom-0.5 left-0.5 w-2 h-2 rounded-full ring-2 ring-[#0a0a0a] ${isOnline ? 'bg-green-400' : 'bg-red-500'}`}
+                  title={isOnline ? 'Online' : 'Offline'}
+                  aria-label={isOnline ? 'online' : 'offline'}
+                />
+              </div>
+            </div>
           )}
         </button>
       </div>

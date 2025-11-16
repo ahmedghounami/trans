@@ -1,6 +1,7 @@
 
 
 import { Edit, Pencil } from "lucide-react";
+import AvatarWithPresence from "../components/AvatarWithPresence";
 import Games_status from "../home/games_status";
 import { useState } from "react";
 import EditProfile from "./editProfile";
@@ -28,16 +29,9 @@ export default function ProfileHeader({ user, games, setEditMode }: { user: any,
 
                 {/* LEFT SIDE : Profile Info */}
                 <div className="flex items-center gap-4 w-full md:w-1/2">
-                    <img
-                        src={user.picture || "/profile.png"}
-                        alt="Profile"
-                        className="w-20 h-20 rounded-full object-cover border-2 border-purple-600 shadow-lg"
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = "/profile.png";
-                        }}
-                    />
+                                        <div>
+                                                <AvatarWithPresence userId={user.id} src={user.picture || "/profile.png"} sizeClass="w-20 h-20" imgClass="object-cover border-2 border-purple-600 shadow-lg" />
+                                        </div>
                     <div className="flex flex-col gap-2 flex-1 ">
                         <div className="flex items-center gap-2 justify-between">
                             <div className="flex items-center gap-2">

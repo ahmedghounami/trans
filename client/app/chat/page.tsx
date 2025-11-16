@@ -3,6 +3,7 @@
 import { FaArrowRight } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import Room from "./room";
+import AvatarWithPresence from "../components/AvatarWithPresence";
 
 import { useUser } from "../Context/UserContext";
 import Sidebar from "./sidebar";
@@ -118,16 +119,7 @@ export default function Chat() {
                                         }}
                                         className="flex items-center gap-4"
                                     >
-                                        <img
-                                            src={users.find(user => user.id === selected)?.picture || "/profile.png"}
-                                            alt="Profile"
-                                            className="w-12 h-12 rounded-full object-cover shadow-md border border-gray-300"
-                                            referrerPolicy="no-referrer"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.src = "/profile.png";
-                                            }}
-                                        />
+                                        <AvatarWithPresence userId={selected} src={users.find(user => user.id === selected)?.picture || "/profile.png"} sizeClass="w-12 h-12" imgClass="rounded-full shadow-md border border-gray-300" />
                                         <h2 className="text-xl font-semibold">
                                             {users.find(user => user.id === selected)?.name}
                                         </h2>

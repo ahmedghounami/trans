@@ -7,6 +7,12 @@ const sockethandler = (io, db) => {
       socket.join(room);
       socket.userId = userId; // Store userId on socket for later use
       console.log(`🔗 User ${userId} joined room ${room}`);
+      // Broadcast presence to all clients
+      try {
+        io.emit('user_presence', { userId, status: 'online' });
+      } catch (e) {
+        console.error('Error emitting user_presence', e);
+      }
     });
 
     socket.on("chat message", (msg) => {
@@ -42,7 +48,22 @@ const sockethandler = (io, db) => {
       );
     });
 
-    // Handle game invite notification
+    // Respond with list of currently connected user IDs
+    socket.on('request_online_users', () => {
+      try {
+        const sockets = Array.from(io.sockets.sockets.values());
+        const userIds = sockets
+          .map(s => s.userId)
+          .filter(id => typeof id !== 'undefined' && id !== null);
+        // unique
+        const unique = Array.from(new Set(userIds));
+        socket.emit('online_users', unique);
+      } catch (err) {
+        console.error('Error getting online users', err);
+        socket.emit('online_users', []);
+      }
+    });
+
     socket.on("send_game_invite", ({ recipientId, gameType }) => {
       const senderId = socket.userId;
       
@@ -53,7 +74,6 @@ const sockethandler = (io, db) => {
 
       console.log(`🎮 Game invite from ${senderId} to ${recipientId} for ${gameType}`);
 
-      // Get sender info
       db.get("SELECT name, picture FROM users WHERE id = ?", [senderId], (err, sender) => {
         if (err || !sender) {
           console.error("❌ Error fetching sender info:", err);
@@ -100,6 +120,10 @@ const sockethandler = (io, db) => {
 
     socket.on("disconnect", () => {
       console.log("❌ Disconnected:", socket.id);
+      // Broadcast offline presence if we have userId
+      if (socket.userId) {
+        io.emit('user_presence', { userId: socket.userId, status: 'offline' });
+      }
     });
   });
 };

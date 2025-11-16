@@ -10,6 +10,7 @@ import { Chakra_Petch } from "next/font/google";
 import { LayoutComp } from "./components/layoutnavbar";
 import { UserProvider } from "./Context/UserContext";
 import { NotificationProvider } from "./Context/NotificationContext";
+import { PresenceProvider } from "./Context/PresenceContext";
 import { Suspense } from "react";
 
 const chakra = Chakra_Petch({
@@ -46,6 +47,7 @@ export default function RootLayout({
       {/* <Suspense fallback={<div className="flex justify-center items-center h-screen text-white">Loading...</div>}> */}
         <UserProvider>
           <NotificationProvider>
+            <PresenceProvider>
             <img
               src="/back.webp"
               alt="Logo"
@@ -56,6 +58,7 @@ export default function RootLayout({
               <LayoutComp>
                 {children}
               </LayoutComp>
+            </PresenceProvider>
           </NotificationProvider>
         </UserProvider>
       {/* </Suspense> */}
