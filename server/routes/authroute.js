@@ -63,7 +63,7 @@ export default async function authRoutes(fastify, opts) {
                     
                     // Password correct - generate JWT token (valid for 7 days)
                     const token = sign(row.id.toString());
-                    console.log('Generated token:', token);
+                    // console.log('Generated token:', token);
                     
                     // Send token and user data back to client
                     reply.send({
@@ -95,7 +95,7 @@ export default async function authRoutes(fastify, opts) {
         if (!token && request.cookies) {
             token = request.cookies.token;
         }
-        console.log('JWT token received in /me:', token);
+        // console.log('JWT token received in /me:', token);
         
         // No token found - user not authenticated
         if (!token) return reply.status(401).send({ error: 'Unauthorized' });
@@ -140,7 +140,7 @@ export default async function authRoutes(fastify, opts) {
             return reply.status(400).send({ error: " Name, email and password are required" });
         const hashedPassword = await bcrypt.hash(password, 8);
 
-        console.log("Request body:", req.body);
+        // console.log("Request body:", req.body);
         return new Promise((resolve, reject) => {
             db.run(
                 `INSERT OR IGNORE INTO users (name, email, password, gold) VALUES (?, ?, ?, ?)`,
