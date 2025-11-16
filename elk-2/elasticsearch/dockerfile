@@ -1,0 +1,12 @@
+FROM docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+
+USER root
+
+COPY elasticsearch.yml /usr/share/elasticsearch/config/elasticsearch.yml
+COPY users /usr/share/elasticsearch/config/users
+COPY users_roles /usr/share/elasticsearch/config/users_roles
+
+RUN chown elasticsearch:elasticsearch /usr/share/elasticsearch/config/users
+RUN chown elasticsearch:elasticsearch /usr/share/elasticsearch/config/users_roles
+
+USER elasticsearch

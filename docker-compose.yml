@@ -42,7 +42,7 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.external-url=https://localhost/prometheus'
+      - '--web.external-url=/prometheus'
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     expose:
@@ -59,14 +59,14 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_SERVER_ROOT_URL=https://localhost/grafana
+      - GF_SERVER_ROOT_URL=/grafana
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
     depends_on:
       - prometheus
     volumes:
       - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
       - ./grafana/datasources:/etc/grafana/provisioning/datasources
-      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/dashboards:/etc/grafana/pervisioning/dashboards
       - grafana_data:/var/lib/grafana
     expose:
       - "3000"
@@ -77,7 +77,6 @@ services:
   node_exporter:
     build:
       context: ./node_exporter
-      dockerfile: dockerfile
     container_name: node_exporter
     expose:
       - "9100"
@@ -86,68 +85,47 @@ services:
     restart: unless-stopped
 
   elasticsearch:
-    build:
-      context: ./elk/elasticsearch
-      dockerfile: dockerfile
+    build: ./elk/elasticsearch
     container_name: elasticsearch
     environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - xpack.security.enabled=true
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
     volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
+      - elastic_data:/usr/share/elasticsearch/data
+    expose:
+      - "9200"
     networks:
       - transcendence
     restart: unless-stopped
+    mem_limit: 2g
 
   kibana:
-    build:
-      context: ./elk/kibana
-      dockerfile: dockerfile
+    build: ./elk/kibana
     container_name: kibana
     depends_on:
       - elasticsearch
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
-    ports:
-      - "5601:5601"
+    expose:
+      - "5601"
     networks:
       - transcendence
     restart: unless-stopped
 
   logstash:
-    build:
-      context: ./elk/logstash
-      dockerfile: dockerfile
+    build: ./elk/logstash
     container_name: logstash
     depends_on:
       - elasticsearch
-    environment:
-      - ELASTIC_USERNAME=elastic
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - ELASTICSEARCH_HOST=http://elasticsearch:9200
-    ports:
-      - "5044:5044"
+    expose:
+      - "5044"
     networks:
       - transcendence
     restart: unless-stopped
 
   filebeat:
-    build:
-      context: ./elk/filebeat
-      dockerfile: dockerfile
+    build: ./elk/filebeat
     container_name: filebeat
+    user: root
     depends_on:
       - logstash
-    user: root
-    volumes:
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - transcendence
     restart: unless-stopped
@@ -169,4 +147,4 @@ networks:
 
 volumes:
   grafana_data:
-  elasticsearch_data:
+  elastic_data:

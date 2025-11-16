@@ -1,0 +1,13 @@
+server.name: kibana
+server.host: "0.0.0.0"
+
+# For Nginx reverse proxy
+server.basePath: "/kibana"
+server.rewriteBasePath: true
+
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+
+telemetry.enabled: false
+telemetry.optIn: false
+
+# REMOVE ALL xpack.security.* — NOT ALLOWED IN KIBANA 8.14+
