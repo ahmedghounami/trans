@@ -9,35 +9,62 @@ import { useRouter } from "next/navigation";
 import Loading from "@/app/components/loading";
 import { Homecontext } from "../layout";
 import { io } from "socket.io-client";
-import { randomUUID } from "crypto";
 import Tournament from "@/app/components/Tournament";
+
+type Score = { p1: number; p2: number };
+type PositionsType = {
+	score?: Score;
+	p1?: number;
+	p2?: number;
+	bally?: number;
+	ballx?: number;
+	Curentplayer?: 1 | 2;
+	win?: 0 | 1 | 2;
+};
+
+type PlayersData = {
+	p1_name: string;
+	p1_img: string;
+	p2_name: string;
+	p2_img: string;
+};
+
+type TournamentPlayers = {
+	p1: string;
+	p1_id: number;
+	p2: string;
+	p2_id: number;
+	winer: number;
+	gamestatus: number;
+};
 
 export default function Game() {
 	const { selected, user, setselected } = Homecontext();
-	// const { me } = Homecontext();
 	const router = useRouter();
-	const [Positions, setPositions] = useState({});
-	const [tournamentplayers, settournamentplayers] = useState({
-		p1: "",
-		p1_id: 0,
-		p2: "",
-		p2_id: 0,
-		winer: 0,
-		gamestatus: 0,
-	});
+	const [Positions, setPositions] = useState<PositionsType>({});
+	const [tournamentplayers, settournamentplayers] = useState<TournamentPlayers>(
+		{
+			p1: "",
+			p1_id: 0,
+			p2: "",
+			p2_id: 0,
+			winer: 0,
+			gamestatus: 0,
+		}
+	);
 
-	const [playersdata, setplayersdata] = useState({
+	const [playersdata, setplayersdata] = useState<PlayersData>({
 		p1_name: "Player 1",
 		p1_img: "",
 		p2_name: "Player 1",
 		p2_img: "",
 	});
 	const serchParams = useSearchParams();
-	let [gametype, setgametype] = useState(serchParams.get("gametype"));
+	const [gametype, setgametype] = useState<string | null>(
+		serchParams.get("gametype")
+	);
 	let oppid = Number(serchParams.get("oppid"));
 	const invited_player = serchParams.get("invited_player");
-
-	let tournament = false;
 	if (!oppid) oppid = 0;
 
 	useEffect(() => {
@@ -59,176 +86,127 @@ export default function Game() {
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify({
-						player_id: user.id,
+						player_id: user!.id,
 						player_name: tournamentplayers.p1
 							? tournamentplayers.p1
-							: user.name,
+							: user!.name,
 						player2_id: oppid,
 						invited_player: invited_player ? true : false,
 						player2_name: tournamentplayers.p2
 							? tournamentplayers.p2
 							: "Player 2",
-						player_img: user.picture ? user.picture : user.name,
+						player_img: user!.picture ? user!.picture : (user!.name as string),
 						game_type: gametype,
 						sessionId: sessionid,
 					}),
 				});
 				const res = await response.json();
 				if (response.ok) {
-					// console.log(res); // "player added successfully"
 					sessionStorage.setItem("gameSessionId", sessionid);
+
+					// Ensure no existing socket connection
 					const socket = io("http://localhost:4000/game", {
 						auth: {
 							sessionId: res.sessionId,
-							playerId: user.id,
+							playerId: user!.id,
 						},
+						forceNew: true,
 					});
 
 					socket.on("gameState", (data) => {
-						// console.log(data);
-						setplayersdata(data.players_info);
+						setplayersdata(data.players_info as PlayersData);
 						setPositions({
 							...data.positions,
 							Curentplayer: data.Curentplayer,
-						});
+						} as PositionsType);
+
+						// Disconnect when game ends
+						if (data.positions.win !== 0) {
+							socket.disconnect();
+						}
 					});
-					function handleKeyDown(event) {
-						const key = event.key;
+
+					// Helper function to emit key events
+					const emitKey = (key: string, action: "keydown" | "keyup") => {
+						socket.emit(action, { key });
+					};
+
+					function handleKeyDown(event: KeyboardEvent) {
+						let key = event.key;
+						// Map mobile keys to game keys
+						if (key === "a") key = "w";
+						if (key === "d") key = "s";
+						if (key === "ArrowLeft") key = "ArrowUp";
+						if (key === "ArrowRight") key = "ArrowDown";
+
 						if (
 							key === "w" ||
 							key === "s" ||
 							key === "ArrowUp" ||
 							key === "ArrowDown"
 						) {
-							socket.emit("keydown", { key: key });
+							emitKey(key, "keydown");
 						}
 					}
 
-					function handleKeyUp(event) {
-						const key = event.key;
+					function handleKeyUp(event: KeyboardEvent) {
+						let key = event.key;
+						// Map mobile keys to game keys
+						if (key === "a") key = "w";
+						if (key === "d") key = "s";
+						if (key === "ArrowLeft") key = "ArrowUp";
+						if (key === "ArrowRight") key = "ArrowDown";
+
 						if (
 							key === "w" ||
 							key === "s" ||
 							key === "ArrowUp" ||
 							key === "ArrowDown"
 						) {
-							socket.emit("keyup", { key: key });
+							emitKey(key, "keyup");
 						}
 					}
+
+					// Store socket and emitKey function globally for button access
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					(window as any).gameSocket = socket;
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					(window as any).emitKey = emitKey;
 
 					document.addEventListener("keydown", handleKeyDown);
 					document.addEventListener("keyup", handleKeyUp);
-
-					// Cleanup function
 					return () => {
 						document.removeEventListener("keydown", handleKeyDown);
 						document.removeEventListener("keyup", handleKeyUp);
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						delete (window as any).gameSocket;
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						delete (window as any).emitKey;
 						socket.disconnect();
 					};
 				} else {
-					// router.push("/games")
-					console.log(res.error); // "missing data" or "player already exists"
+					console.log(res.error);
 				}
 			} catch (error) {
 				console.log(error);
 			}
 		}
-		const cleanup = newgame();
+		const cleanup = newgame() as unknown as (() => void) | undefined;
 		return () => {
 			if (cleanup && typeof cleanup === "function") {
 				cleanup();
 			}
 		};
-		// name picture
-		// console.log(me);
-		// const oppdata = {}
-		// // Connect to Socket.IO game namespace
-		// const socket = io('http://localhost:4000/game', {
-		// 	query: {
-		// 		gametype: gametype,
-		// 		oppid: oppid
-		// 	}
-		// });
-
-		// // Socket event listeners
-		// socket.on('connect', () => {
-		// 	console.log('Connected to game server');
-		// 	// Join the game after connection is established
-		// 	socket.emit('joinGame', {
-		// 		gametype: gametype,
-		// 		oppid: oppid,
-		// 		id: me.id
-		// 	});
-		// });
-
-		// socket.on('welcome', (data) => {
-		// 	console.log(data.message);
-		// });
-
-		// socket.on('gameState', (data) => {
-		// 	setPositions(data);
-		// });
-		// socket.on('oppid', (data)=>{
-		// 	console.log(data);
-
-		// 	oppdata
-
-		// })
-
-		// socket.on('exit', (data) => {
-		// 	console.log('Game exit:', data);
-		// 	router.push("/games");
-		// });
-
-		// socket.on('opponentDisconnected', () => {
-		// 	console.log('Opponent disconnected');
-		// 	// Handle opponent disconnection
-		// 	router.push("/games");
-		// });
-
-		// socket.on('disconnect', () => {
-		// 	console.log('Disconnected from game server');
-		// });
-
-		// socket.on('connect_error', (error) => {
-		// 	console.error('Connection error:', error);
-		// 	router.push("/games");
-		// });
-
-		// // Keyboard event handlers
-		// function handleKeyDown(event) {
-		// 	const key = event.key;
-		// 	if (key === 'w' || key === 's' || key === 'ArrowUp' || key === 'ArrowDown') {
-		// 		socket.emit('keydown', { key: key });
-		// 	}
-		// }
-
-		// function handleKeyUp(event) {
-		// 	const key = event.key;
-		// 	if (key === 'w' || key === 's' || key === 'ArrowUp' || key === 'ArrowDown') {
-		// 		socket.emit('keyup', { key: key });
-		// 	}
-		// }
-
-		// document.addEventListener("keydown", handleKeyDown);
-		// document.addEventListener("keyup", handleKeyUp);
-
-		// // Cleanup function
-		// return () => {
-		// 	document.removeEventListener("keydown", handleKeyDown);
-		// 	document.removeEventListener("keyup", handleKeyUp);
-		// 	socket.disconnect();
-		// };
-	}, [gametype, tournamentplayers]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [gametype, tournamentplayers.gamestatus, invited_player, oppid, user]);
 
 	useEffect(() => {
 		async function fetchSkin() {
 			try {
 				const res = await fetch(
-					`http://localhost:4000/selected_skins?player_id=${user.id}`
+					`http://localhost:4000/selected_skins?player_id=${user!.id}`
 				);
 				const data = await res.json();
-				// console.log(data);
 				setselected({ types: data, type: 0 });
 			} catch (err) {
 				console.error("Error fetching skin:", err);
@@ -237,7 +215,7 @@ export default function Game() {
 		if (user) {
 			fetchSkin();
 		}
-	}, [user]);
+	}, [user, setselected]);
 	async function tournamentstates() {
 		console.log("tournament win", playersdata, Positions, tournamentplayers);
 
@@ -246,17 +224,11 @@ export default function Game() {
 		settournamentplayers({
 			...tournamentplayers,
 			gamestatus: 0,
-			winer: Positions.win,
+			winer: (Positions.win as number) || 0,
 		});
 	}
-	// if (gametype == "tournament") {
-	// 	gametype = "local";
-	// 	tournament = true;
-	// }
-	// console.log(selected);
 
 	if (gametype == "tournament") {
-		tournament = true;
 		if (
 			!tournamentplayers.p1 ||
 			!tournamentplayers.p1_id ||
@@ -292,38 +264,45 @@ export default function Game() {
 			}
 
 			tournamentstates();
-			// setTimeout(() => {
-			// 	// router.push(
-			// 	// 	`/games/tournament?winer=${Positions.win == 1 ? p1 : p2}&id=${
-			// 	// 		Positions.win == 1 ? p1id : p2id
-			// 	// 	}`
-			// 	// );
-			// }, 100);
 			return <></>;
 		} else {
 			setTimeout(() => {
 				router.push("/games");
-			}, 500);
+			}, 0);
 			return (
 				<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
-					{Positions.win == 1 ? (
-						<Loader word={"Victory!"}></Loader>
-					) : (
-						<Loader word={"Defeat"}></Loader>
-					)}
+					{Positions.win == 1 ? <Loader></Loader> : <Loader></Loader>}
 				</div>
 			);
 		}
 	}
 
+	// Button control handlers
+	const handleButtonPress = (key: string) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const emitKey = (window as any).emitKey;
+		if (emitKey) {
+			emitKey(key, "keydown");
+		}
+	};
+
+	const handleButtonRelease = (key: string) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const emitKey = (window as any).emitKey;
+		if (emitKey) {
+			emitKey(key, "keyup");
+		}
+	};
+
 	return (
-		<div className="bg-gray-400/30 backdrop-blur-sm flex justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
-			<div className="flex  flex-col gap-5 w-2/3">
-				<div className="flex items-center justify-between px-5">
-					<div className="flex items-center gap-5">
-						<div className="rounded-full w-14 overflow-hidden h-14 border  ">
-							<Image
-								className="w-full h-full object-cover object-center "
+		<div className="bg-gray-400/30 backdrop-blur-sm flex justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0 p-4">
+			<div className="flex flex-col gap-5 w-full h-full max-w-7xl">
+				{/* Score and player info bar (always on top, not rotated) */}
+				<div className="flex items-center justify-between px-2 md:px-5 mb-4">
+					<div className="flex items-center gap-2 md:gap-5">
+						<div className="rounded-full w-10 h-10 md:w-14 md:h-14 overflow-hidden border">
+							{/* <Image
+								className="w-full h-full object-cover object-center"
 								src={
 									"/" +
 									(Positions.Curentplayer == 1
@@ -332,15 +311,20 @@ export default function Game() {
 								}
 								width={60}
 								height={60}
-								alt="profile"></Image>
+								alt="profile"></Image> */}
+							<img src={
+									(Positions.Curentplayer == 1
+										? playersdata.p1_img
+										: playersdata.p2_img)}
+									alt="profile"></img>
 						</div>
-						<p>
+						<p className="text-sm md:text-base">
 							{Positions.Curentplayer == 1
 								? playersdata.p1_name
 								: playersdata.p2_name}
 						</p>
 					</div>
-					<div>{`${
+					<div className="text-lg md:text-xl font-bold">{`${
 						Positions.Curentplayer == 1
 							? Positions.score?.p1
 							: Positions.score?.p2
@@ -349,15 +333,15 @@ export default function Game() {
 							? Positions.score?.p2
 							: Positions.score?.p1
 					}`}</div>
-					<div className="flex items-center gap-5">
-						<p>
+					<div className="flex items-center gap-2 md:gap-5">
+						<p className="text-sm md:text-base">
 							{Positions.Curentplayer == 1
 								? playersdata.p2_name
 								: playersdata.p1_name}
 						</p>
-						<div className="rounded-full w-14 overflow-hidden h-14 border  ">
-							<Image
-								className="w-full h-full object-cover object-center "
+						<div className="rounded-full w-10 h-10 md:w-14 md:h-14 overflow-hidden border">
+							{/* <Image
+								className="w-full h-full object-cover object-center"
 								src={
 									"/" +
 									(Positions.Curentplayer == 1
@@ -366,41 +350,101 @@ export default function Game() {
 								}
 								width={60}
 								height={60}
-								alt="profile"></Image>
+								alt="profile"></Image> */}
+							<img src={
+									(Positions.Curentplayer == 1
+										? playersdata.p2_img
+										: playersdata.p1_img)}
+									alt="profile"></img>
 						</div>
 					</div>
 				</div>
-				<div
-					id="table"
-					style={{
-						background: selected.types[0].color,
-					}}
-					className={` relative ${
-						Positions.Curentplayer == 2 && `transform -scale-x-100`
-					}  bg-[#252525] flex justify-center  border-4 rounded-2xl w-full aspect-[9/5]`}>
-					<div className=" border border-dashed h-full "></div>
-					<div
-						id="padle1"
-						className={`h-1/5 -translate-y-1/2  aspect-[1/6] rounded-full bg-[#fff] absolute left-1`}
-						style={{
-							top: `${Positions.p1}%`,
-							background: selected.types[1].color,
-						}}></div>
-					<div
-						id="padle2"
-						className="h-1/5 -translate-y-1/2 aspect-[1/6] rounded-full bg-green-700 absolute right-1"
-						style={{
-							top: `${Positions.p2}%`,
-							background: selected.types[1].color,
-						}}></div>
-					<div
-						id="ball"
-						style={{
-							top: `${Positions.bally}%`,
-							left: `${Positions.ballx}%`,
-							background: selected.types[2].color,
-						}}
-						className=" bg-[#c7c7c7] h-[4%] -translate-1/2 aspect-square   rounded-full absolute"></div>
+
+				{/* Rotated game area and buttons container */}
+				<div className="flex max-md:-rotate-90 flex-1 min-h-0 items-center justify-center w-full  gap-5">
+					{/* Player 1 Controls (left on desktop, bottom on mobile after rotation) */}
+					<div className="flex flex-col justify-center items-center gap-3">
+						<button
+							onTouchStart={() => handleButtonPress("w")}
+							onTouchEnd={() => handleButtonRelease("w")}
+							onMouseDown={() => handleButtonPress("w")}
+							onMouseUp={() => handleButtonRelease("w")}
+							onMouseLeave={() => handleButtonRelease("w")}
+							className="w-20 h-20 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 rounded-lg flex items-center justify-center text-white font-bold text-2xl touch-none select-none">
+							↑
+						</button>
+						<button
+							onTouchStart={() => handleButtonPress("s")}
+							onTouchEnd={() => handleButtonRelease("s")}
+							onMouseDown={() => handleButtonPress("s")}
+							onMouseUp={() => handleButtonRelease("s")}
+							onMouseLeave={() => handleButtonRelease("s")}
+							className="w-20 h-20 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 rounded-lg flex items-center justify-center text-white font-bold text-2xl touch-none select-none">
+							↓
+						</button>
+					</div>
+
+					{/* Game Table */}
+					<div className="flex-1 flex items-center justify-center">
+						<div
+							id="table"
+							style={{
+								background: selected.types[0].color,
+							}}
+							className={`relative ${
+								Positions.Curentplayer == 2 && `transform -scale-x-100`
+							} bg-[#252525] flex justify-center border-4 rounded-2xl 
+							w-full min-md:max-w-3xl max-md:w-[60vh] aspect-[9/5]
+							`}>
+							<div className="border border-dashed h-full"></div>
+							<div
+								id="padle1"
+								className="h-1/5 -translate-y-1/2 aspect-[1/6] rounded-full bg-[#fff] absolute left-1"
+								style={{
+									top: `${Positions.p1}%`,
+									background: selected.types[1].color,
+								}}></div>
+							<div
+								id="padle2"
+								className="h-1/5 -translate-y-1/2 aspect-[1/6] rounded-full bg-green-700 absolute right-1"
+								style={{
+									top: `${Positions.p2}%`,
+									background: selected.types[1].color,
+								}}></div>
+							<div
+								id="ball"
+								style={{
+									top: `${Positions.bally}%`,
+									left: `${Positions.ballx}%`,
+									background: selected.types[2].color,
+								}}
+								className="bg-[#c7c7c7] h-[4%] -translate-1/2 aspect-square rounded-full absolute"></div>
+						</div>
+					</div>
+
+					{/* Player 2 Controls (right on desktop, top on mobile after rotation) */}
+					{gametype === "local" && (
+						<div className="flex flex-col justify-center items-center gap-3">
+							<button
+								onTouchStart={() => handleButtonPress("ArrowUp")}
+								onTouchEnd={() => handleButtonRelease("ArrowUp")}
+								onMouseDown={() => handleButtonPress("ArrowUp")}
+								onMouseUp={() => handleButtonRelease("ArrowUp")}
+								onMouseLeave={() => handleButtonRelease("ArrowUp")}
+								className="w-20 h-20 bg-green-500 hover:bg-green-600 active:bg-green-700 rounded-lg flex items-center justify-center text-white font-bold text-2xl touch-none select-none">
+								↑
+							</button>
+							<button
+								onTouchStart={() => handleButtonPress("ArrowDown")}
+								onTouchEnd={() => handleButtonRelease("ArrowDown")}
+								onMouseDown={() => handleButtonPress("ArrowDown")}
+								onMouseUp={() => handleButtonRelease("ArrowDown")}
+								onMouseLeave={() => handleButtonRelease("ArrowDown")}
+								className="w-20 h-20 bg-green-500 hover:bg-green-600 active:bg-green-700 rounded-lg flex items-center justify-center text-white font-bold text-2xl touch-none select-none">
+								↓
+							</button>
+						</div>
+					)}
 				</div>
 			</div>
 		</div>

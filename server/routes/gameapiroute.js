@@ -36,12 +36,22 @@ const gameApiRoute = async (fastify, options) => {
 					error: "missing data",
 				});
 			}
-			if(invited_player){
-				console.log("invited player flow");
-				
+			const ingame = Array.from(sessionsmap.values()).some(
+				(player) =>
+					(player.players_info.p1_id == player_id && player.p1_ready) ||
+					(player.players_info.p2_id == player_id && player.p2_ready)
+			);
+			if (ingame) {
+				return reply.status(409).send({
+					success: false,
+					error: "player already exists in an active game",
+				});
+			}
+			if (invited_player) {
 				const invitedSession = Array.from(sessionsmap.entries()).find(
 					([sessionId, session]) =>
-						session.gametype == "online" && session.players_info.p1_id == player2_id
+						session.gametype == "online" &&
+						session.players_info.p1_id == player2_id
 				);
 				if (invitedSession) {
 					const [sessionId, session] = invitedSession;
@@ -56,19 +66,6 @@ const gameApiRoute = async (fastify, options) => {
 						sessionId: sessionId,
 					});
 				}
-			}
-			const ingame = Array.from(sessionsmap.values()).some(
-				(player) =>
-					player.players_info.p1_id == player_id ||
-					player.players_info.p2_id == player_id
-			);
-			if (ingame) {
-				// sessionsmap.clear();
-
-				return reply.status(409).send({
-					success: false,
-					error: "player already exists",
-				});
 			}
 			if (game_type == "online" && !player2_id) {
 				const onlineSession = Array.from(sessionsmap.entries()).find(
@@ -91,7 +88,7 @@ const gameApiRoute = async (fastify, options) => {
 				}
 			}
 			console.log("new session flow");
-			
+
 			sessionsmap.set(sessionId, {
 				players_info: {
 					p1_id: player_id,
