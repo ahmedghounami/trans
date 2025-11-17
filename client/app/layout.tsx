@@ -2,8 +2,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Topheader from "./components/topheader";
-import Leftheader from "./components/leftheader";
 
 import { console } from "inspector";
 import { Chakra_Petch } from "next/font/google";
@@ -11,7 +9,6 @@ import { LayoutComp } from "./components/layoutnavbar";
 import { UserProvider } from "./Context/UserContext";
 import { NotificationProvider } from "./Context/NotificationContext";
 import { PresenceProvider } from "./Context/PresenceContext";
-import { Suspense } from "react";
 
 const chakra = Chakra_Petch({
   subsets: ["latin"],
