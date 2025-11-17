@@ -12,7 +12,7 @@ export default function EditProfile({ setEditMode, editMode, user }) {
     const [formData, setFormData] = useState({
         name: user.name || '',
         email: user.email || '',
-        language: user.language || 'English',
+        
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
@@ -24,12 +24,7 @@ export default function EditProfile({ setEditMode, editMode, user }) {
         confirm: false
     })
 
-    const languages = [
-        { code: 'en', name: 'English' },
-        { code: 'fr', name: 'Français' },
-        { code: 'es', name: 'Español' },
-        { code: 'ar', name: 'العربية' }
-    ]
+    
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }))
@@ -61,7 +56,6 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                 userid: user.id,
                 name: formData.name,
                 email: formData.email,
-                language: formData.language,
                 picture: uploadedImageUrl || user.picture, // Use uploaded image or keep current
                 currentPassword: formData.currentPassword,
                 newPassword: formData.newPassword
@@ -201,23 +195,7 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                             />
                         </div>
 
-                        {/* Language */}
-                        <div className="space-y-2">
-                            <label className="text-gray-300 font-medium flex items-center gap-2">
-                                <Globe size={18} /> Language
-                            </label>
-                            <select
-                                value={formData.language}
-                                onChange={(e) => handleInputChange('language', e.target.value)}
-                                className="w-full p-3 rounded-lg bg-black/40 text-white border border-purple-500/30 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
-                            >
-                                {languages.map((lang) => (
-                                    <option key={lang.code} value={lang.name} className="bg-gray-900">
-                                        {lang.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                       
                     </div>
 
                     {/* RIGHT COLUMN - Password Section */}
