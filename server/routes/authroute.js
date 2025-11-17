@@ -151,7 +151,27 @@ export default async function authRoutes(fastify, opts) {
                         reply.status(500).send({ error: "Database error" });
                         return reject(err);
                     }
-                    resolve({ id: this.lastID, name, email });
+                    
+                    // Check if user was actually inserted (lastID > 0)
+                    if (this.lastID) {
+                        // Generate JWT token for auto-login
+                        const token = sign(this.lastID.toString());
+                        
+                        // Send token and user data for immediate login
+                        reply.send({
+                            success: true,
+                            token,
+                            user: {
+                                id: this.lastID,
+                                name,
+                                email
+                            }
+                        });
+                        resolve({ id: this.lastID, name, email });
+                    } else {
+                        // User already exists (INSERT OR IGNORE didn't insert)
+                        reply.status(409).send({ error: "Email already registered" });
+                    }
                 }
             );
         });
