@@ -1,8 +1,5 @@
-# logstash/config/logstash.yml
-
 http.host: "0.0.0.0"
 
-# Optional but nice: Logstash monitoring in ES
 xpack.monitoring.enabled: true
 xpack.monitoring.elasticsearch.hosts: [ "https://elasticsearch:9200" ]
 xpack.monitoring.elasticsearch.username: "logstash_internal"

@@ -22,3 +22,13 @@ clean: down
 restart: down all
 
 re: clean all
+
+users:
+	@echo -e "$(BLUE)[+] Waiting for Elasticsearch to be ready...$(NC)"
+	@until curl -k -u elastic:machidarouri https://localhost:9200 >/dev/null 2>&1; do \
+		echo " - ES not ready yet..."; \
+		sleep 3; \
+	done
+	@echo -e "$(GREEN)[✔] ES is UP — now creating users...$(NC)"
+	@docker exec elasticsearch /usr/local/bin/setup-elk-users.sh
+	@echo -e "$(GREEN)[✔] All ELK users created successfully!$(NC)"

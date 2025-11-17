@@ -85,6 +85,9 @@ services:
       - transcendence
     restart: unless-stopped
 
+  # ---------------------- #
+  #  CERTIFICATES BUILDER  #
+  # ---------------------- #
   es_certs:
     build:
       context: ./elk/certs
@@ -97,6 +100,9 @@ services:
       - transcendence
     restart: "no"
 
+  # ---------------------- #
+  #     ELASTICSEARCH      #
+  # ---------------------- #
   elasticsearch:
     build:
       context: ./elk/elasticsearch
@@ -105,12 +111,9 @@ services:
     environment:
       - ES_JAVA_OPTS=-Xms1g -Xmx2g
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
-      - LOGSTASH_INTERNAL_PASSWORD=${LOGSTASH_INTERNAL_PASSWORD}
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
       - es_certs:/usr/share/elasticsearch/config/certs
-      - ./elk/scripts:/usr/share/elasticsearch/scripts   # <-- required for running setup script
     expose:
       - "9200"
     networks:
@@ -119,27 +122,60 @@ services:
     mem_limit: 4g
     depends_on:
       - es_certs
+    healthcheck:
+      test: ["CMD", "curl", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "https://localhost:9200/_cluster/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
 
+
+  # ---------------------- #
+  #      ES SETUP JOB      #
+  # ---------------------- #
+  es_setup:
+    build:
+      context: ./elk/es_setup
+    container_name: es_setup
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_SYSTEM_PASSWORD=${KIBANA_SYSTEM_PASSWORD}
+      - LOGSTASH_INTERNAL_PASSWORD=${LOGSTASH_INTERNAL_PASSWORD}
+      - BEATS_SYSTEM_PASSWORD=${BEATS_SYSTEM_PASSWORD}
+    networks:
+      - transcendence
+    restart: "no"
+
+
+
+  # ---------------------- #
+  #        KIBANA          #
+  # ---------------------- #
   kibana:
     build:
       context: ./elk/kibana
       dockerfile: Dockerfile
     container_name: kibana
     environment:
-      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_SYSTEM_PASSWORD=${KIBANA_SYSTEM_PASSWORD}
       - KIBANA_ENCRYPTION_KEY=${KIBANA_ENCRYPTION_KEY}
     volumes:
       - es_certs:/usr/share/kibana/config/certs:ro
     depends_on:
       - elasticsearch
-      - es_certs
+      - es_setup
     expose:
       - "5601"
+    ports:
+      - "5601:5601"
     networks:
       - transcendence
     restart: unless-stopped
 
+  # ---------------------- #
+  #       LOGSTASH         #
+  # ---------------------- #
   logstash:
     build:
       context: ./elk/logstash
@@ -147,18 +183,20 @@ services:
     container_name: logstash
     environment:
       - LOGSTASH_INTERNAL_PASSWORD=${LOGSTASH_INTERNAL_PASSWORD}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     volumes:
       - es_certs:/usr/share/logstash/config/certs:ro
     depends_on:
       - elasticsearch
-      - es_certs
+      - es_setup
     expose:
       - "5044"
     networks:
       - transcendence
     restart: unless-stopped
 
+  # ---------------------- #
+  #       FILEBEAT         #
+  # ---------------------- #
   filebeat:
     build:
       context: ./elk/filebeat
@@ -171,11 +209,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - logstash
-      - es_certs
+      - es_setup
     networks:
       - transcendence
     restart: unless-stopped
 
+  # ---------------------- #
+  #         NGINX          #
+  # ---------------------- #
   nginx:
     build:
       context: .
@@ -183,6 +224,8 @@ services:
     container_name: nginx
     ports:
       - "443:443"
+    depends_on:
+      - kibana
     networks:
       - transcendence
     restart: unless-stopped

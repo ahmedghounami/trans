@@ -6,3 +6,6 @@ RUN mkdir -p /usr/share/logstash/config/certs
 
 COPY config/logstash.yml /usr/share/logstash/config/logstash.yml
 COPY pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
+
+# safer permissions
+RUN chmod 660 /usr/share/logstash/config/logstash.yml

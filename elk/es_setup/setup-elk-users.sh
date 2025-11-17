@@ -1,18 +1,22 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 set -e
 
 ES_URL="https://elasticsearch:9200"
+ELASTIC_PASSWORD="${ELASTIC_PASSWORD}"
 
+CURL="curl -k -s -u elastic:${ELASTIC_PASSWORD} -H Content-Type:application/json"
+
+# --- WAIT FOR ELASTICSEARCH ---
 echo ">> Waiting for Elasticsearch to be ready..."
-until curl -k -u elastic:${ELASTIC_PASSWORD} -s "${ES_URL}" >/dev/null; do
-  echo "Elasticsearch is not ready yet. Retrying..."
+
+until curl -k -s -u elastic:${ELASTIC_PASSWORD} "${ES_URL}" >/dev/null 2>&1; do
+  echo "   Elasticsearch not ready yet... retrying in 3s"
   sleep 3
 done
 
 echo ">> Elasticsearch is ready."
 
-CURL="curl -k -u elastic:${ELASTIC_PASSWORD} -H Content-Type:application/json"
-
+# --- RUN PASSWORD + USER SETUP ---
 echo ">> Setting password for kibana_system"
 $CURL -X POST "${ES_URL}/_security/user/kibana_system/_password" -d "{
   \"password\": \"${KIBANA_SYSTEM_PASSWORD}\"
@@ -20,7 +24,7 @@ $CURL -X POST "${ES_URL}/_security/user/kibana_system/_password" -d "{
 
 echo ">> Creating role logstash_writer"
 $CURL -X POST "${ES_URL}/_security/role/logstash_writer" -d '{
-  "cluster": ["monitor","manage_ilm"],
+  "cluster": ["monitor", "manage_ilm", "manage_index_templates"],
   "indices": [
     {
       "names": ["docker-logs-*"],
@@ -40,4 +44,4 @@ $CURL -X POST "${ES_URL}/_security/user/beats_system/_password" -d "{
   \"password\": \"${BEATS_SYSTEM_PASSWORD}\"
 }"
 
-echo ">> DONE. All ELK users and roles configured successfully."
+echo "DONE."
