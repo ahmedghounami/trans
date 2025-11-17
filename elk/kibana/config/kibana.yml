@@ -1,13 +1,15 @@
+# kibana/config/kibana.yml
+
 server.name: kibana
 server.host: "0.0.0.0"
 
-# For Nginx reverse proxy
-server.basePath: "/kibana"
-server.rewriteBasePath: true
+# ---- Connect to Elasticsearch over HTTPS ----
+elasticsearch.hosts: ["https://elasticsearch:9200"]
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "${KIBANA_PASSWORD}"
 
-elasticsearch.hosts: ["http://elasticsearch:9200"]
+elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/certs/ca/ca.crt"]
+elasticsearch.ssl.verificationMode: full
 
-telemetry.enabled: false
-telemetry.optIn: false
-
-# REMOVE ALL xpack.security.* — NOT ALLOWED IN KIBANA 8.14+
+# ---- Security ----
+xpack.security.enabled: true

@@ -3,13 +3,11 @@ filebeat.inputs:
     enabled: true
     paths:
       - /var/lib/docker/containers/*/*.log
-
-processors:
-  - add_docker_metadata: ~
-  - decode_json_fields:
-      fields: ["message"]
-      target: ""
-      overwrite_keys: true
+    processors:
+      - add_docker_metadata: ~
 
 output.logstash:
   hosts: ["logstash:5044"]
+
+setup.ilm.enabled: false
+setup.template.enabled: false

@@ -1,5 +1,4 @@
 services:
-
   client:
     build:
       context: .
@@ -57,16 +56,17 @@ services:
       dockerfile: dockerfile
     container_name: grafana
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_SERVER_ROOT_URL=/grafana
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL}
+      - GF_AUTH_ANONYMOUS_ENABLED=${GF_AUTH_ANONYMOUS_ENABLED}
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
     depends_on:
       - prometheus
     volumes:
       - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
       - ./grafana/datasources:/etc/grafana/provisioning/datasources
-      - ./grafana/dashboards:/etc/grafana/pervisioning/dashboards
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
       - grafana_data:/var/lib/grafana
     expose:
       - "3000"
@@ -77,6 +77,7 @@ services:
   node_exporter:
     build:
       context: ./node_exporter
+      dockerfile: dockerfile
     container_name: node_exporter
     expose:
       - "9100"
@@ -84,25 +85,55 @@ services:
       - transcendence
     restart: unless-stopped
 
+  es_certs:
+    build:
+      context: ./elk/certs
+      dockerfile: dockerfile
+    container_name: es_certs
+    user: "0"
+    volumes:
+      - es_certs:/certs
+    networks:
+      - transcendence
+    restart: "no"
+
   elasticsearch:
-    build: ./elk/elasticsearch
+    build:
+      context: ./elk/elasticsearch
+      dockerfile: Dockerfile
     container_name: elasticsearch
     environment:
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - ES_JAVA_OPTS=-Xms1g -Xmx2g
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
+      - LOGSTASH_INTERNAL_PASSWORD=${LOGSTASH_INTERNAL_PASSWORD}
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
+      - es_certs:/usr/share/elasticsearch/config/certs
+      - ./elk/scripts:/usr/share/elasticsearch/scripts   # <-- required for running setup script
     expose:
       - "9200"
     networks:
       - transcendence
     restart: unless-stopped
-    mem_limit: 2g
+    mem_limit: 4g
+    depends_on:
+      - es_certs
 
   kibana:
-    build: ./elk/kibana
+    build:
+      context: ./elk/kibana
+      dockerfile: Dockerfile
     container_name: kibana
+    environment:
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_ENCRYPTION_KEY=${KIBANA_ENCRYPTION_KEY}
+    volumes:
+      - es_certs:/usr/share/kibana/config/certs:ro
     depends_on:
       - elasticsearch
+      - es_certs
     expose:
       - "5601"
     networks:
@@ -110,10 +141,18 @@ services:
     restart: unless-stopped
 
   logstash:
-    build: ./elk/logstash
+    build:
+      context: ./elk/logstash
+      dockerfile: Dockerfile
     container_name: logstash
+    environment:
+      - LOGSTASH_INTERNAL_PASSWORD=${LOGSTASH_INTERNAL_PASSWORD}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    volumes:
+      - es_certs:/usr/share/logstash/config/certs:ro
     depends_on:
       - elasticsearch
+      - es_certs
     expose:
       - "5044"
     networks:
@@ -121,11 +160,18 @@ services:
     restart: unless-stopped
 
   filebeat:
-    build: ./elk/filebeat
+    build:
+      context: ./elk/filebeat
+      dockerfile: Dockerfile
     container_name: filebeat
     user: root
+    volumes:
+      - es_certs:/usr/share/filebeat/certs:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - logstash
+      - es_certs
     networks:
       - transcendence
     restart: unless-stopped
@@ -148,3 +194,4 @@ networks:
 volumes:
   grafana_data:
   elastic_data:
+  es_certs:

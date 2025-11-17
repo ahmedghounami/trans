@@ -1,0 +1,26 @@
+FROM docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+
+USER root
+
+RUN mkdir -p /usr/share/elasticsearch/config/certs
+
+COPY instances.yml /usr/share/elasticsearch/config/certs/instances.yml
+
+WORKDIR /usr/share/elasticsearch
+
+RUN bin/elasticsearch-certutil ca \
+      --silent --pem \
+      --out config/certs/elastic-stack-ca.zip && \
+    unzip config/certs/elastic-stack-ca.zip -d config/certs/ && \
+    bin/elasticsearch-certutil cert \
+      --silent --pem \
+      --in config/certs/instances.yml \
+      --out config/certs/elastic-stack-certs.zip \
+      --ca-cert config/certs/ca/ca.crt \
+      --ca-key config/certs/ca/ca.key && \
+    unzip config/certs/elastic-stack-certs.zip -d config/certs/ && \
+    rm config/certs/elastic-stack-ca.zip \
+       config/certs/elastic-stack-certs.zip \
+       config/certs/instances.yml
+
+ENTRYPOINT ["/bin/sh", "-c", "cp -R /usr/share/elasticsearch/config/certs/* /certs && chown -R 1000:0 /certs"]

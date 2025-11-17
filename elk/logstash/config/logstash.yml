@@ -1,3 +1,11 @@
+# logstash/config/logstash.yml
+
 http.host: "0.0.0.0"
-http.port: 9600
-xpack.monitoring.enabled: false
+
+# Optional but nice: Logstash monitoring in ES
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.hosts: [ "https://elasticsearch:9200" ]
+xpack.monitoring.elasticsearch.username: "logstash_internal"
+xpack.monitoring.elasticsearch.password: "${LOGSTASH_INTERNAL_PASSWORD}"
+xpack.monitoring.elasticsearch.ssl.certificate_authority: "/usr/share/logstash/config/certs/ca/ca.crt"
+xpack.monitoring.elasticsearch.ssl.verification_mode: "full"

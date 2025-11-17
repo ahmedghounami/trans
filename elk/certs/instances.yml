@@ -1,0 +1,12 @@
+instances:
+  - name: elasticsearch
+    dns:
+      - elasticsearch
+
+  - name: kibana
+    dns:
+      - kibana
+
+  - name: logstash
+    dns:
+      - logstash
