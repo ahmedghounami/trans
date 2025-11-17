@@ -43,7 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-chakra h-screen" >
+      <body className="font-chakra min-h-screen" >
       {/* <Suspense fallback={<div className="flex justify-center items-center h-screen text-white">Loading...</div>}> */}
         <UserProvider>
           <NotificationProvider>
