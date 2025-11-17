@@ -1,5 +1,5 @@
 "use client";
-import { IoNotifications } from 'react-icons/io5';
+import { IoNotifications, IoPeople} from 'react-icons/io5';
 import { useUser } from '../Context/UserContext';
 import { Skeleton } from '@heroui/skeleton';
 import { CiSearch } from 'react-icons/ci';
@@ -16,7 +16,7 @@ export default function Topheader() {
   useEffect(() => {
     const fectusers = async () => {
       try {
-        const res = await fetch('/api/search?search=' + value);
+        const res = await fetch('http://localhost:4000/search?search=' + value);
         const data = await res.json();
         setSearchResults(data);
       } catch (error) {
@@ -57,6 +57,14 @@ export default function Topheader() {
       <div
         className='flex items-center ' >
         <IoNotifications size={24} className="text-white" />
+        {user && (
+          <button onClick={() => window.location.href = "/friends"} className="ml-4">
+            <IoPeople
+              size={24}
+              className="text-white cursor-pointer hover:text-purple-400 transition-colors"
+            />
+          </button>
+        )}
         <button className="flex items-center ml-4 cursor-pointer"
           onClick={() => {
             window.location.href = `/profile/${user.id}`;

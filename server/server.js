@@ -3,13 +3,13 @@ import cors from '@fastify/cors';
 import sqlite3 from 'sqlite3';
 import { Server } from 'socket.io';
 import { sockethandler } from './socket.js';
-// import friendsRoutes from './routes/friendsroute.js';
-import game from './game.js';
+
+import { setupGameSocketIO } from './game.js';
 
 const fastify = Fastify();
 
 await fastify.register(cors, {
-  origin: 'https://localhost',
+  origin: 'http://localhost:3000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
@@ -30,19 +30,14 @@ db.serialize(() => {
 	  CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
-		picture TEXT NOT NULL,
-		gold INTEGER DEFAULT 0,
+		email TEXT UNIQUE,
+		password TEXT,
+		picture TEXT,
+		gold INTEGER DEFAULT 300,
+		games INTEGER DEFAULT 10,
+		win INTEGER DEFAULT 6,
+		lose INTEGER DEFAULT 4,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	  );
-	`);
-
-	db.run(`
-	  CREATE TABLE IF NOT EXISTS friends (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user_id INTEGER NOT NULL,
-		friend_id INTEGER NOT NULL,
-		is_favorite BOOLEAN DEFAULT 0,
-		is_request BOOLEAN DEFAULT 0
 	  );
 	`);
 
@@ -83,6 +78,7 @@ db.serialize(() => {
 		type TEXT NOT NULL,
 		price INTEGER,
 		img TEXT NOT NULL,
+		color TEXT NOT NULL,
 		UNIQUE(name, type, img)
 	  );
 	`);
@@ -97,8 +93,17 @@ db.serialize(() => {
 		FOREIGN KEY (skin_id) REFERENCES skins(id)
 	  );
 	`);
-});
 
+	db.run(`
+	  CREATE TABLE IF NOT EXISTS friends (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		friend_id INTEGER NOT NULL,
+		is_favorite BOOLEAN DEFAULT 0,
+		is_request BOOLEAN DEFAULT 0
+	  );
+	`);
+});
 
 // Register routes on fastify
 const devRoute = (await import('./routes/devroute.js')).default;
@@ -122,11 +127,14 @@ fastify.register(buyRoute, { db });
 const shopRoute = (await import('./routes/shoproute.js')).default;
 fastify.register(shopRoute, { db });
 
-const ProfileRoutes = (await import('./routes/profileroute.js')).default;
-fastify.register(ProfileRoutes, { db });
-
 const friendsRoute = (await import('./routes/friendsroute.js')).default;
 fastify.register(friendsRoute, { db });
+
+const gameApiRoute = (await import('./routes/gameapiroute.js')).default;
+fastify.register(gameApiRoute, { db });
+
+const ProfileRoutes = (await import('./routes/profileroute.js')).default;
+fastify.register(ProfileRoutes, { db });
 
 // Create raw HTTP server from fastify's internal handler
 const httpServer = fastify.server;
@@ -134,7 +142,7 @@ const httpServer = fastify.server;
 // Setup Socket.IO server on top of the HTTP server
 const io = new Server(httpServer, {
   cors: {
-    origin: 'https://localhost',
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
   },
   connectionStateRecovery: {
@@ -146,38 +154,7 @@ const io = new Server(httpServer, {
 });
 
 sockethandler(io, db);
-
-
-// --- Prometheus Metrics Setup ---
-import client from "prom-client";
-
-// Create a Registry to register metrics
-const register = new client.Registry();
-
-// Collect default Node.js metrics (CPU, memory, event loop, etc.)
-client.collectDefaultMetrics({ register });
-
-// Optional: Add a custom metric for HTTP requests count
-const httpRequestsTotal = new client.Counter({
-  name: "http_requests_total",
-  help: "Total number of HTTP requests handled",
-  labelNames: ["method", "route", "status"],
-});
-register.registerMetric(httpRequestsTotal);
-
-// Middleware to track request counts
-fastify.addHook("onResponse", (request, reply, done) => {
-  const route = request.routerPath || request.url;
-  httpRequestsTotal.inc({ method: request.method, route, status: reply.statusCode });
-  done();
-});
-
-// Metrics endpoint for Prometheus
-fastify.get("/metrics", async (req, reply) => {
-  reply.header("Content-Type", register.contentType);
-  return register.metrics();
-});
-
+setupGameSocketIO(io);
 
 await fastify.ready();
 const PORT = 4000;

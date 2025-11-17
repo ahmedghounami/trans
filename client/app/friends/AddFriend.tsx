@@ -7,7 +7,7 @@ import Loading from "../components/loading";
 // Cancel friend request function
 export async function CancelFriendRequest(userId: number, friendId: number) {
   try {
-    const res = await fetch(`/api/friends/remove`, {
+    const res = await fetch(`http://localhost:4000/friends/remove`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, friendId }),
@@ -22,7 +22,7 @@ export async function CancelFriendRequest(userId: number, friendId: number) {
 // Send a friend request
 export async function AddFriendRequest(userId: number, friendId: number) {
   try {
-    const res = await fetch(`/api/friends`, {
+    const res = await fetch(`http://localhost:4000/friends`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, friendId }),
@@ -57,7 +57,7 @@ const AddFriend = ({ onClose }: { onClose: () => void }) => {
 
     const fetchUsers = async () => {
       try {
-        const res = await fetch("/api/users");
+        const res = await fetch("http://localhost:4000/users");
         if (!res.ok) throw new Error(`Failed to fetch users: ${res.status}`);
         const data: UserType[] = await res.json();
         if (isMounted) setUsers(data);
@@ -70,7 +70,7 @@ const AddFriend = ({ onClose }: { onClose: () => void }) => {
 
     const fetchOutgoingRequests = async () => {
       try {
-        const res = await fetch(`/api/friends/request?userId=${user.id}`);
+        const res = await fetch(`http://localhost:4000/friends/request?userId=${user.id}`);
         const data = await res.json();
         const ids = data.data.map((r: { friend_id: number }) => r.friend_id);
         setRequestedIds(ids);
@@ -81,7 +81,7 @@ const AddFriend = ({ onClose }: { onClose: () => void }) => {
 
     const fetchIncomingRequests = async () => {
       try {
-        const res = await fetch(`/api/friends/myrequests?userId=${user.id}`);
+        const res = await fetch(`http://localhost:4000/friends/myrequests?userId=${user.id}`);
         const data = await res.json();
         const ids = data.data.map((r: { user_id: number }) => r.user_id);
         setIncomingRequestIds(ids);
@@ -92,7 +92,7 @@ const AddFriend = ({ onClose }: { onClose: () => void }) => {
 
     const fetchFriends = async () => {
       try {
-        const res = await fetch(`/api/friends/accepted?userId=${user.id}`);
+        const res = await fetch(`http://localhost:4000/friends/accepted?userId=${user.id}`);
         const data = await res.json();
         const ids = data.data.map((f: { id: number }) => f.id);
         setFriendsIds(ids);
@@ -172,8 +172,7 @@ const AddFriend = ({ onClose }: { onClose: () => void }) => {
                     <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden">
                       <img
                         src={
-                          u.picture ||
-                          `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.name}`
+                          u.picture
                         }
                         alt={u.name}
                         className="w-full h-full object-cover"

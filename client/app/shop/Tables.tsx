@@ -21,7 +21,7 @@ export default function Tables({ currentUser }: Props) {
   useEffect(() => {
     async function fetchTables() {
       try {
-        const res = await fetch("/api/tables");
+        const res = await fetch("http://localhost:4000/tables");
         if (!res.ok) throw new Error("Failed to fetch tables");
         const data: Item[] = await res.json();
         setItems(data);

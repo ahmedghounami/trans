@@ -28,7 +28,7 @@ export default function Requests({
 
     const fetchRequests = async () => {
       try {
-        const res = await fetch(`/api/friends/myrequests?userId=${user.id}`);
+        const res = await fetch(`http://localhost:4000/friends/myrequests?userId=${user.id}`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         if (isMounted) {
@@ -52,7 +52,7 @@ export default function Requests({
   const handleAccept = async (friendId: number) => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/friends/accept`, {
+      const res = await fetch(`http://localhost:4000/friends/accept`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id, friendId }),
@@ -69,7 +69,7 @@ export default function Requests({
   const handleDecline = async (friendId: number) => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/friends/remove`, {
+      const res = await fetch(`http://localhost:4000/friends/remove`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id, friendId }),
@@ -108,8 +108,7 @@ export default function Requests({
                   <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden">
                     <img
                       src={
-                        request.picture ||
-                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${request.name}`
+                        request.picture
                       }
                       alt={request.name}
                       className="w-full h-full object-cover"

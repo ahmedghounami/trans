@@ -1,6 +1,0 @@
-cluster.name: "docker-cluster"
-network.host: 0.0.0.0
-
-xpack.security.enabled: true
-xpack.security.enrollment.enabled: false
-xpack.license.self_generated.type: basic

@@ -1,7 +1,7 @@
 export default async function shopRoute(fastify, opts) {
 	const db = opts.db;
 
-	fastify.get("/api/paddles", (request, reply) => {
+	fastify.get("/paddles", (request, reply) => {
 		const db = opts.db;
 		db.all("SELECT * FROM skins WHERE type = ?", ["paddle"], (err, rows) => {
 			if
@@ -10,7 +10,7 @@ export default async function shopRoute(fastify, opts) {
 				reply.send(rows);
 		});
 	});
-	fastify.get("/api/balls", (request, reply) => {
+	fastify.get("/balls", (request, reply) => {
 		const db = opts.db;
 		db.all("SELECT * FROM skins WHERE type = ?", ["ball"], (err, rows) => {
 			if
@@ -19,7 +19,7 @@ export default async function shopRoute(fastify, opts) {
 				reply.send(rows);
 		});
 	});
-		fastify.get("/api/tables", (request, reply) => {
+		fastify.get("/tables", (request, reply) => {
 		const db = opts.db;
 		db.all("SELECT * FROM skins WHERE type = ?", ["table"], (err, rows) => {
 			if (err)

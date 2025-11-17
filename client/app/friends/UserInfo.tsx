@@ -7,9 +7,9 @@ type UserType = {
   name: string;
   level: number;
   status: string;
-  totalGames: number;
-  wins: number;
-  loss: number;
+  games: number;
+  win: number;
+  lose: number;
   is_favorite?: boolean;
 };
 
@@ -31,7 +31,6 @@ export default function UserInfo({
     });
   };
 
-
   const handleToggleFavorite = async () => {
     if (!currentUser) return;
 
@@ -40,8 +39,8 @@ export default function UserInfo({
 
     try {
       const endpoint = user.is_favorite
-        ? "/api/friends/removefavorite"
-        : "/api/friends/setfavorite";
+        ? "http://localhost:4000/friends/removefavorite"
+        : "http://localhost:4000/friends/setfavorite";
 
       const res = await fetch(endpoint, {
         method: "POST",
@@ -73,7 +72,7 @@ export default function UserInfo({
     const friendId = user.id;
 
     try {
-      const res = await fetch(`/api/friends/remove`, {
+      const res = await fetch(`http://localhost:4000/friends/remove`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, friendId }),
@@ -129,15 +128,15 @@ export default function UserInfo({
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2">
           <Gamepad2 className="w-5 h-5 text-white" />
-          <span className="text-white text-sm">{user.totalGames || 0}</span>
+          <span className="text-white text-sm">{user.games || 0}</span>
         </div>
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-white" />
-          <span className="text-white text-sm">{user.wins || 0}</span>
+          <span className="text-white text-sm">{user.win || 0}</span>
         </div>
         <div className="flex items-center gap-2">
           <TrendingDown className="w-5 h-5 text-white" />
-          <span className="text-white text-sm">{user.loss || 0}</span>
+          <span className="text-white text-sm">{user.lose || 0}</span>
         </div>
 
         <button

@@ -36,7 +36,7 @@ const LeaderboardSection = () => {
   const fetchFriends = useCallback(async () => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/friends/accepted?userId=${user.id}`);
+      const res = await fetch(`http://localhost:4000/friends/accepted?userId=${user.id}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setFriends(sortUsersByFavorite(data.data));
@@ -54,7 +54,7 @@ const LeaderboardSection = () => {
   if (loading) return <Loading />;
 
   return (
-   <div className="w-full max-w-7xl p-2 relative flex flex-col h-screen max-h-screen">
+   <div className="w-full max-w-[100rem] p-2 relative flex flex-col h-screen max-h-screen">
       <BottomButtons
         onAddFriends={() => setShowAddFriends(true)}
         onRequests={() => setShowRequests(true)}
