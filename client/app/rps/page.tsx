@@ -18,7 +18,8 @@ export default function rps(  ) {
     // roomId is for the current room
     // joinedRoomId is for the joined room
     const [ roomId , setRoomId ] = useState<string>('')
-    const [ joinedRoomId , setJoinedRoomId ] = useState<string>('')
+    // const [ joinedRoomId , setJoinedRoomId ] = useState<string>('')
+    const [ result , setResult ] = useState<string>('')
 
     // for keeping the same socket
     const [ ws , setWs ] = useState<WebSocket | null>(null)
@@ -27,11 +28,22 @@ export default function rps(  ) {
 
     useEffect( () => {
         // connect to rps socket
-        const ws: WebSocket = new WebSocket ('ws://localhost:8090')
+        const ws: WebSocket = new WebSocket ('ws://localhost:8090') //possible memory leak
 
         ws.onopen = () => {
             console.log("connected to rps socket")
             setWs(ws)
+        }
+        ws.onmessage = (msg) => {
+            console.log(`received ${msg.data}`)
+
+            if ( msg.data === "1" )
+                setResult("WIN")
+            else if ( msg.data === "-1" )
+                setResult("LOSE")
+            else
+                setResult("DRAW")
+
         }
         // generate 12 character alpha-numeric code
         const chars: string = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -54,8 +66,22 @@ export default function rps(  ) {
                 
             } ) )
 
-            console.log ("rps socket message sent")
+            console.log ("create_or_join_room away!")
 
+        }
+    }
+
+    const handleChoice = ( choice: number ) => {
+        if ( ws && ws.readyState == WebSocket.OPEN ) {
+            ws.send( JSON.stringify(
+                {
+                    type: 'rps',
+                    roomId: roomId,
+                    choice: choice
+                }
+            ) )
+
+            console.log( "rps away!" )
         }
     }
 
@@ -71,11 +97,11 @@ export default function rps(  ) {
                 {/* buttons */}
                 <div className="flex gap-4 justify-center">
                     <button className="px-8 py-4 rounded-lg text-2-xl hover:bg-amber-800
-                    cursor-pointer border" >ROCK</button>
+                    cursor-pointer border" onClick={ () => handleChoice(0) } >ROCK</button>
                     <button className="px-8 py-4 rounded-lg text-2-xl hover:bg-amber-200
-                    cursor-pointer border hover:text-black" >PAPER</button>
+                    cursor-pointer border hover:text-black" onClick={ () => handleChoice(1) } >PAPER</button>
                     <button className="px-8 py-4 rounded-lg text-2-xl hover:bg-slate-600
-                    cursor-pointer border hover:text-black" >SCISSOR</button>
+                    cursor-pointer border hover:text-black" onClick={ () => handleChoice(2) } >SCISSOR</button>
 
                     
                 </div>
@@ -118,6 +144,24 @@ export default function rps(  ) {
                     Join
                 </button>
             </div>
+
+            {/* result */}
+            { result &&
+                (
+                    <div className="mt-10 flex justify-center" >
+                        <div className={`px-8 py-4 rounded-xl text-3xl font-bold shadow-xl transition-all duration-300
+                            ${result === 'WIN' ? 'bg-green-700 text-white' : ''}
+                            ${result === 'LOSE' ? 'bg-red-700 text-white' : ''}
+                            ${result === 'DRAW' ? 'bg-gray-700 text-white' : ''}
+                            `} >
+                                {result === 'WIN' && 'YOU WIN! :)'}
+                                {result === 'LOSE' && 'YOU LOSE :('}
+                                {result === 'DRAW' && 'ITS A DRAW!'}
+
+                        </div>
+                    </div>
+                )
+            }
         </div>
     )
 }
