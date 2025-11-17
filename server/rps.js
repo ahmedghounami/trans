@@ -83,7 +83,7 @@ ws.on('connection' , ( ws , req ) => {
         // when a choice is clicked
         if ( msg.type == "rps" )
         {
-            let room
+            let room = null
             let result
             let half_turn = 0
 
@@ -101,10 +101,16 @@ ws.on('connection' , ( ws , req ) => {
                     break
                 }
 
+            if ( !room )
+            {
+                ws.close()
+                // remove room from array
+                return
+            }
+
             if ( !half_turn && ws == room.half_soc )
             {
                 ws.close()
-                room.half_soc.close()
                 // remove room from array
                 return
             }
