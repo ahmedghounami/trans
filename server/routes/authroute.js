@@ -78,6 +78,9 @@ export default async function authRoutes(fastify, opts) {
                             name: row.name,
                             picture: row.picture,
                             gold: row.gold,
+                            rps_wins: row.rps_wins,
+                            rps_losses: row.rps_losses,
+                            rps_draws: row.rps_draws,
                         });
                         resolve(row);
                     } else {
