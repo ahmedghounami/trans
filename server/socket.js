@@ -41,6 +41,33 @@ const sockethandler = (io, db) => {
       );
     });
 
+    // Send friend request
+    socket.on("friends:request:send", ({ fromUserId, toUserId }) => {
+      console.log(`📨 Friend request sent from ${fromUserId} → ${toUserId}`);
+
+      io.to(`user:${toUserId}`).emit("friends:request:incoming", {
+        fromUserId
+      });
+    });
+
+    // When friend request accepted or removed
+    socket.on("friends:update", ({ userA, userB }) => {
+      console.log(`🔄 Friends updated between ${userA} & ${userB}`);
+      io.to(`user:${userA}`).emit("friends:updated");
+      io.to(`user:${userB}`).emit("friends:updated");
+    });
+
+    // Favorite changed only for owner
+    socket.on("friends:favorite", ({ userId, friendId, is_favorite }) => {
+      console.log(`⭐ Favorite changed by ${userId} for friend ${friendId}`);
+
+      io.to(`user:${userId}`).emit("friends:favorite:changed", {
+        friendId,
+        is_favorite
+      });
+    });
+
+
     socket.on("disconnect", () => {
       console.log("❌ Disconnected:", socket.id);
     });

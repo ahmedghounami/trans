@@ -3,13 +3,7 @@
 import UserInfo from "./UserInfo";
 import { useUser } from "../Context/UserContext";
 
-export default function UsersCard({
-  friends,
-  setUsers,
-}: {
-  friends: any[];
-  setUsers: (users: any[]) => void;
-}) {
+export default function UsersCard({ friends, setUsers }) {
   const { user: currentUser } = useUser();
 
   return (

@@ -1,35 +1,30 @@
 "use client";
 
-import { UserX, Star, MessageCircle, Gamepad2, Trophy, TrendingDown } from "lucide-react";
-import { useEffect } from "react";
+import {
+  UserX,
+  Star,
+  MessageCircle,
+  Gamepad2,
+  Trophy,
+  TrendingDown,
+} from "lucide-react";
+import socket from "@/app/socket";
+
 type UserType = {
   id: number;
   name: string;
   level: number;
-  status: string;
   games: number;
   win: number;
   lose: number;
   is_favorite?: boolean;
 };
 
-export default function UserInfo({
-  user,
-  currentUser,
-  setUsers,
-}: {
-  user: UserType;
-  currentUser: { id: number } | null;
-  setUsers: (users: UserType[]) => void;
-}) {
-  
-  const sortUsersByFavorite = (users) => {
-    return [...users].sort((a, b) => {
-      const favA = a.is_favorite ? 1 : 0;
-      const favB = b.is_favorite ? 1 : 0;
-      return favB - favA; // Favorites first
-    });
-  };
+export default function UserInfo({ user, currentUser, setUsers }) {
+  const sortUsersByFavorite = (list) =>
+    [...list].sort(
+      (a, b) => (b.is_favorite ? 1 : 0) - (a.is_favorite ? 1 : 0)
+    );
 
   const handleToggleFavorite = async () => {
     if (!currentUser) return;
@@ -37,31 +32,29 @@ export default function UserInfo({
     const userId = currentUser.id;
     const friendId = user.id;
 
-    try {
-      const endpoint = user.is_favorite
-        ? "http://localhost:4000/friends/removefavorite"
-        : "http://localhost:4000/friends/setfavorite";
+    const endpoint = user.is_favorite
+      ? "http://localhost:4000/friends/removefavorite"
+      : "http://localhost:4000/friends/setfavorite";
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, friendId }),
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, friendId }),
+    });
+
+    if (res.ok) {
+      socket.emit("friends:favorite", {
+        userId,
+        friendId,
+        is_favorite: user.is_favorite ? 0 : 1,
       });
 
-      if (!res.ok) throw new Error("Failed to toggle favorite");
-
       setUsers((prev) => {
-        // Update the specific friend’s favorite status
         const updated = prev.map((u) =>
           u.id === user.id ? { ...u, is_favorite: !u.is_favorite } : u
         );
-
-        // Sort: favorites on top
         return sortUsersByFavorite(updated);
-        
       });
-    } catch (err) {
-      console.error("Error toggling favorite:", err);
     }
   };
 
@@ -71,23 +64,16 @@ export default function UserInfo({
     const userId = currentUser.id;
     const friendId = user.id;
 
-    try {
-      const res = await fetch(`http://localhost:4000/friends/remove`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, friendId }),
-      });
+    const res = await fetch(`http://localhost:4000/friends/remove`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, friendId }),
+    });
 
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Remove friend response:", text);
-        throw new Error(`Failed to remove friend, status: ${res.status}`);
-      }
+    if (res.ok) {
+      socket.emit("friends:update", { userA: userId, userB: friendId });
 
-      // Update local state
       setUsers((prev) => prev.filter((u) => u.id !== friendId));
-    } catch (err) {
-      console.error("Error removing friend:", err);
     }
   };
 
@@ -114,7 +100,9 @@ export default function UserInfo({
         <div className="flex flex-col">
           <h3 className="text-white font-semibold text-lg">
             {user.name}{" "}
-            <span className="text-orange-400 text-sm">lvl {user.level || 0}</span>
+            <span className="text-orange-400 text-sm">
+              lvl {user.level || 0}
+            </span>
           </h3>
         </div>
 

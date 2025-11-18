@@ -127,8 +127,8 @@ fastify.register(buyRoute, { db });
 const shopRoute = (await import('./routes/shoproute.js')).default;
 fastify.register(shopRoute, { db });
 
-const friendsRoute = (await import('./routes/friendsroute.js')).default;
-fastify.register(friendsRoute, { db });
+// const friendsRoute = (await import('./routes/friendsroute.js')).default;
+// fastify.register(friendsRoute, { db });
 
 const gameApiRoute = (await import('./routes/gameapiroute.js')).default;
 fastify.register(gameApiRoute, { db });
@@ -155,6 +155,10 @@ const io = new Server(httpServer, {
 
 sockethandler(io, db);
 setupGameSocketIO(io);
+
+
+const friendsRoute = (await import('./routes/friendsroute.js')).default;
+fastify.register(friendsRoute, { db, io });
 
 await fastify.ready();
 const PORT = 4000;

@@ -5,39 +5,23 @@ import UsersCard from "./UsersCard";
 import BottomButtons from "./BottomButtons";
 import Loading from "../components/loading";
 import { useUser } from "../Context/UserContext";
+import socket from "@/app/socket";
 
-type UserType = {
-  id: number;
-  name: string;
-  level: number;
-  status: string;
-  totalGames: number;
-  wins: number;
-  loss: number;
-  is_favorite?: boolean;
-};
-
-const sortUsersByFavorite = (users) => {
-  return [...users].sort((a, b) => {
-    const favA = a.is_favorite ? 1 : 0;
-    const favB = b.is_favorite ? 1 : 0;
-    return favB - favA; // Favorites first
-  });
-};
+const sortUsersByFavorite = (users) =>
+  [...users].sort((a, b) => (b.is_favorite ? 1 : 0) - (a.is_favorite ? 1 : 0));
 
 const LeaderboardSection = () => {
   const { user, loading } = useUser();
-  const [friends, setFriends] = useState<UserType[]>([]);
-  const [showAddFriends, setShowAddFriends] = useState(false);
-  const [showRequests, setShowRequests] = useState(false);
-  const [refreshToggle, setRefreshToggle] = useState(false); // trigger re-fetch
+  const [friends, setFriends] = useState([]);
+  const [refreshToggle, setRefreshToggle] = useState(false);
 
-  // Reusable fetch function
   const fetchFriends = useCallback(async () => {
     if (!user) return;
+
     try {
-      const res = await fetch(`http://localhost:4000/friends/accepted?userId=${user.id}`);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const res = await fetch(
+        `http://localhost:4000/friends/accepted?userId=${user.id}`
+      );
       const data = await res.json();
       setFriends(sortUsersByFavorite(data.data));
     } catch (err) {
@@ -45,26 +29,29 @@ const LeaderboardSection = () => {
     }
   }, [user]);
 
-  // Fetch friends initially and whenever refreshToggle changes
   useEffect(() => {
-    fetchFriends();
-  }, [user, fetchFriends, refreshToggle]);
+    if (!user) return;
 
+    socket.emit("join", user.id);
+
+    fetchFriends();
+
+    socket.on("friends:updated", fetchFriends);
+    socket.on("friends:favorite:changed", fetchFriends);
+
+    return () => {
+      socket.off("friends:updated", fetchFriends);
+      socket.off("friends:favorite:changed", fetchFriends);
+    };
+  }, [user, fetchFriends]);
 
   if (loading) return <Loading />;
 
   return (
-   <div className="w-full max-w-[100rem] p-2 relative flex flex-col h-screen max-h-screen">
-      <BottomButtons
-        onAddFriends={() => setShowAddFriends(true)}
-        onRequests={() => setShowRequests(true)}
-        onRefreshFriends={() => setRefreshToggle(prev => !prev)}
-      />
+    <div className="w-full max-w-[100rem] p-2 relative flex flex-col h-screen max-h-screen">
+      <BottomButtons onRefreshFriends={() => setRefreshToggle((prev) => !prev)} />
 
-      <UsersCard
-        friends={friends}
-        setUsers={setFriends}
-      />
+      <UsersCard friends={friends} setUsers={setFriends} />
     </div>
   );
 };
