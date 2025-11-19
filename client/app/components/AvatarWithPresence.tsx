@@ -25,7 +25,7 @@ export default function AvatarWithPresence({ userId, src, alt = "User", sizeClas
         onError={(e) => { (e.target as HTMLImageElement).src = '/profile.png' }}
       />
       <span
-        className={`absolute bottom-0.5 left-0.5 w-2 h-2 rounded-full ring-2 ring-[#0a0a0a] ${online ? 'bg-green-400' : 'bg-red-500'}`}
+        className={`absolute ${sizeClass ? 'bottom-2 left-2' : 'bottom-0.5 left-0.5'} w-2 h-2 rounded-full ring-2 ring-[#0a0a0a] ${online ? 'bg-green-400' : 'bg-red-500'}`}
         title={online ? 'Online' : 'Offline'}
         aria-label={online ? 'online' : 'offline'}
       />

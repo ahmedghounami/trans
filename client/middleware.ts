@@ -27,6 +27,24 @@ export function middleware(request: NextRequest) {
   // Check if token is in URL (from Google OAuth redirect)
   const urlToken = request.nextUrl.searchParams.get("token");
 
+  // If token is present in the URL (OAuth redirect), set a cookie and remove it from URL
+  if (urlToken) {
+    const redirectUrl = request.nextUrl.clone();
+    // Remove token from visible URL
+    redirectUrl.searchParams.delete("token");
+
+    const res = NextResponse.redirect(redirectUrl);
+    // Set cookie so client-side JS (js-cookie) can read it. Use non-httpOnly here
+    // (if you prefer a secure setup, use httpOnly and call /me with credentials: 'include')
+    res.cookies.set("token", urlToken, {
+      path: "/",
+      httpOnly: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+    return res;
+  }
+
   // ========================================
   // Protect Routes - Require Authentication
   // ========================================

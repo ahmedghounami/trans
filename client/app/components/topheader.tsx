@@ -21,8 +21,7 @@ export default function Topheader() {
   const notificationRef = useRef<HTMLDivElement>(null);
 
   const isOnline = useOnlineStatus();
-  console.log("User in Topheader:", user);
-
+  
   useEffect(() => {
     const fectusers = async () => {
       try {
@@ -35,7 +34,8 @@ export default function Topheader() {
     }
     fectusers();
   }, [value]);
-
+  
+  console.log("User in Topheader:", user);
   // Close notification dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

@@ -26,7 +26,7 @@ export const UserProvider = ({ children }) => {
       try {
         // Get JWT token from cookie (set during login)
         const token = Cookies.get("token");
-        
+        console.log("Fetched token from usecontext:", token);
         // If no token exists, user is not logged in
         if (!token) {
           setLoading(false);
