@@ -311,13 +311,19 @@ export function setupGameSocketIO(io) {
 		) {
 			return next(new Error("Player not authorized for this session"));
 		}
+
+		// Mark player as ready when connecting
+		if (session.players_info.p1_id === playerId) {
+			session.p1_ready = true;
+		} else if (session.players_info.p2_id === playerId) {
+			session.p2_ready = true;
+		}
+
 		socket.sessionId = sessionId;
 		socket.playerId = playerId;
 		socket.session = session;
-		// if (session.startgame)
-		// 	return next(new Error("Game has already started"));
 		console.log(session);
-		
+
 		next();
 	});
 	io.of("/game").on("connection", (socket) => {
@@ -421,7 +427,10 @@ export function setupGameSocketIO(io) {
 				session.positions.score.p1 = 12;
 				session.positions.score.p2 = 0;
 			}
-			if (socket.playerId == socket.session.players_info.p2_id && session.gametype == 'online') {
+			if (
+				socket.playerId == socket.session.players_info.p2_id &&
+				session.gametype == "online"
+			) {
 				postresult(
 					session.positions.score.p1,
 					session.positions.score.p2,
@@ -430,8 +439,13 @@ export function setupGameSocketIO(io) {
 					session.positions.win
 				);
 			}
-			sessionsmap.delete(socket.sessionId);
+
+			// Clean up session and interval
 			clearInterval(intervalID);
+			// Delay session deletion to allow final state to be sent
+			setTimeout(() => {
+				sessionsmap.delete(socket.sessionId);
+			}, 100);
 
 			// if (currentPlayerId) {
 			// 	const playerIndex = players.findIndex((p) => p.id === currentPlayerId);
