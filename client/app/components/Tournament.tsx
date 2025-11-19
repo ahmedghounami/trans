@@ -1,19 +1,52 @@
 /** @format */
 
 "use client";
-import LocalTournamentSetings from "@/app/components/LocalTournamentSetings";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Homecontext } from "../games/layout";
+import { useUser } from "../Context/UserContext";
 
-function win(id, name, finals, setfinals) {
-	const res = Math.floor(id / 10) + 1;
-	const winerid = res + "" + Math.floor(((id % 10) + 1) / 2);
+interface User {
+	id: string | number;
+	name?: string;
+	email?: string;
+	picture?: string;
+}
+
+interface Player {
+	name: string;
+	id: string | number;
+	index: number;
+}
+
+interface FinalEntry {
+	name: string;
+	id: string;
+}
+
+interface TournamentPlayers {
+	p1?: string;
+	p1_id?: string | number;
+	p2?: string;
+	p2_id?: string | number;
+	winer?: number;
+	gamestatus?: number;
+}
+
+function win(
+	id: string | number,
+	name: string,
+	finals: FinalEntry[],
+	setfinals: (finals: FinalEntry[]) => void
+) {
+	const res = Math.floor(Number(id) / 10) + 1;
+	const winerid = res + "" + Math.floor(((Number(id) % 10) + 1) / 2);
 	// console.log("win", winerid);
 
 	setfinals(
-		[...finals, { name: name, id: winerid }].sort((a, b) => a.id - b.id)
+		[...finals, { name: name, id: winerid }].sort(
+			(a, b) => Number(a.id) - Number(b.id)
+		)
 	);
 }
 
@@ -26,6 +59,17 @@ function Tournamentbracket({
 	size,
 	playerbox,
 	settournamentplayers,
+	userId,
+}: {
+	player: Player;
+	setplayers: (players: Player[]) => void;
+	finals: FinalEntry[];
+	setfinals: (finals: FinalEntry[]) => void;
+	players: Player[];
+	size: number;
+	playerbox: number;
+	settournamentplayers: (data: TournamentPlayers) => void;
+	userId: string | number | undefined;
 }) {
 	const router = useRouter();
 	const [play, setplay] = useState(true);
@@ -54,9 +98,10 @@ function Tournamentbracket({
 				s = Math.floor((s + 1) / 2);
 				index *= 2;
 			}
-			newfinals.sort((a, b) => a.id - b.id);
+			newfinals.sort((a, b) => Number(a.id) - Number(b.id));
 			setfinals(newfinals);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [players]);
 	useEffect(() => {
 		let playstate = true;
@@ -74,6 +119,7 @@ function Tournamentbracket({
 			if (finals.find((f) => f.id == nextbox) || !p1 || !p2) playstate = false;
 		}
 		setplay(playstate);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [finals]);
 	let count = 0;
 	let number = index * 2;
@@ -88,10 +134,16 @@ function Tournamentbracket({
 		if (winer) {
 			// console.log("win");
 			setTimeout(() => {
-				router.push("/games");
-				setfinals([]);
-				setplayers([]);
-			}, 500);
+				if (userId) {
+					router.push("/games");
+					setfinals([]);
+					setplayers([]);
+					localStorage.removeItem(`tournament_id_${userId}`);
+					localStorage.removeItem(`tournament_finals_${userId}`);
+					localStorage.removeItem(`tournament_players_${userId}`);
+					localStorage.removeItem(`tournament_started_${userId}`);
+				}
+			}, 1500);
 		}
 	}
 	if (box % 2 != 0 && box != size) return <></>;
@@ -112,9 +164,6 @@ function Tournamentbracket({
 					<button
 						onClick={() => {
 							if (index == 2 && box % 2 != 1 && box <= players.length) {
-								const nextbox = count + "" + Math.floor((box + 1) / 2);
-								// setTimeout(() => {
-
 								settournamentplayers({
 									p1: players[box - 1].name,
 									p1_id: box,
@@ -182,7 +231,12 @@ function Tournamentbracket({
 							players={players}
 							size={length / 2}
 							playerbox={box / 2}
-							player={{ index: index, id: player.id }}></Tournamentbracket>
+							userId={userId}
+							player={{
+								index: index,
+								id: player.id,
+								name: player.name,
+							}}></Tournamentbracket>
 					</div>
 				</div>
 			</div>
@@ -200,12 +254,22 @@ function Localtournament({
 	setfinals,
 	setplayers,
 	settournamentplayers,
+	userId,
+}: {
+	players: Player[];
+	started: boolean;
+	size: number;
+	finals: FinalEntry[];
+	setfinals: (finals: FinalEntry[]) => void;
+	setplayers: (players: Player[]) => void;
+	settournamentplayers: (data: TournamentPlayers) => void;
+	userId: string | number | undefined;
 }) {
 	const [name, setname] = useState("");
 	const [message, setMessage] = useState("");
-	
+
 	// Function to shuffle players array
-	const shufflePlayers = (playerList) => {
+	const shufflePlayers = (playerList: Player[]) => {
 		const shuffled = [...playerList];
 		for (let i = shuffled.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
@@ -219,7 +283,7 @@ function Localtournament({
 	const canStartTournament = validPlayerCounts.includes(players.length);
 
 	// Handle form submission
-	const handleSubmit = (e) => {
+	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		addPlayer();
 	};
@@ -231,7 +295,7 @@ function Localtournament({
 			setMessage("Maximum 8 players allowed for tournament");
 			return;
 		}
-		
+
 		// Check if player already exists
 		const existingPlayer = players.find(
 			(p) => p.name.toLowerCase() == name.toLowerCase()
@@ -240,7 +304,7 @@ function Localtournament({
 			setMessage("Player name already exists");
 			return;
 		}
-		
+
 		// Add new player and shuffle
 		if (name != "") {
 			const newPlayers = [
@@ -262,7 +326,9 @@ function Localtournament({
 			) : (
 				<>
 					<div className="flex gap-4">
-						<form onSubmit={handleSubmit} className="border rounded-md flex">
+						<form
+							onSubmit={handleSubmit}
+							className="border rounded-md flex">
 							<input
 								type="text"
 								value={name}
@@ -282,29 +348,27 @@ function Localtournament({
 							</button>
 						</form>
 					</div>
-					
+
 					{/* Show message if exists */}
-					{message && (
-						<div className="text-red-500 font-medium">
-							{message}
-						</div>
-					)}
-					
+					{message && <div className="text-red-500 font-medium">{message}</div>}
+
 					{/* Show message about valid player counts */}
 					{players.length > 0 && !canStartTournament && (
 						<div className="text-red-500 font-medium">
-							Tournament requires exactly 2, 4, or 8 players (currently: {players.length})
+							Tournament requires exactly 2, 4, or 8 players (currently:{" "}
+							{players.length})
 						</div>
 					)}
-					
+
 					{canStartTournament && (
 						<div className="text-green-500 font-medium">
-							Ready to start tournament! Click on game controllers to begin matches.
+							Ready to start tournament! Click on game controllers to begin
+							matches.
 						</div>
 					)}
 				</>
 			)}
-			
+
 			{/* Only show bracket if player count is valid */}
 			{canStartTournament ? (
 				<div className="flex flex-col gap-4 w-fit">
@@ -322,6 +386,7 @@ function Localtournament({
 									size={size}
 									playerbox={index + 1}
 									settournamentplayers={settournamentplayers}
+									userId={userId}
 									player={player}></Tournamentbracket>
 							</div>
 						);
@@ -341,40 +406,124 @@ function Localtournament({
 export default function Tournament({
 	tournamentplayers,
 	settournamentplayers,
+}: {
+	tournamentplayers: TournamentPlayers;
+	settournamentplayers: (data: TournamentPlayers) => void;
 }) {
 	const router = useRouter();
+	const { user } = useUser() as { user: User | null };
 
-	const { selected } = Homecontext();
-	const [finals, setfinals] = useState(() => {
-		const saved = sessionStorage.getItem("finals");
-		return saved ? JSON.parse(saved) : [];
-	});
-	const [players, setplayers] = useState(() => {
-		const saved = sessionStorage.getItem("players");
-		return saved ? JSON.parse(saved) : [];
-	});
+	const [finals, setfinals] = useState<FinalEntry[]>([]);
+	const [players, setplayers] = useState<Player[]>([]);
+	const [started, setstarted] = useState(false);
+	const [isLoaded, setIsLoaded] = useState(false);
+	const [showWinnerAnimation, setShowWinnerAnimation] = useState(false);
+	const [tournamentWinner, setTournamentWinner] = useState<string>("");
+
+	// Load from sessionStorage after mount to avoid hydration mismatch
 	useEffect(() => {
-		sessionStorage.setItem("players", JSON.stringify(players));
-		if (players.length == 0) setstarted(false);
-	}, [players]);
-	useEffect(() => {
-		sessionStorage.setItem("finals", JSON.stringify(finals));
-	}, [finals]);
-	useEffect(() => {
-		if (!selected.types || !selected.types[0]) {
-			router.push("/games");
+		if (!user?.id) return; // Wait for user to be loaded
+
+		const userId = user.id;
+		const savedFinals = localStorage.getItem(`tournament_finals_${userId}`);
+		const savedPlayers = localStorage.getItem(`tournament_players_${userId}`);
+		const savedStarted = localStorage.getItem(`tournament_started_${userId}`);
+		const savedTournamentId = localStorage.getItem(`tournament_id_${userId}`);
+		const currentWindowId = sessionStorage.getItem("currentWindowId");
+
+		// Generate unique window ID if not exists
+		if (!currentWindowId) {
+			const newWindowId = crypto.randomUUID();
+			sessionStorage.setItem("currentWindowId", newWindowId);
 		}
-	});
 
-	const [started, setstarted] = useState(() => {
-		const saved = sessionStorage.getItem("started");
-		return saved ? JSON.parse(saved) : false;
-	});
+		const thisWindowId = sessionStorage.getItem("currentWindowId");
+
+		// If tournament exists but no owner, claim it
+		if (!savedTournamentId && (savedPlayers || savedFinals)) {
+			localStorage.setItem(`tournament_id_${userId}`, thisWindowId || "");
+		}
+		// This window already owns it or no tournament exists
+		else if (savedTournamentId === thisWindowId) {
+			// Keep the current tournament ID
+		}
+		// No tournament at all, claim it
+		else {
+			localStorage.setItem(`tournament_id_${userId}`, thisWindowId || "");
+		}
+
+		if (savedFinals) setfinals(JSON.parse(savedFinals));
+		if (savedPlayers) setplayers(JSON.parse(savedPlayers));
+		if (savedStarted) setstarted(JSON.parse(savedStarted));
+
+		setIsLoaded(true);
+
+		// Cleanup tournament ownership when navigating away or closing tab
+		const handleBeforeUnload = () => {
+			const currentWindowId = sessionStorage.getItem("currentWindowId");
+			const savedTournamentId = localStorage.getItem(`tournament_id_${userId}`);
+
+			// Only remove if this window owns the tournament
+			if (savedTournamentId === currentWindowId) {
+				localStorage.removeItem(`tournament_id_${userId}`);
+			}
+		};
+
+		window.addEventListener("beforeunload", handleBeforeUnload);
+
+		return () => {
+			window.removeEventListener("beforeunload", handleBeforeUnload);
+			handleBeforeUnload(); // Also cleanup on component unmount
+		};
+	}, [user]);
+
 	useEffect(() => {
-		sessionStorage.setItem("started", JSON.stringify(started));
-	}, [started]);
+		if (!isLoaded || !user?.id) return;
+		localStorage.setItem(
+			`tournament_players_${user.id}`,
+			JSON.stringify(players)
+		);
+		if (players.length == 0) setstarted(false);
 
-	const serchParams = useSearchParams();
+		// Check if tournament is complete
+		const count = Math.floor((players.length + 1) / 2);
+		const tournamentWinnerEntry = finals.find(
+			(p: FinalEntry) => p.id == count + "1"
+		);
+
+		if (tournamentWinnerEntry && players.length > 1) {
+			setTournamentWinner(tournamentWinnerEntry.name);
+			setShowWinnerAnimation(true);
+
+			// Auto-close after 5 seconds
+			setTimeout(() => {
+				setShowWinnerAnimation(false);
+				router.push("/games");
+				setfinals([]);
+				setplayers([]);
+				localStorage.removeItem(`tournament_id_${user.id}`);
+				localStorage.removeItem(`tournament_finals_${user.id}`);
+				localStorage.removeItem(`tournament_players_${user.id}`);
+				localStorage.removeItem(`tournament_started_${user.id}`);
+			}, 5000);
+		}
+	}, [players, isLoaded, user, finals, router]);
+
+	useEffect(() => {
+		if (!isLoaded || !user?.id) return;
+		localStorage.setItem(
+			`tournament_finals_${user.id}`,
+			JSON.stringify(finals)
+		);
+	}, [finals, isLoaded, user]);
+
+	useEffect(() => {
+		if (!isLoaded || !user?.id) return;
+		localStorage.setItem(
+			`tournament_started_${user.id}`,
+			JSON.stringify(started)
+		);
+	}, [started, isLoaded, user]);
 
 	const winer =
 		tournamentplayers.winer == 1 ? tournamentplayers.p1 : tournamentplayers.p2;
@@ -383,15 +532,51 @@ export default function Tournament({
 		tournamentplayers.winer == 1
 			? tournamentplayers.p1_id
 			: tournamentplayers.p2_id;
+
 	useEffect(() => {
-		if (winer && id) {
-			setstarted(true);
-			win(id, winer, finals, setfinals);
-			// router.push("/games/tournament");
+		if (winer && id && isLoaded) {
+			// Calculate the winner's next position
+			const res = Math.floor(Number(id) / 10) + 1;
+			const winerid = res + "" + Math.floor(((Number(id) % 10) + 1) / 2);
+
+			// Only add winner if they're not already in finals at this position
+			const alreadyExists = finals.find(
+				(f: FinalEntry) => f.id === winerid && f.name === winer
+			);
+
+			if (!alreadyExists) {
+				setstarted(true);
+				win(id, winer, finals, setfinals);
+			}
+
+			// Clear the tournament players after processing
+			settournamentplayers({});
 		}
-	}, []);
+	}, [winer, id, isLoaded, finals, settournamentplayers]);
 	return (
 		<div className="bg-gray-400/30 backdrop-blur-sm flex justify-center items-center z-50 absolute top-0 bottom-0 left-0 right-0">
+			{/* Winner Animation */}
+			{showWinnerAnimation && (
+				<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md">
+					<div className="text-center animate-bounce">
+						<div className="text-8xl mb-8 animate-pulse">🏆</div>
+						<h1 className="text-6xl font-bold text-yellow-400 mb-4 animate-pulse">
+							CHAMPION!
+						</h1>
+						<h2 className="text-4xl font-semibold text-white mb-8">
+							{tournamentWinner}
+						</h2>
+						<div className="flex gap-4 justify-center">
+							<div className="text-2xl">🎉</div>
+							<div className="text-2xl">✨</div>
+							<div className="text-2xl">🎊</div>
+							<div className="text-2xl">⭐</div>
+							<div className="text-2xl">🎉</div>
+						</div>
+					</div>
+				</div>
+			)}
+
 			<div className="h-screen w-screen p-10 overflow-auto">
 				<div className="flex gap-4 mb-8">
 					<button
@@ -403,10 +588,15 @@ export default function Tournament({
 					</button>
 					<button
 						onClick={() => {
+							if (!user?.id) return;
 							setfinals([]);
 							setplayers([]);
 							setstarted(false);
 							settournamentplayers({});
+							localStorage.removeItem(`tournament_id_${user.id}`);
+							localStorage.removeItem(`tournament_finals_${user.id}`);
+							localStorage.removeItem(`tournament_players_${user.id}`);
+							localStorage.removeItem(`tournament_started_${user.id}`);
 							router.push("/games");
 						}}
 						className="bg-red-700 cursor-pointer px-4 py-2 rounded-sm">
@@ -421,6 +611,7 @@ export default function Tournament({
 					players={players}
 					size={players.length}
 					setplayers={setplayers}
+					userId={user?.id}
 				/>
 			</div>
 		</div>
