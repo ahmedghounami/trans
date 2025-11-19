@@ -68,6 +68,8 @@ export default  function skinsRoutes(fastify, opts) {
 						reply.status(500).send({ error: "Database error" });
 						return reject(err);
 					}
+					console.log(rows);
+					
 					resolve(rows);
 				}
 			);
