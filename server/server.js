@@ -34,6 +34,9 @@ db.serialize(() => {
 		email TEXT UNIQUE,
 		password TEXT,
 		picture TEXT,
+		games Integer DEFAULT 0,
+        win INTEGER DEFAULT 0,
+        lose INTEGER DEFAULT 0,
 		gold INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	  );

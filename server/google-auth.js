@@ -24,7 +24,7 @@ export default async function googleAuth(fastify, opts) {
   fastify.get('/auth/google', async (request, reply) => {
     // Google's OAuth authorization endpoint
     const googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
-    
+
     // Build URL parameters for Google
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,           // Tell Google who we are
@@ -108,15 +108,15 @@ export default async function googleAuth(fastify, opts) {
             // ========================================
             // User Already Exists - Update & Login
             // ========================================
-            
+
             // Update profile picture if it changed on Google
             if (picture && user.picture !== picture) {
               db.run('UPDATE users SET picture = ? WHERE id = ?', [picture, user.id]);
             }
-            
+
             // Create JWT token for this user (valid for 7 days)
             const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
-            
+
             // Send user to home page with token in URL
             reply.redirect(`${CLIENT_URL}/home?token=${token}`);
             resolve(user);
@@ -136,9 +136,16 @@ export default async function googleAuth(fastify, opts) {
 
                 // Create JWT token for new user (valid for 7 days)
                 const token = jwt.sign({ userId: this.lastID }, JWT_SECRET, { expiresIn: '7d' });
-                
+
                 // Send user to home page with token in URL
                 reply.redirect(`${CLIENT_URL}/home?token=${token}`);
+                // add default skins for new player (use proper VALUES syntax)
+                db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected) VALUES (?, ?, ?)`, [this.lastID, 1, 1]);
+                db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected) VALUES (?, ?, ?)`, [this.lastID, 2, 1]);
+                db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected) VALUES (?, ?, ?)`, [this.lastID, 3, 1]);
+                db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected) VALUES (?, ?, ?)`, [this.lastID, 4, 0]);
+                db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected) VALUES (?, ?, ?)`, [this.lastID, 5, 0]);
+                db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected) VALUES (?, ?, ?)`, [this.lastID, 6, 0]);
                 resolve({ id: this.lastID, name, email, picture });
               }
             );

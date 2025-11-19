@@ -21,36 +21,7 @@ export default  function skinsRoutes(fastify, opts) {
     ('Pastel Blue', 'table'  , 0, '#252525', '#252525'),
     ('Pastel Blue', 'paddle' , 0, '#ffffff', '#ffffff')
     `);
-	 db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
-    SELECT id, 1, 1 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 1
-    );`);
-	 db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
-    SELECT id, 2, 1 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 2
-    );`);
-	 db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
-    SELECT id, 3, 1 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 3
-    );`);
-	 db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
-    SELECT id, 4 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 4
-    );`);
-	 db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
-    SELECT id, 5 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 5
-    );`);
-	 db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
-    SELECT id, 6 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 6
-    );`);
+	 
 	fastify.get("/player_skins", async (request, reply) => {
 		return new Promise((resolve, reject) => {
 			const { player_id } = request.query;
