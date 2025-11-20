@@ -2,14 +2,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Topheader from "./components/topheader";
-import Leftheader from "./components/leftheader";
 
 import { console } from "inspector";
 import { Chakra_Petch } from "next/font/google";
 import { LayoutComp } from "./components/layoutnavbar";
 import { UserProvider } from "./Context/UserContext";
-import { Suspense } from "react";
+import { NotificationProvider } from "./Context/NotificationContext";
+import { PresenceProvider } from "./Context/PresenceContext";
 
 const chakra = Chakra_Petch({
   subsets: ["latin"],
@@ -41,19 +40,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-chakra h-screen" >
+      <body className="font-chakra min-h-screen" >
       {/* <Suspense fallback={<div className="flex justify-center items-center h-screen text-white">Loading...</div>}> */}
         <UserProvider>
-          <img
-            src="/back.webp"
-            alt="Logo"
-            className="absolute w-full h-full object-cover -z-10"
-            style={{ filter: "brightness(0.5) blur(10px)" }}
-          />
-          {/* Ensure children is rendered */}
-            <LayoutComp>
-              {children}
-            </LayoutComp>
+          <NotificationProvider>
+            <PresenceProvider>
+            <img
+              src="/back.webp"
+              alt="Logo"
+              className="absolute w-full h-full object-cover -z-10"
+              style={{ filter: "brightness(0.5) blur(10px)" }}
+            />
+            {/* Ensure children is rendered */}
+              <LayoutComp>
+                {children}
+              </LayoutComp>
+            </PresenceProvider>
+          </NotificationProvider>
         </UserProvider>
       {/* </Suspense> */}
       </body>

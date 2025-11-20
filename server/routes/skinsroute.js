@@ -1,9 +1,9 @@
 /** @format */
 
-export default async function skinsRoutes(fastify, opts) {
+export default  function skinsRoutes(fastify, opts) {
 	const db = opts.db;
 	// await db.run(`DROP TABLE skins;`)
-	await db.run(`
+	 db.run(`
     INSERT OR IGNORE INTO skins (name, type, price, color, img) VALUES
     ('Pastel Blue', 'ball'   , 0, '#ff7300', '#ff7300'),
     ('Pastel Blue', 'table'  , 0, '#ff7380', '/table1.png'),
@@ -21,36 +21,7 @@ export default async function skinsRoutes(fastify, opts) {
     ('Pastel Blue', 'table'  , 0, '#252525', '#252525'),
     ('Pastel Blue', 'paddle' , 0, '#ffffff', '#ffffff')
     `);
-	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
-    SELECT id, 1, 1 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 1
-    );`);
-	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
-    SELECT id, 2, 1 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 2
-    );`);
-	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id, selected)
-    SELECT id, 3, 1 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 3
-    );`);
-	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
-    SELECT id, 4 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 4
-    );`);
-	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
-    SELECT id, 5 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 5
-    );`);
-	await db.run(`INSERT OR IGNORE INTO player_skins (player_id, skin_id)
-    SELECT id, 6 FROM users
-    WHERE id NOT IN (
-        SELECT player_id FROM player_skins WHERE skin_id = 6
-    );`);
+	 
 	fastify.get("/player_skins", async (request, reply) => {
 		return new Promise((resolve, reject) => {
 			const { player_id } = request.query;
@@ -68,6 +39,8 @@ export default async function skinsRoutes(fastify, opts) {
 						reply.status(500).send({ error: "Database error" });
 						return reject(err);
 					}
+					console.log(rows);
+					
 					resolve(rows);
 				}
 			);

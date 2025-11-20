@@ -1,15 +1,35 @@
+import React, { useState } from "react"
+import { useUser } from "../Context/UserContext"
+import Cookies from 'js-cookie'
 import { Pencil, X, Globe, Upload, Lock, Eye, EyeOff } from "lucide-react"
-import { useState } from "react"
+import socket from "../socket"
 
-export default function EditProfile({ setEditMode, editMode, user }) {
+export default function EditProfile({ setEditMode, editMode, user }: any) {
+    // stores the new uploaded img, initially set to user.picture
+    // which is the current picture supplied by server
+    const [previewPic , setPreviewPic ] = useState( user.picture )
+    const [uploadedImageUrl, setUploadedImageUrl] = useState(null) // Store uploaded image URL
+
+
+
     const [formData, setFormData] = useState({
         name: user.name || '',
         email: user.email || '',
-        language: user.language || 'English',
+        
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
     })
+
+    const [errors, setErrors] = useState({
+        name: '',
+        email: '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    })
+    const [submitError, setSubmitError] = useState('')
+    const [submitSuccess, setSubmitSuccess] = useState('')
 
     const [showPasswords, setShowPasswords] = useState({
         current: false,
@@ -17,38 +37,133 @@ export default function EditProfile({ setEditMode, editMode, user }) {
         confirm: false
     })
 
-    const languages = [
-        { code: 'en', name: 'English' },
-        { code: 'fr', name: 'Français' },
-        { code: 'es', name: 'Español' },
-        { code: 'ar', name: 'العربية' }
-    ]
+    // access global user setter so we can update header in real-time
+    const { setUser } = useUser();
 
-    const handleInputChange = (field, value) => {
+    
+
+    const handleInputChange = (field: string, value: string) => {
+        // enforce max length for name
+        if (field === 'name') {
+            const max = 24
+            if (value.length > max) value = value.slice(0, max)
+        }
+        // clear submit messages on change
+        setSubmitError('')
+        setSubmitSuccess('')
+        // clear field-specific error while editing
+        setErrors(prev => ({ ...prev, [field]: '' }))
         setFormData(prev => ({ ...prev, [field]: value }))
     }
 
-    const togglePasswordVisibility = (field) => {
+    const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
         setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }))
     }
 
     const validatePassword = () => {
-        if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
-            alert('New passwords do not match!')
-            return false
+        const errs: any = { name: '', email: '', currentPassword: '', newPassword: '', confirmPassword: '' }
+
+        // name validation
+        if (!formData.name || formData.name.trim().length < 2) {
+            errs.name = 'Name must be at least 2 characters.'
         }
-        if (formData.newPassword && formData.newPassword.length < 6) {
-            alert('Password must be at least 6 characters long!')
-            return false
+
+        // email validation (required and must be valid format)
+        const email = (formData.email || '').trim()
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!email) {
+            errs.email = 'Email is required.'
+        } else if (!emailRegex.test(email)) {
+            errs.email = 'Enter a valid email address.'
         }
-        return true
+
+        // password validation only if changing
+        if (formData.newPassword) {
+            if (!formData.currentPassword) {
+                errs.currentPassword = 'Current password is required to change password.'
+            }
+            const strong = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/
+            if (!strong.test(formData.newPassword)) {
+                errs.newPassword = 'Password must be at least 6 chars and include letters and numbers.'
+            }
+            if (formData.newPassword !== formData.confirmPassword) {
+                errs.confirmPassword = 'Passwords do not match.'
+            }
+        }
+
+        setErrors(errs)
+        return !Object.values(errs).some(Boolean)
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!validatePassword()) return
-        console.log('Form submitted:', formData)
-        setEditMode(false)
+        
+        try {
+            // Prepare data to send
+            const updateData = {
+                userid: user.id,
+                name: formData.name,
+                email: (formData.email || '').trim(),
+                picture: uploadedImageUrl || user.picture, // Use uploaded image or keep current
+                currentPassword: formData.currentPassword,
+                newPassword: formData.newPassword
+            }
+
+            console.log("📤 Sending update data:", updateData)
+
+            const response = await fetch('http://localhost:4000/profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${Cookies.get('token')}`
+                },
+                body: JSON.stringify(updateData),
+            })
+
+            if (!response.ok) {
+                const errorText = await response.text()
+                console.error("Update failed:", errorText)
+                setSubmitError(errorText || 'Failed to update profile')
+                return
+            }
+
+            const result = await response.json()
+            console.log('✅ Profile updated successfully:', result)
+            setSubmitSuccess('Profile updated successfully')
+            // If server returned the updated user object, update global user immediately
+            if (result && result.id) {
+                try {
+                    setUser(result)
+                } catch (e) {
+                    console.warn('Could not set global user from editProfile:', e)
+                }
+            } else if (result && result.user) {
+                try { setUser(result.user) } catch (e) { }
+            } else {
+                // Fallback: update only name/picture locally in global user
+                try {
+                    setUser((prev: any) => ({ ...prev, name: updateData.name, picture: updateData.picture }))
+                } catch (e) { }
+            }
+            // Update local preview so the modal shows the saved picture instantly
+            setPreviewPic(updateData.picture)
+            // emit socket event
+            try {
+                socket.emit('profile_updated', {
+                    userId: user.id,
+                    name: updateData.name,
+                    picture: updateData.picture
+                })
+            } catch (e) {
+                console.error('Failed to emit socket event', e)
+            }
+            // close modal after slight delay so user sees success message
+            setTimeout(() => setEditMode(false), 700)
+        } catch (err) {
+            console.error("❌ Error updating profile:", err)
+            setSubmitError('An error occurred while updating profile')
+        }
     }
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,25 +190,11 @@ export default function EditProfile({ setEditMode, editMode, user }) {
             }
 
             const data = await res.json();
+            console.log("✅ Image uploaded successfully:", data.url);
 
-
-            const update = await fetch('http://localhost:4000/profile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    picture: data.url, // Use the URL returned from the upload
-                    userid: user.id, // Assuming you have the user ID available
-                }),
-            });
-            // if (!update.ok) {
-            //     const errorText = await res.text();
-            //     console.error("Upload failed. Server said:", errorText);
-            //     return;
-            // }
-
-            console.log("✅ Uploaded successfully:", data.url);
+            // Only update preview and store the URL, don't save to DB yet
+            setPreviewPic(data.url);
+            setUploadedImageUrl(data.url);
         } catch (err) {
             console.error("❌ Network/Fetch error:", err);
         }
@@ -106,7 +207,7 @@ export default function EditProfile({ setEditMode, editMode, user }) {
 
                 {/* Header */}
                 <div className="relative p-6 border-b border-purple-500/20">
-                    <h2 className="text-white text-2xl font-bold text-center bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                    <h2 className="text-2xl font-bold text-center bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                         Edit Profile
                     </h2>
                     <button
@@ -120,7 +221,7 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                 <div className="flex flex-col items-center gap-4">
                     <div className="relative">
                         <img
-                            src={user.picture}
+                            src={previewPic}
                             alt="Profile"
                             className="w-24 h-24 rounded-full object-cover border-4 border-gradient-to-r from-purple-500 to-blue-500 shadow-xl ring-4 ring-purple-500/20"
                         />
@@ -158,6 +259,10 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                                 className="w-full p-3 rounded-lg bg-black/40 text-white border border-purple-500/30 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
                                 placeholder="Enter your name"
                             />
+                            {/* inline validation message for name */}
+                            {errors.name && (
+                                <div className="text-xs text-red-400 mt-1">{errors.name}</div>
+                            )}
                         </div>
 
                         {/* Email */}
@@ -170,25 +275,12 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                                 className="w-full p-3 rounded-lg bg-black/40 text-white border border-purple-500/30 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
                                 placeholder="Enter your email"
                             />
+                            {errors.email && (
+                                <div className="text-xs text-red-400 mt-1">{errors.email}</div>
+                            )}
                         </div>
 
-                        {/* Language */}
-                        <div className="space-y-2">
-                            <label className="text-gray-300 font-medium flex items-center gap-2">
-                                <Globe size={18} /> Language
-                            </label>
-                            <select
-                                value={formData.language}
-                                onChange={(e) => handleInputChange('language', e.target.value)}
-                                className="w-full p-3 rounded-lg bg-black/40 text-white border border-purple-500/30 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
-                            >
-                                {languages.map((lang) => (
-                                    <option key={lang.code} value={lang.name} className="bg-gray-900">
-                                        {lang.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                       
                     </div>
 
                     {/* RIGHT COLUMN - Password Section */}
@@ -210,6 +302,9 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                                     {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
+                            {errors.currentPassword && (
+                                <div className="text-xs text-red-400 mt-1">{errors.currentPassword}</div>
+                            )}
                         </div>
 
                         {/* New Password */}
@@ -229,6 +324,9 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                                     {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
+                            {errors.newPassword && (
+                                <div className="text-xs text-red-400 mt-1">{errors.newPassword}</div>
+                            )}
                         </div>
 
                         {/* Confirm Password */}
@@ -248,11 +346,18 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                                     {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
+                            {errors.confirmPassword && (
+                                <div className="text-xs text-red-400 mt-1">{errors.confirmPassword}</div>
+                            )}
                         </div>
                     </div>
                 </form>
-
                 {/* Footer Buttons */}
+                <div className="p-4">
+                    {/* submit messages */}
+                    {submitError && <div className="text-sm text-red-400 mb-3">{submitError}</div>}
+                    {submitSuccess && <div className="text-sm text-green-400 mb-3">{submitSuccess}</div>}
+                </div>
                 <div className="flex gap-3 p-6 border-t border-purple-500/20">
                     <button
                         type="button"
@@ -262,8 +367,7 @@ export default function EditProfile({ setEditMode, editMode, user }) {
                         Cancel
                     </button>
                     <button
-                        type="button"
-                        onClick={handleSubmit}
+                        type="submit"
                         className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
                     >
                         Save Changes

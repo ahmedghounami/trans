@@ -5,61 +5,28 @@ import { motion } from "framer-motion";
 
 type Game = { winner_id: number };
 
-const StatusCard = ({
-    icon,
-    label,
-    count,
-    delay,
-}: {
-    icon: string;
-    label: string;
-    count: number;
-    delay: number;
-}) => {
+const StatusCard = ({ icon, label, count, delay }: { icon: string; label: string; count: number; delay: number; }) => {
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 30 }}
+            initial={{ opacity: 0, scale: 0.9, y: 18 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay, duration: 0.5, type: "spring" }}
-            whileHover={{
-                scale: 1.05,
-                boxShadow: "0 0 30px rgba(123,93,223,0.5)",
-                rotate: 1,
-            }}
-            className="relative sm:w-30 rounded-2xl shadow-lg border border-[#7b5ddf44] 
-      text-white flex flex-col items-center overflow-hidden 
-      backdrop-blur-md bg-gradient-to-b from-[#2a2340aa] to-[#1a142ccc]
-      group transition-all duration-300 ease-in-out"
+            transition={{ delay, duration: 0.45, type: "spring" }}
+            whileHover={{ scale: 1.03, boxShadow: "0 10px 30px rgba(0,0,0,0.35)" }}
+            className="w-full sm:w-36 md:w-40 lg:w-46 p-4 rounded-2xl shadow-lg border border-[#7b5ddf44] text-white flex flex-col items-start overflow-hidden backdrop-blur-md bg-gradient-to-b from-[#2a2340aa] to-[#1a142ccc] group transition-all duration-300"
         >
-            {/* Glow background icon */}
-            <div className="absolute -top-6 right-0 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
-                <img src={icon} alt={`${label} icon`} className="w-20 h-20" />
+            <div className="flex items-center w-full">
+                <div className="flex-shrink-0">
+                    <img src={icon} alt={`${label} icon`} className="w-12 h-12 md:w-14 md:h-14 opacity-80" />
+                </div>
+                <div className="ml-3 flex-1">
+                    <motion.div key={count} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="text-xl md:text-2xl font-extrabold text-cyan-300 leading-none">
+                        {count}
+                    </motion.div>
+                    <div className="text-xs md:text-sm text-[#bfb8e7] font-bold tracking-wide mt-1 whitespace-nowrap">
+                        {label}
+                    </div>
+                </div>
             </div>
-
-            {/* Foreground icon */}
-            <motion.img
-                src={icon}
-                alt={`${label} icon`}
-                className="h-1 z-10 mb-2 drop-shadow-lg"
-                whileHover={{ rotate: 15 }}
-                transition={{ type: "spring", stiffness: 200 }}
-            />
-
-            {/* Animated count */}
-            <motion.span
-                key={count}
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                className="text-3xl font-extrabold mt-1 z-10 text-cyan-300"
-            >
-                {count}
-            </motion.span>
-
-            {/* Label */}
-            <span className="text-sm text-[#bfb8e7] z-10 font-bold tracking-wide">
-                {label}
-            </span>
         </motion.div>
     );
 };
@@ -93,14 +60,12 @@ export default function Games_status({ userId }: { userId: string }) {
     }, [userId]);
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="w-full flex justify-end  items-center gap-4 flex-wrap rounded-xl "
-        >
-            <StatusCard icon="/total.png" label="Total Games" count={games} delay={0.1} />
-            <StatusCard icon="/win.png" label="Wins" count={win} delay={0.2} />
-            <StatusCard icon="/loss.png" label="Losses" count={lost} delay={0.3} />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full flex items-center">
+            <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3 justify-items-stretch">
+                <StatusCard icon="/total.png" label="Total Games" count={games} delay={0.05} />
+                <StatusCard icon="/win.png" label="Wins" count={win} delay={0.12} />
+                <StatusCard icon="/loss.png" label="Losses" count={lost} delay={0.18} />
+            </div>
         </motion.div>
     );
 }

@@ -31,8 +31,12 @@ export default async function userRoutes(fastify, opts) {
         reply.send({
           id: row.id,
           name: row.name,
+          email: row.email,
           picture: row.picture,
           gold: row.gold,
+          games: row.games,
+          win: row.win,
+          lose: row.lose
         });
         resolve(row);
       });

@@ -3,13 +3,25 @@
 import { FaArrowRight } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import Room from "./room";
+import AvatarWithPresence from "../components/AvatarWithPresence";
 
 import { useUser } from "../Context/UserContext";
 import Sidebar from "./sidebar";
 import Loading from "../components/loading";
+import { FaTableTennisPaddleBall } from "react-icons/fa6";
+import socket from "../socket";
+import { useRouter } from "next/navigation";
+
+type User = {
+    id: number;
+    name: string;
+    picture?: string;
+    // add other properties as needed
+};
 
 export default function Chat() {
-    const [users, setUsers] = useState([]);
+    const rout =  useRouter();
+    const [users, setUsers] = useState<User[]>([]);
     const [selected, setSelected] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
     const [messages, setMessages] = useState<any[]>([]); // Initialize messages as an empty array
@@ -47,6 +59,26 @@ export default function Chat() {
     }
     const me = user.id;
 
+    const handleSendGameInvite = () => {
+        const recipient = users.find(user => user.id === selected);
+        if (!recipient) return;
+        rout.push(`/games/game?gametype=online&oppid=${selected}`);
+        console.log(selected, user.id);
+        
+        // Emit Socket.io event to send game invite
+        socket.emit("send_game_invite", {
+            recipientId: selected,
+            gameType: "Pingpong"
+        });
+
+        // Listen for confirmation
+        socket.once("game_invite_sent", (data) => {
+            if (data.success) {
+                alert(`Game invite sent to ${recipient.name}! 🎮`);
+            }
+        });
+    };
+
 
     const showSidebar = !isMobile || (isMobile && selected === 0);
     const showChat = !isMobile || (isMobile && selected !== 0);
@@ -71,8 +103,8 @@ export default function Chat() {
                         </div>
                     ) : (
                         <>
-                            <div className="flex justify-between  items-center border-b border-[#a0a0a0] px-4 py-3 gap-4">
-                                <div className="flex items-center gap-4">
+                            <div className="flex  items-center border-b border-[#a0a0a0] px-4 py-3 gap-4">
+                                <div className="flex items-center gap-4 justify-between flex-1">
                                     {isMobile && (
                                         <button
                                             className="text-gray-400 hover:text-white transition-colors rotate-180"
@@ -84,30 +116,32 @@ export default function Chat() {
                                     <button
                                         onClick={() => {
                                             window.location.href = `/profile/${selected}`;
-                                            }}
-                                            className="flex items-center gap-4"
+                                        }}
+                                        className="flex items-center gap-4"
                                     >
-
-                                        <img
-                                        src={users.find(user => user.id === selected)?.picture || "/profile.jpg"}
-                                        alt="Profile"
-                                        className="w-12 h-12 rounded-full object-cover shadow-md border border-gray-300"
-                                    />
-                                    <h2 className="text-xl font-semibold">
-                                        {users.find(user => user.id === selected)?.name}
-                                    </h2>
-
-                                </button>
+                                        <AvatarWithPresence userId={selected} src={users.find(user => user.id === selected)?.picture || "/profile.png"} sizeClass="w-12 h-12" imgClass="rounded-full shadow-md border border-gray-300" />
+                                        <h2 className="text-xl font-semibold">
+                                            {users.find(user => user.id === selected)?.name}
+                                        </h2>
+                                    </button>
+                                                                        <button
+                                        className="ml-4 flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-white shadow-lg bg-gradient-to-r from-blue-700 via-purple-700 to-black border border-blue-900 hover:from-blue-500 hover:via-purple-600 hover:to-black hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        onClick={handleSendGameInvite}
+                                    >
+                                        <span className="flex items-center justify-center text-xl">
+                                            <FaTableTennisPaddleBall />
+                                        </span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    <div className="flex-1 overflow-y-auto">
-                        <Room selected={selected} me={me} messages={messages} setMessages={setMessages} />
-                    </div>
-                </>
-            )}
-        </div>
-    )
-}
+                            <div className="flex-1 overflow-y-auto">
+                                <Room selected={selected} me={me} messages={messages} setMessages={setMessages} />
+                            </div>
+                        </>
+                    )}
+                </div>
+            )
+            }
         </div >
     );
 }
