@@ -1,10 +1,32 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+const SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
 export default async function ProfileRoutes(fastify, opts) {
     const db = opts.db;
     const io = opts.io;
     fastify.post('/profile', async (request, reply) => {
         const { userid, name, email, language, picture, currentPassword, newPassword } = request.body;
+
+        // Authorize: verify JWT and ensure the requester matches the userid being updated
+        let token = request.headers.authorization?.split(' ')[1];
+        if (!token && request.cookies) token = request.cookies.token;
+        if (!token) {
+            return reply.status(401).send({ error: 'Unauthorized' });
+        }
+        let decoded;
+        try {
+            decoded = jwt.verify(token, SECRET);
+        } catch (err) {
+            console.error('JWT verification failed for profile update:', err);
+            return reply.status(401).send({ error: 'Unauthorized' });
+        }
+        if (!decoded || String(decoded.userId || decoded.id) !== String(userid)) {
+            console.warn('Forbidden profile update attempt', { tokenUser: decoded, targetUser: userid });
+            return reply.status(403).send({ error: 'Forbidden' });
+        }
+
         console.log("📥 Received profile update request:", { userid, name, email, language, picture, hasPassword: !!newPassword });
 
         return new Promise((resolve, reject) => {

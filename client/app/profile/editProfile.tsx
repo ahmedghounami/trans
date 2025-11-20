@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import { useUser } from "../Context/UserContext"
+import Cookies from 'js-cookie'
 import { Pencil, X, Globe, Upload, Lock, Eye, EyeOff } from "lucide-react"
 import socket from "../socket"
 
@@ -22,6 +23,7 @@ export default function EditProfile({ setEditMode, editMode, user }: any) {
 
     const [errors, setErrors] = useState({
         name: '',
+        email: '',
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
@@ -59,11 +61,20 @@ export default function EditProfile({ setEditMode, editMode, user }: any) {
     }
 
     const validatePassword = () => {
-        const errs = { name: '', currentPassword: '', newPassword: '', confirmPassword: '' }
+        const errs: any = { name: '', email: '', currentPassword: '', newPassword: '', confirmPassword: '' }
 
         // name validation
         if (!formData.name || formData.name.trim().length < 2) {
             errs.name = 'Name must be at least 2 characters.'
+        }
+
+        // email validation (required and must be valid format)
+        const email = (formData.email || '').trim()
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!email) {
+            errs.email = 'Email is required.'
+        } else if (!emailRegex.test(email)) {
+            errs.email = 'Enter a valid email address.'
         }
 
         // password validation only if changing
@@ -93,7 +104,7 @@ export default function EditProfile({ setEditMode, editMode, user }: any) {
             const updateData = {
                 userid: user.id,
                 name: formData.name,
-                email: formData.email,
+                email: (formData.email || '').trim(),
                 picture: uploadedImageUrl || user.picture, // Use uploaded image or keep current
                 currentPassword: formData.currentPassword,
                 newPassword: formData.newPassword
@@ -105,6 +116,7 @@ export default function EditProfile({ setEditMode, editMode, user }: any) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${Cookies.get('token')}`
                 },
                 body: JSON.stringify(updateData),
             })
@@ -263,6 +275,9 @@ export default function EditProfile({ setEditMode, editMode, user }: any) {
                                 className="w-full p-3 rounded-lg bg-black/40 text-white border border-purple-500/30 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all duration-200"
                                 placeholder="Enter your email"
                             />
+                            {errors.email && (
+                                <div className="text-xs text-red-400 mt-1">{errors.email}</div>
+                            )}
                         </div>
 
                        
@@ -352,8 +367,7 @@ export default function EditProfile({ setEditMode, editMode, user }: any) {
                         Cancel
                     </button>
                     <button
-                        type="button"
-                        onClick={handleSubmit}
+                        type="submit"
                         className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
                     >
                         Save Changes

@@ -230,7 +230,7 @@ export default function Topheader() {
                 />
 
                 <span
-                  className={`absolute bottom-0.5 left-0.5 w-2 h-2 rounded-full ring-2 ring-[#0a0a0a] ${isOnline ? 'bg-green-400' : 'bg-gray-600'}`}
+                  className={`absolute bottom-0.5 left-0.5 w-2 h-2 animate-pulse rounded-full ring-2 ring-[#0a0a0a] ${isOnline ? 'bg-green-400' : 'bg-gray-600'}`}
                   title={isOnline ? 'Online' : 'Offline'}
                   aria-label={isOnline ? 'online' : 'offline'}
                 />

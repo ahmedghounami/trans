@@ -32,10 +32,10 @@ export default function AvatarWithPresence({ userId, src, alt = "User", sizeClas
         onError={(e) => { (e.target as HTMLImageElement).src = '/profile.png' }}
       />
       <span
-        className={`absolute ${dotSizeClass} rounded-full ring-2 ring-black/80 ${online ? 'bg-green-400' : 'bg-gray-500'}`}
+        className={`absolute ${dotSizeClass} rounded-full animate-pulse ring-2 ring-black/80 ${online ? 'bg-green-400' : 'bg-gray-500'}`}
         title={online ? 'Online' : 'Offline'}
         aria-label={online ? 'online' : 'offline'}
-        style={{ right: 0, bottom: 0, transform: 'translate(30%, 30%)' }}
+        style={{ right: 2, bottom: 2, transform: 'translate(20%, 20%)' }}
       />
     </div>
   );
