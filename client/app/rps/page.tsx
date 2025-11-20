@@ -1,5 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react'
+import { useUser } from '../Context/UserContext'
+import Cookies from 'js-cookie'
 
 interface gameStatsType {
     wins: number;
@@ -8,6 +10,8 @@ interface gameStatsType {
 }
 
 export default function rps(  ) {
+    const { user, loading } = useUser()
+    
     // the data will be fetched from server
     const [ gameStats , setGameStats ] = useState<gameStatsType>( { // should initialize to db values
         wins: 0,
@@ -20,29 +24,74 @@ export default function rps(  ) {
     const [ roomId , setRoomId ] = useState<string>('')
     // const [ joinedRoomId , setJoinedRoomId ] = useState<string>('')
     const [ result , setResult ] = useState<string>('')
+    const [ selectedChoice , setSelectedChoice ] = useState<number | null>(null)
 
     // for keeping the same socket
     const [ ws , setWs ] = useState<WebSocket | null>(null)
 
+    // Function to fetch stats from database
+    const fetchStats = async () => {
+        if (user?.id) {
+            try {
+                const res = await fetch('http://localhost:4000/me', {
+                    headers: {
+                        Authorization: `Bearer ${Cookies.get('token')}`,
+                    },
+                })
+                const data = await res.json()
+                if (data.rps_wins !== undefined) {
+                    setGameStats({
+                        wins: data.rps_wins || 0,
+                        losses: data.rps_losses || 0,
+                        draws: data.rps_draws || 0,
+                    })
+                }
+            } catch (error) {
+                console.error('Error fetching RPS stats:', error)
+            }
+        }
+    }
+
+    // Fetch initial stats from database
+    useEffect(() => {
+        fetchStats()
+    }, [user])
+
    
 
     useEffect( () => {
+        if (!user?.id) return // Don't connect until user is loaded
+
         // connect to rps socket
         const ws: WebSocket = new WebSocket ('ws://localhost:8090') //possible memory leak
 
         ws.onopen = () => {
             console.log("connected to rps socket")
             setWs(ws)
+            
+            // Send userId to server
+            ws.send(JSON.stringify({
+                type: 'set_user',
+                userId: user.id
+            }))
         }
         ws.onmessage = (msg) => {
             console.log(`received ${msg.data}`)
 
-            if ( msg.data === "1" )
+            if ( msg.data === "1" ) {
                 setResult("WIN")
-            else if ( msg.data === "-1" )
+            }
+            else if ( msg.data === "-1" ) {
                 setResult("LOSE")
-            else
+            }
+            else if ( msg.data === "0" ) {
                 setResult("DRAW")
+            }
+
+            // Refetch stats from database after each game to ensure accuracy
+            setTimeout(() => {
+                fetchStats()
+            }, 500)
 
         }
         // generate 12 character alpha-numeric code
@@ -54,7 +103,11 @@ export default function rps(  ) {
             result += chars.charAt(randomIndex)
         }
         setRoomId( result )
-    } , [] )
+
+        return () => {
+            ws.close()
+        }
+    } , [user])
 
     // for when the user clicks on join
     const handleJoinRoom = () => {
@@ -63,6 +116,7 @@ export default function rps(  ) {
             ws.send ( JSON.stringify( {
                 type: 'create_or_join_room',
                 roomId: roomId,
+                userId: user?.id
                 
             } ) )
 
@@ -73,11 +127,13 @@ export default function rps(  ) {
 
     const handleChoice = ( choice: number ) => {
         if ( ws && ws.readyState == WebSocket.OPEN ) {
+            setSelectedChoice(choice)
             ws.send( JSON.stringify(
                 {
                     type: 'rps',
                     roomId: roomId,
-                    choice: choice
+                    choice: choice,
+                    userId: user?.id
                 }
             ) )
 
@@ -88,6 +144,12 @@ export default function rps(  ) {
 
     return (
         <div className="flex flex-col" >
+            {loading ? (
+                <div className="flex justify-center items-center h-screen">
+                    <div className="text-2xl">Loading...</div>
+                </div>
+            ) : (
+            <>
             <div className="flex flex-col items-center pt-10">
                 <div className="w-full p-8 rounded-lg">
                     <h1 className="text-6xl font-bold text-white mb-4 text-center w-full">Rocky Papery Scissory :)</h1>
@@ -96,12 +158,36 @@ export default function rps(  ) {
 
                 {/* buttons */}
                 <div className="flex gap-4 justify-center">
-                    <button className="px-8 py-4 rounded-lg text-2-xl hover:bg-amber-800
-                    cursor-pointer border" onClick={ () => handleChoice(0) } >ROCK</button>
-                    <button className="px-8 py-4 rounded-lg text-2-xl hover:bg-amber-200
-                    cursor-pointer border hover:text-black" onClick={ () => handleChoice(1) } >PAPER</button>
-                    <button className="px-8 py-4 rounded-lg text-2-xl hover:bg-slate-600
-                    cursor-pointer border hover:text-black" onClick={ () => handleChoice(2) } >SCISSOR</button>
+                    <button 
+                        className={`px-8 py-4 rounded-lg text-2-xl cursor-pointer border transition-all duration-200 ${
+                            selectedChoice === 0 
+                                ? 'bg-amber-800 border-amber-600 scale-105 shadow-lg' 
+                                : 'hover:bg-amber-800'
+                        }`}
+                        onClick={ () => handleChoice(0) }
+                    >
+                        ROCK
+                    </button>
+                    <button 
+                        className={`px-8 py-4 rounded-lg text-2-xl cursor-pointer border transition-all duration-200 ${
+                            selectedChoice === 1 
+                                ? 'bg-amber-200 text-black border-amber-400 scale-105 shadow-lg' 
+                                : 'hover:bg-amber-200 hover:text-black'
+                        }`}
+                        onClick={ () => handleChoice(1) }
+                    >
+                        PAPER
+                    </button>
+                    <button 
+                        className={`px-8 py-4 rounded-lg text-2-xl cursor-pointer border transition-all duration-200 ${
+                            selectedChoice === 2 
+                                ? 'bg-slate-600 text-black border-slate-400 scale-105 shadow-lg' 
+                                : 'hover:bg-slate-600 hover:text-black'
+                        }`}
+                        onClick={ () => handleChoice(2) }
+                    >
+                        SCISSOR
+                    </button>
 
                     
                 </div>
@@ -162,6 +248,8 @@ export default function rps(  ) {
                     </div>
                 )
             }
+            </>
+            )}
         </div>
     )
 }
