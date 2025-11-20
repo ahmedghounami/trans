@@ -7,6 +7,10 @@ import ProfileHeader from "../profileheader";
 import { useParams, useRouter } from "next/navigation";
 import Loading from "@/app/components/loading";
 import EditProfile from "../editProfile";
+import PingPongPerformanceChart from "../../home/chart";
+import PingPongAchievements from "../../home/cards";
+import GameHistory from "../../home/gamehistory";
+import RPSSummary from "../RPSSummary";
 
 export default function Profile() {
     const [games, setGames] = useState<any[]>([]);
@@ -16,6 +20,22 @@ export default function Profile() {
     const router = useRouter();
     const { user: currentUser } = useUser();
     const [editMode, setEditMode] = useState(false);
+
+    // Keep local `user` in sync when the global currentUser changes (e.g., profile updates)
+    useEffect(() => {
+            if (!currentUser) return;
+            // If the fetched profile matches the currently logged in user, update the displayed user
+            try {
+                const currId = (currentUser as any).id;
+                if (String(currId) === String(id)) {
+                    setUser(currentUser);
+                }
+            } catch (e) {
+                // ignore
+            }
+        }, [currentUser, id]);
+
+    // Chart component used on the right column (imported at top)
 
     useEffect(() => {
         console.log("User ID from params:", id);
@@ -100,125 +120,16 @@ export default function Profile() {
             )}
             <ProfileHeader user={user} games={games} setEditMode={setEditMode} />
             {/* ////////////////////////////////////////////////////////// */}
-            <div className="flex-1/5 flex gap-4 m-5 flex-col">
-
-                {/* Small RPS summary row: shared card with transparent background and inline circle */}
-                <div className="w-[90%] mx-auto mt-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.45 }}
-                        className="flex items-center justify-between gap-6 rounded-2xl p-4 bg-gradient-to-r from-[#1e1330]/80 to-[#241635]/80 border border-[#6b3be033] shadow-inner text-white"
-                    >
-                        {/* Left: summary + small stat boxes */}
-                        <div className="flex-1 pr-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="text-sm text-[#bfb8e7] font-bold">RPS Summary</div>
-                                    <div className="text-sm text-gray-300">A quick overview for Rock-Paper-Scissors</div>
-                                </div>
-                                <img src="/rps.png" alt="rps" className="w-12 h-12 opacity-90" />
-                            </div>
-
-                            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-                                {(() => {
-                                    const rpsWins = games.filter((g: any) => g.winner_id === user.id).length;
-                                    const rpsDraws = games.filter((g: any) => g.winner_id === 0).length;
-                                    const rpsLosses = Math.max(0, games.length - rpsWins - rpsDraws);
-
-                                    const statClass = "p-3 rounded-lg bg-white/5 border border-white/10";
-
-                                    return (
-                                        <>
-                                            <motion.div whileHover={{ scale: 1.03 }} className={statClass}>
-                                                <div className="text-base font-bold text-[#bfb8e7]">Wins</div>
-                                                <motion.div
-                                                    initial={{ scale: 0.9, opacity: 0 }}
-                                                    animate={{ scale: 1, opacity: 1 }}
-                                                    transition={{ delay: 0.05 }}
-                                                    className="text-xl font-bold text-green-300"
-                                                >
-                                                    {rpsWins}
-                                                </motion.div>
-                                            </motion.div>
-
-                                            <motion.div whileHover={{ scale: 1.03 }} className={statClass}>
-                                                <div className="text-base font-bold text-[#bfb8e7]">Losses</div>
-                                                <motion.div
-                                                    initial={{ scale: 0.9, opacity: 0 }}
-                                                    animate={{ scale: 1, opacity: 1 }}
-                                                    transition={{ delay: 0.12 }}
-                                                    className="text-xl font-bold text-red-400"
-                                                >
-                                                    {rpsLosses}
-                                                </motion.div>
-                                            </motion.div>
-
-                                            <motion.div whileHover={{ scale: 1.03 }} className={statClass}>
-                                                <div className="text-base font-bold text-[#bfb8e7]">Draws</div>
-                                                <motion.div
-                                                    initial={{ scale: 0.9, opacity: 0 }}
-                                                    animate={{ scale: 1, opacity: 1 }}
-                                                    transition={{ delay: 0.18 }}
-                                                    className="text-xl font-bold text-blue-300"
-                                                >
-                                                    {rpsDraws}
-                                                </motion.div>
-                                            </motion.div>
-                                        </>
-                                    );
-                                })()}
-                            </div>
-                        </div>
-
-                        {/* Right: circular win/loss percentage (inline) */}
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="w-44 h-44 flex-shrink-0 flex items-center justify-center">
-                            {(() => {
-                                const rpsWins = games.filter((g: any) => g.winner_id === user.id).length;
-                                const rpsDraws = games.filter((g: any) => g.winner_id === 0).length;
-                                const rpsLosses = Math.max(0, games.length - rpsWins - rpsDraws);
-                                const active = rpsWins + rpsLosses; // exclude draws for percent
-                                const winPct = active > 0 ? Math.round((rpsWins / active) * 100) : 0;
-
-                                const size = 140;
-                                const stroke = 12;
-                                const radius = (size - stroke) / 2;
-                                const circumference = 2 * Math.PI * radius;
-                                const winOffset = circumference - (winPct / 100) * circumference;
-
-                                return (
-                                    <div className="relative w-full h-full flex items-center justify-center">
-                                        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-                                            {/* background ring */}
-                                            <circle cx={size / 2} cy={size / 2} r={radius} stroke="#1f1f2a" strokeWidth={stroke} fill="transparent" />
-                                            {/* loss ring (gray) */}
-                                            <circle cx={size / 2} cy={size / 2} r={radius} stroke="#2b2b39" strokeWidth={stroke} fill="transparent" />
-                                            {/* win progress */}
-                                            <circle
-                                                cx={size / 2}
-                                                cy={size / 2}
-                                                r={radius}
-                                                stroke="#34d399"
-                                                strokeWidth={stroke}
-                                                fill="transparent"
-                                                strokeDasharray={`${circumference} ${circumference}`}
-                                                strokeDashoffset={winOffset}
-                                                strokeLinecap="round"
-                                                style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%', transition: 'stroke-dashoffset 0.8s ease' }}
-                                            />
-                                        </svg>
-
-                                        <div className="absolute flex flex-col items-center">
-                                            <div className="text-sm text-[#bfb8e7]">Win Rate</div>
-                                            <div className="text-2xl font-bold text-white">{winPct}%</div>
-                                           
-                                        </div>
-                                    </div>
-                                );
-                            })()}
-                        </motion.div>
-                    </motion.div>
+            <div className="flex flex-col gap-4 max-h-[40%] p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <PingPongPerformanceChart user={user} games={games} />
+                    <RPSSummary
+                    user={user}
+                    games={games}
+                    />
                 </div>
+
+                
             </div>
         </div>
     );

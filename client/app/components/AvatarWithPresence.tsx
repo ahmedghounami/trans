@@ -15,6 +15,9 @@ export default function AvatarWithPresence({ userId, src, alt = "User", sizeClas
   const { isOnline } = usePresence();
   const online = userId ? isOnline(userId) : false;
 
+  // choose dot placement based on avatar size class (keeps dot inside image for small avatars)
+  const dotPosition = (sizeClass && (sizeClass.includes('w-22') || sizeClass.includes('w-24') || sizeClass.includes('w-20'))) ? 'bottom-2 left-2' : 'bottom-0.5 left-0.5';
+
   return (
     <div className={`relative ${sizeClass}`}>
       <img
@@ -25,7 +28,7 @@ export default function AvatarWithPresence({ userId, src, alt = "User", sizeClas
         onError={(e) => { (e.target as HTMLImageElement).src = '/profile.png' }}
       />
       <span
-        className={`absolute ${sizeClass ? 'bottom-2 left-2' : 'bottom-0.5 left-0.5'} w-2 h-2 rounded-full ring-2 ring-[#0a0a0a] ${online ? 'bg-green-400' : 'bg-red-500'}`}
+        className={`absolute ${dotPosition} w-2 h-2 rounded-full ring-2 ring-black/80 ${online ? 'bg-green-400' : 'bg-gray-500'}`}
         title={online ? 'Online' : 'Offline'}
         aria-label={online ? 'online' : 'offline'}
       />

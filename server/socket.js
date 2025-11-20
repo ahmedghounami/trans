@@ -125,6 +125,22 @@ const sockethandler = (io, db) => {
         io.emit('user_presence', { userId: socket.userId, status: 'offline' });
       }
     });
+
+    // Re-broadcast profile updates received from clients so other sockets can update UI
+    socket.on('profile_updated', (payload) => {
+      try {
+        const { userId, name, picture } = payload || {};
+        console.log('🔁 Received profile_updated from client:', payload);
+        // Broadcast to all other clients so they can refresh headers/avatars
+        socket.broadcast.emit('user_profile_updated', { userId, name, picture });
+        // Also emit to the user's own room so their other sessions/devices receive it
+        if (userId) {
+          io.to(`user:${userId}`).emit('user_profile_updated', { userId, name, picture });
+        }
+      } catch (err) {
+        console.error('Error handling profile_updated', err);
+      }
+    });
   });
 };
 

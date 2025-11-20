@@ -30,7 +30,7 @@ export default function ProfileHeader({ user, games, setEditMode }: { user: any,
                 {/* LEFT SIDE : Profile Info */}
                 <div className="flex items-center gap-4 w-full md:w-1/2">
                     <div>
-                        <AvatarWithPresence userId={user.id} src={user.picture || "/profile.png"} sizeClass="w-20 h-20" imgClass="object-cover border-2 border-purple-600 shadow-lg" />
+                        <AvatarWithPresence userId={user.id} src={user.picture || "/profile.png"} sizeClass="w-22 h-22" imgClass="object-cover border-2 border-purple-600 shadow-lg" />
                     </div>
                     <div className="flex flex-col gap-2 flex-1 ">
                         <div className="flex items-center gap-2 justify-between">
