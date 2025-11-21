@@ -5,35 +5,37 @@ import { Server } from 'socket.io';
 import { sockethandler } from './socket.js';
 // import friendsRoutes from './routes/friendsroute.js';
 import game from './game.js';
+import pino from "pino";
 
+const logStream = pino.destination({
+  dest: "/var/log/transcendence/server.log",
+  mkdir: true,
+});
+
+const logger = pino(
+  {
+    level: "info",
+    base: null,
+  },
+  logStream
+);
 
 const fastify = Fastify({
   logger: {
-    level: "info",          // produces structured JSON
+    instance: logger
   }
 });
 
-
-await fastify.register(cors, {
-  origin: 'https://localhost',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-});
-
-import pino from "pino";
-const logger = pino();
-
 fastify.addHook("onResponse", (req, reply, done) => {
-  req.log.info({
+  logger.info({
     event: "api_request",
     service: "transcendence",
     method: req.method,
     path: req.url,
-    status: reply.statusCode
+    status: reply.statusCode,
   });
   done();
 });
-
 
 
 // Connect SQLite DB

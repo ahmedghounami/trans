@@ -1,18 +1,13 @@
-filebeat.autodiscover:
-  providers:
-    - type: docker
-      hints.enabled: true
-      host: "unix:///var/run/docker.sock"
-
 filebeat.inputs:
-  - type: container
+  - type: log
     enabled: true
     paths:
-      - /hostfs/var/lib/docker/containers/*/*.log
+      - /var/log/transcendence/*.log      # 🔥 logs from shared volume
     processors:
-      - add_docker_metadata:
-          host: "unix:///var/run/docker.sock"
-
+      - add_fields:
+          target: 'service'
+          fields:
+            name: 'transcendence-server'
 
 output.logstash:
   hosts: ["logstash:5044"]
