@@ -1,0 +1,7 @@
+{
+  "watch": ["."],
+  "ext": "js,json",
+  "exec": "node server.js",
+  "stdout": false,
+  "verbose": false
+}

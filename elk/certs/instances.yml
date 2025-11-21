@@ -10,3 +10,7 @@ instances:
   - name: logstash
     dns:
       - logstash
+
+  - name: filebeat
+    dns:
+      - filebeat

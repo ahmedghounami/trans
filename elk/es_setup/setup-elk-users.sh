@@ -24,10 +24,10 @@ $CURL -X POST "${ES_URL}/_security/user/kibana_system/_password" -d "{
 
 echo ">> Creating role logstash_writer"
 $CURL -X POST "${ES_URL}/_security/role/logstash_writer" -d '{
-  "cluster": ["monitor", "manage_ilm", "manage_index_templates"],
+  "cluster": ["monitor", "manage_ilm", "manage_index_templates", "manage"],
   "indices": [
     {
-      "names": ["docker-logs-*"],
+      "names": ["transcendence-logs-*"],
       "privileges": ["write","create","delete","create_index","manage"]
     }
   ]

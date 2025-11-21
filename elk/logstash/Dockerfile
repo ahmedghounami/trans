@@ -9,3 +9,5 @@ COPY pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
 
 # safer permissions
 RUN chmod 660 /usr/share/logstash/config/logstash.yml
+RUN chmod 660 /usr/share/logstash/pipeline/logstash.conf
+

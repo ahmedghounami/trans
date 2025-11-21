@@ -1,26 +1,34 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:8.15.0 
+FROM docker.elastic.co/elasticsearch/elasticsearch:8.15.0
 
 USER root
 
+# CREATE THE EXACT DIRECTORY THAT docker-compose MOUNTS OVER
 RUN mkdir -p /usr/share/elasticsearch/config/certs
 
-COPY instances.yml /usr/share/elasticsearch/config/certs/instances.yml
+COPY instances.yml /tmp/instances.yml
 
 WORKDIR /usr/share/elasticsearch
 
-RUN bin/elasticsearch-certutil ca \
-      --silent --pem \
-      --out config/certs/elastic-stack-ca.zip && \
-    unzip config/certs/elastic-stack-ca.zip -d config/certs/ && \
-    bin/elasticsearch-certutil cert \
-      --silent --pem \
-      --in config/certs/instances.yml \
-      --out config/certs/elastic-stack-certs.zip \
-      --ca-cert config/certs/ca/ca.crt \
-      --ca-key config/certs/ca/ca.key && \
-    unzip config/certs/elastic-stack-certs.zip -d config/certs/ && \
-    rm config/certs/elastic-stack-ca.zip \
-       config/certs/elastic-stack-certs.zip \
-       config/certs/instances.yml
-
-ENTRYPOINT ["/bin/sh", "-c", "cp -R /usr/share/elasticsearch/config/certs/* /certs && chown -R 1000:0 /certs"]
+ENTRYPOINT ["sh", "-c", "\
+set -e ; \
+CERT_DIR=/usr/share/elasticsearch/config/certs ; \
+echo '>>> Checking if certs already exist...' ; \
+if [ -f \"$CERT_DIR/ca/ca.crt\" ]; then \
+    echo '>>> Certs already exist. Skipping generation.' ; \
+    sleep infinity ; \
+fi ; \
+echo '>>> Generating CA...' ; \
+bin/elasticsearch-certutil ca --silent --pem --out /tmp/ca.zip ; \
+unzip /tmp/ca.zip -d \"$CERT_DIR\" ; \
+echo '>>> Generating instance certs...' ; \
+bin/elasticsearch-certutil cert --silent --pem \
+  --in /tmp/instances.yml \
+  --out /tmp/certs.zip \
+  --ca-cert \"$CERT_DIR/ca/ca.crt\" \
+  --ca-key \"$CERT_DIR/ca/ca.key\" ; \
+unzip /tmp/certs.zip -d \"$CERT_DIR\" ; \
+chmod -R 755 \"$CERT_DIR\" ; \
+chown -R 1000:0 \"$CERT_DIR\" ; \
+echo '>>> DONE. Certs generated into VOLUME.' ; \
+sleep infinity \
+"]

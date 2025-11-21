@@ -6,13 +6,34 @@ import { sockethandler } from './socket.js';
 // import friendsRoutes from './routes/friendsroute.js';
 import game from './game.js';
 
-const fastify = Fastify();
+
+const fastify = Fastify({
+  logger: {
+    level: "info",          // produces structured JSON
+  }
+});
+
 
 await fastify.register(cors, {
   origin: 'https://localhost',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
+
+import pino from "pino";
+const logger = pino();
+
+fastify.addHook("onResponse", (req, reply, done) => {
+  req.log.info({
+    event: "api_request",
+    service: "transcendence",
+    method: req.method,
+    path: req.url,
+    status: reply.statusCode
+  });
+  done();
+});
+
 
 
 // Connect SQLite DB

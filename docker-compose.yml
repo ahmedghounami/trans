@@ -1,108 +1,100 @@
 services:
-  client:
-    build:
-      context: .
-      dockerfile: ./client/dockerfile
-    container_name: client
-    volumes:
-      - ./client:/app
-      - /app/node_modules
-    env_file:
-      - .env
-    networks:
-      - transcendence
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
+  # client:
+  #   build:
+  #     context: .
+  #     dockerfile: ./client/dockerfile
+  #   container_name: client
+  #   volumes:
+  #     - ./client:/app
+  #     - /app/node_modules
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - transcendence
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
 
   server:
     build:
       context: .
       dockerfile: ./server/dockerfile
     container_name: server
+    working_dir: /usr/src/app
     volumes:
-      - ./server:/var/www/server
-      - /var/www/server/node_modules
-    env_file:
-      - .env
-    networks:
-      - transcendence
-    restart: unless-stopped
+      - ./server:/usr/src/app
+      - node_modules_server:/usr/src/app/node_modules
     ports:
       - "4000:4000"
-
-  prometheus:
-    build:
-      context: ./prometheus
-      dockerfile: dockerfile
-    container_name: prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.external-url=/prometheus'
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    expose:
-      - "9090"
-    networks:
-      - transcendence
     restart: unless-stopped
 
-  grafana:
-    build:
-      context: ./grafana
-      dockerfile: dockerfile
-    container_name: grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
-      - GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL}
-      - GF_AUTH_ANONYMOUS_ENABLED=${GF_AUTH_ANONYMOUS_ENABLED}
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
-    depends_on:
-      - prometheus
-    volumes:
-      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
-      - ./grafana/datasources:/etc/grafana/provisioning/datasources
-      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - grafana_data:/var/lib/grafana
-    expose:
-      - "3000"
-    networks:
-      - transcendence
-    restart: unless-stopped
 
-  node_exporter:
-    build:
-      context: ./node_exporter
-      dockerfile: dockerfile
-    container_name: node_exporter
-    expose:
-      - "9100"
-    networks:
-      - transcendence
-    restart: unless-stopped
+  # prometheus:
+  #   build:
+  #     context: ./prometheus
+  #     dockerfile: dockerfile
+  #   container_name: prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #     - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+  #     - '--web.console.templates=/usr/share/prometheus/consoles'
+  #     - '--web.external-url=/prometheus'
+  #   volumes:
+  #     - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  #   expose:
+  #     - "9090"
+  #   networks:
+  #     - transcendence
+  #   restart: unless-stopped
 
-  # ---------------------- #
-  #  CERTIFICATES BUILDER  #
-  # ---------------------- #
+  # grafana:
+  #   build:
+  #     context: ./grafana
+  #     dockerfile: dockerfile
+  #   container_name: grafana
+  #   environment:
+  #     - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+  #     - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+  #     - GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL}
+  #     - GF_AUTH_ANONYMOUS_ENABLED=${GF_AUTH_ANONYMOUS_ENABLED}
+  #     - GF_SERVER_SERVE_FROM_SUB_PATH=true
+  #   depends_on:
+  #     - prometheus
+  #   volumes:
+  #     - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+  #     - ./grafana/datasources:/etc/grafana/provisioning/datasources
+  #     - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+  #     - grafana_data:/var/lib/grafana
+  #   expose:
+  #     - "3000"
+  #   networks:
+  #     - transcendence
+  #   restart: unless-stopped
+
+  # node_exporter:
+  #   build:
+  #     context: ./node_exporter
+  #     dockerfile: dockerfile
+  #   container_name: node_exporter
+  #   expose:
+  #     - "9100"
+  #   networks:
+  #     - transcendence
+  #   restart: unless-stopped
+
   es_certs:
     build:
       context: ./elk/certs
-      dockerfile: dockerfile
     container_name: es_certs
     user: "0"
     volumes:
-      - es_certs:/certs
+      - transcendence_certs:/usr/share/elasticsearch/config/certs
     networks:
       - transcendence
     restart: "no"
 
-  # ---------------------- #
-  #     ELASTICSEARCH      #
-  # ---------------------- #
+
   elasticsearch:
     build:
       context: ./elk/elasticsearch
@@ -113,7 +105,7 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
-      - es_certs:/usr/share/elasticsearch/config/certs
+      - transcendence_certs:/usr/share/elasticsearch/config/certs
     expose:
       - "9200"
     networks:
@@ -128,16 +120,13 @@ services:
       timeout: 10s
       retries: 10
 
-
-  # ---------------------- #
-  #      ES SETUP JOB      #
-  # ---------------------- #
   es_setup:
     build:
       context: ./elk/es_setup
     container_name: es_setup
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     environment:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - KIBANA_SYSTEM_PASSWORD=${KIBANA_SYSTEM_PASSWORD}
@@ -147,11 +136,6 @@ services:
       - transcendence
     restart: "no"
 
-
-
-  # ---------------------- #
-  #        KIBANA          #
-  # ---------------------- #
   kibana:
     build:
       context: ./elk/kibana
@@ -161,10 +145,12 @@ services:
       - KIBANA_SYSTEM_PASSWORD=${KIBANA_SYSTEM_PASSWORD}
       - KIBANA_ENCRYPTION_KEY=${KIBANA_ENCRYPTION_KEY}
     volumes:
-      - es_certs:/usr/share/kibana/config/certs:ro
+      - transcendence_certs:/usr/share/kibana/config/certs:ro
     depends_on:
-      - elasticsearch
-      - es_setup
+      elasticsearch:
+        condition: service_healthy
+      es_setup:
+        condition: service_completed_successfully
     expose:
       - "5601"
     ports:
@@ -173,9 +159,6 @@ services:
       - transcendence
     restart: unless-stopped
 
-  # ---------------------- #
-  #       LOGSTASH         #
-  # ---------------------- #
   logstash:
     build:
       context: ./elk/logstash
@@ -184,19 +167,18 @@ services:
     environment:
       - LOGSTASH_INTERNAL_PASSWORD=${LOGSTASH_INTERNAL_PASSWORD}
     volumes:
-      - es_certs:/usr/share/logstash/config/certs:ro
+      - transcendence_certs:/usr/share/logstash/config/certs:ro
     depends_on:
-      - elasticsearch
-      - es_setup
+      elasticsearch:
+        condition: service_healthy
+      es_setup:
+        condition: service_completed_successfully
     expose:
       - "5044"
     networks:
       - transcendence
     restart: unless-stopped
 
-  # ---------------------- #
-  #       FILEBEAT         #
-  # ---------------------- #
   filebeat:
     build:
       context: ./elk/filebeat
@@ -204,19 +186,19 @@ services:
     container_name: filebeat
     user: root
     volumes:
-      - es_certs:/usr/share/filebeat/certs:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/lib/docker/containers/:/hostfs/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - transcendence_certs:/data:ro
     depends_on:
-      - logstash
-      - es_setup
+      logstash:
+        condition: service_started
+      es_setup:
+        condition: service_completed_successfully
     networks:
       - transcendence
     restart: unless-stopped
 
-  # ---------------------- #
-  #         NGINX          #
-  # ---------------------- #
+
   nginx:
     build:
       context: .
@@ -236,5 +218,7 @@ networks:
 
 volumes:
   grafana_data:
+  node_modules_server:
   elastic_data:
-  es_certs:
+  transcendence_certs:
+    name: transcendence_certs

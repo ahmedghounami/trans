@@ -1,11 +1,21 @@
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+      host: "unix:///var/run/docker.sock"
+
 filebeat.inputs:
   - type: container
     enabled: true
     paths:
-      - /var/lib/docker/containers/*/*.log
+      - /hostfs/var/lib/docker/containers/*/*.log
     processors:
-      - add_docker_metadata: ~
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+
 
 output.logstash:
   hosts: ["logstash:5044"]
-  ssl.certificate_authorities: ["/usr/share/filebeat/certs/ca/ca.crt"]
+  ssl.certificate_authorities: ["/data/ca/ca.crt"]
+  ssl.certificate: "/data/filebeat/filebeat.crt"
+  ssl.key: "/data/filebeat/filebeat.key"
