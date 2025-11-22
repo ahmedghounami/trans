@@ -1,3 +1,5 @@
+import AvatarWithPresence from "../components/AvatarWithPresence";
+
 export default function Search({ searchResults, me, setSelected, value, setValue }: {
     searchResults: { id: number; name: string; picture?: string }[];
     me: number;
@@ -19,11 +21,9 @@ export default function Search({ searchResults, me, setSelected, value, setValue
                             setValue("");
                         }}
                     >
-                        <img
-                            src={user.picture || "/profile.jpg"}
-                            alt="Profile"
-                            className="w-10 h-10 rounded-full border-2 border-purple-600 shadow-md object-cover"
-                        />
+                                                <div>
+                                                    <AvatarWithPresence userId={user.id} src={user.picture || "/profile.png"} alt={user.name} sizeClass="w-10 h-10" imgClass="" />
+                                                </div>
                         <span className="text-white font-medium text-sm tracking-wide">
                             {user.name}
                         </span>

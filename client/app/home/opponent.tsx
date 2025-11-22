@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Loading from "../components/loading";
+import AvatarWithPresence from "../components/AvatarWithPresence";
 
 export default function OpponentInfo({ id }:
   { id: string }
@@ -28,11 +29,7 @@ export default function OpponentInfo({ id }:
         window.location.href = `/profile/${opponent.id}`;
       }
       }>
-      <img
-        src={opponent.picture}
-        alt="opponent"
-        className="w-6 h-6 rounded-full"
-      />
+      <AvatarWithPresence userId={opponent.id} src={opponent.picture || "/profile.png"} alt="opponent" sizeClass="w-6 h-6" imgClass="rounded-full" />
       {opponent.name}
     </div>
   );

@@ -15,7 +15,7 @@ export default function Leftheader() {
 
     const navItems = [
         { href: "/home", icon: <GoHomeFill size={26} />, label: "Home" },
-        { href: "/games", icon: <IoGameController size={26} />, label: "Games" },
+        { href: "/games", icon: <IoGameController size={26} />, label: "games" },
         { href: "/chat", icon: <IoChatbubbleSharp size={26} />, label: "Chat" },
         { href: "/shop", icon: <FaShoppingCart size={26} />, label: "Shop" },
     ];
@@ -73,8 +73,6 @@ export default function Leftheader() {
                 <span className="text-xs mt-10 opacity-0 group-hover:opacity-100 transition duration-300"
 
                 >
-
-
                     Logout
                 </span>
             </button>

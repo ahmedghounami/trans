@@ -2,6 +2,7 @@
 
 import { Snippet } from "next/font/google";
 import { Suspense, useEffect, useState } from "react";
+import AvatarWithPresence from "../components/AvatarWithPresence";
 
 export default function UserInfo({
   user,
@@ -55,11 +56,9 @@ export default function UserInfo({
       className={`flex p-1 items-center hover:bg-[#a9a8a847] rounded-lg transition-colors duration-200 cursor-pointer ${selected === user.id ? 'bg-[#a9a8a847]' : ''}`}
       onClick={selectedhandler}
     >
-      <img
-        src={user.picture}
-        alt={user.name}
-        className="w-12 h-12 rounded-full m-2 border-2 border-purple-600 shadow-md object-cover"
-      />
+      <div className="m-2">
+        <AvatarWithPresence userId={user.id} src={user.picture || "/profile.png"} alt={user.name} />
+      </div>
       <div className="flex flex-col">
         <h3 className="text-white font-semibold">{user.name}</h3>
         <p className="text-gray-400 text-sm">{lastmessage || "No messages yet"}</p>

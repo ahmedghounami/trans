@@ -6,19 +6,19 @@ import { get } from 'http';
 
 const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const CustomTooltip = ({ active, payload, label }) =>
+const CustomTooltip: React.FC<any> = ({ active, payload, label }: any) =>
     active && payload?.length ? (
         <div className="bg-gray-800 p-3 rounded-lg border border-gray-600 shadow-lg">
             <p className="text-white font-medium">{label}</p>
             {payload.map((entry, i) => (
-                <p key={i} style={{ color: entry.color }} className="text-sm">
-                    {entry.dataKey}: {entry.value}
-                </p>
+                    <p key={i} style={{ color: entry.color }} className="text-sm">
+                        {entry.dataKey}: {entry.value}
+                    </p>
             ))}
         </div>
     ) : null;
 
-const SimplePerformanceChart = ({ games = [], user }) => {
+const SimplePerformanceChart: React.FC<{ games?: any[]; user?: any }> = ({ games = [], user }: { games?: any[]; user?: any }) => {
     if (!games || !user) return <Loading />;
 
     const today = new Date();
@@ -34,13 +34,29 @@ const SimplePerformanceChart = ({ games = [], user }) => {
         };
     });
 
-    games.forEach(({ date, winner_id }) => {
-        const dayData = last7Days.find(d => d.date === new Date(date).toISOString().split('T')[0]);
-        if (dayData) {
-            if (winner_id === user.id) dayData.wins++;
-            else if (winner_id !== 0) dayData.losses++;
+    // Normalize and accumulate games into the last7Days buckets.
+    games.forEach((g: any) => {
+        try {
+            const rawDate = g.date || g.created_at || g.timestamp || g.played_at || g.createdAt;
+            const winner_id = g.winner_id ?? g.winnerId ?? g.winner;
+            if (!rawDate) return;
+            const gameDateStr = new Date(rawDate).toISOString().split('T')[0];
+            const dayData = last7Days.find((d: any) => d.date === gameDateStr);
+            if (dayData) {
+                if (Number(winner_id) === Number(user.id)) dayData.wins++;
+                else if (Number(winner_id) !== 0) dayData.losses++;
+            }
+        } catch (e) {
+            // ignore malformed dates
+            return;
         }
     });
+
+    // If all buckets are empty, chart will still render axes; log for debugging
+    const allZero = last7Days.every(d => d.wins === 0 && d.losses === 0);
+    if (allZero) {
+        // console.debug('PerformanceChart: no activity in last 7 days for user', user?.id);
+    }
 
     return (
         <div className="flex-1/2 flex flex-col justify-between  border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm rounded-lg p-6 border bg-[#2b24423d]">
@@ -55,12 +71,12 @@ const SimplePerformanceChart = ({ games = [], user }) => {
 
             {/* Chart */}
             <div className="flex-1 min-h-[250px]">
-                <ResponsiveContainer width="90%">
+                <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={last7Days} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis dataKey="day" stroke="#9ca3af" fontSize={12} />
                         <YAxis stroke="#9ca3af" fontSize={12} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={(props: any) => <CustomTooltip {...props} />} />
                         <Line type="monotone" dataKey="wins" stroke="#0ea5e9" strokeWidth={6} dot />
                         <Line type="monotone" dataKey="losses" stroke="#8b5cf6" strokeWidth={6} dot />
                     </LineChart>

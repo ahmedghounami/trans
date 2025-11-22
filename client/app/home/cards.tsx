@@ -3,7 +3,7 @@ import { Trophy, Flame, Coins, Star, Crown, BarChart3 } from 'lucide-react';
 import { Calendar, TrendingUp, Clock } from "lucide-react";
 
 
-const StatCard = ({ icon: Icon, label, value, trend, color = "from-purple-500 to-blue-600", subtitle }) => {
+const StatCard = ({ icon: Icon, label, value, trend = 0, color = "from-purple-500 to-blue-600", subtitle }: any) => {
     return (
         <div
             className="relative bg-gradient-to-br from-black/50 to-purple-900/20 backdrop-blur-md rounded-xl p-4 h-28 w-full 
@@ -39,15 +39,15 @@ const StatCard = ({ icon: Icon, label, value, trend, color = "from-purple-500 to
     );
 };
 
-export default function PingPongAchievements({ games, user }) {
+export default function PingPongAchievements({ games, user }: any) {
     const gameCount = games.length;
-    const totalGold = user.gold || 0;
-    const winrate = gameCount > 0 ? Math.round((games.filter((g) => g.winner_id === user.id).length / gameCount) * 100) : 0;
+    const totalGold = (user as any)?.gold ?? 0;
+    const winrate = gameCount > 0 ? Math.round((games.filter((g: any) => g.winner_id === (user as any)?.id).length / gameCount) * 100) : 0;
 
     const streak = (() => {
         let maxStreak = 0, current = 0;
         for (let i = 0; i < games.length; i++) {
-            if (games[i].winner_id === user.id) current++;
+            if ((games[i] as any).winner_id === (user as any)?.id) current++;
             else {
                 maxStreak = Math.max(maxStreak, current);
                 current = 0;
@@ -58,7 +58,7 @@ export default function PingPongAchievements({ games, user }) {
 
     const recentForm = () => {
         const recent = games.slice(-5);
-        const wins = recent.filter((g) => g.winner_id === user.id).length;
+        const wins = recent.filter((g: any) => g.winner_id === (user as any)?.id).length;
         return recent.length > 0 ? Math.round((wins / recent.length) * 100) : 0;
     };
 
@@ -72,18 +72,18 @@ export default function PingPongAchievements({ games, user }) {
     const favoriteTimeSlot = () => {
         if (games.length === 0) return "N/A";
         const slots = { morning: 0, afternoon: 0, evening: 0, night: 0 };
-        games.forEach((g) => {
+        games.forEach((g: any) => {
             const h = new Date(g.created_at || Date.now()).getHours();
             if (h >= 6 && h < 12) slots.morning++;
             else if (h >= 12 && h < 17) slots.afternoon++;
             else if (h >= 17 && h < 22) slots.evening++;
             else slots.night++;
         });
-        const maxSlot = Object.keys(slots).reduce((a, b) => (slots[a] > slots[b] ? a : b));
+        const maxSlot = (Object.keys(slots) as Array<keyof typeof slots>).reduce((a, b) => (slots[a] > slots[b] ? a : b));
         return maxSlot.charAt(0).toUpperCase() + maxSlot.slice(1);
     };
-    const wins = games.filter(game => game.winner_id === user.id).length;
-    const draw = games.filter(game => game.winner_id === 0).length;
+    const wins = games.filter((game: any) => game.winner_id === (user as any)?.id).length;
+    const draw = games.filter((game: any) => game.winner_id === 0).length;
     const progress = (wins + (draw / 2)) % 10; // Assuming 10 wins + 5 draws = 1 level
     const xp = (wins * 100) + draw * 50; // Assuming each win gives 100 XP and each draw gives 50 XP
     const level = Math.floor((wins + (draw / 2)) / 10); // 10 wins or 5 draws = 1 level

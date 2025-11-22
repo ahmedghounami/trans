@@ -49,6 +49,7 @@ export default function Requests({ onClose, onFriendAccepted }) {
 
   const handleAccept = async (friendId: number) => {
     if (!user) return;
+
     try {
       const res = await fetch(`http://localhost:4000/friends/accept`, {
         method: "PUT",
@@ -67,6 +68,7 @@ export default function Requests({ onClose, onFriendAccepted }) {
 
   const handleDecline = async (friendId: number) => {
     if (!user) return;
+
     try {
       const res = await fetch(`http://localhost:4000/friends/remove`, {
         method: "POST",
@@ -114,6 +116,7 @@ export default function Requests({ onClose, onFriendAccepted }) {
                   </div>
                   <span className="text-white">{request.name}</span>
                 </div>
+
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleAccept(request.id)}

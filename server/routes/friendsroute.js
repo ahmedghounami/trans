@@ -11,6 +11,19 @@ export default async function friendRoutes(fastify, opts) {
     try {
       const result = await handleAddFriend(db, Number(userId), Number(friendId));
 
+      if (result.autoAccepted) {
+        // 🔥 Auto accept happened
+        io.to(`user:${userId}`).emit("friends:updated");
+        io.to(`user:${friendId}`).emit("friends:updated");
+
+        return reply.send({
+          success: true,
+          autoAccepted: true,
+          message: "You are now friends!",
+        });
+      }
+
+      // Otherwise normal request
       io.to(`user:${friendId}`).emit("friends:request:incoming", {
         fromUserId: Number(userId),
       });
@@ -20,6 +33,7 @@ export default async function friendRoutes(fastify, opts) {
       reply.status(400).send({ success: false, error: err.message });
     }
   });
+
 
   fastify.get("/friends/accepted", (request, reply) => {
     const userId = Number(request.query.userId);
@@ -33,8 +47,7 @@ export default async function friendRoutes(fastify, opts) {
         u.gold,
         CAST(u.games AS INTEGER) AS games,
         CAST(u.win AS INTEGER) AS win,
-        CAST(u.lose AS INTEGER) AS lose,
-        f.is_favorite
+        CAST(u.lose AS INTEGER) AS lose
       FROM friends f
       JOIN users u ON u.id = f.friend_id
       WHERE f.user_id = ? AND f.is_request = 0
@@ -48,8 +61,7 @@ export default async function friendRoutes(fastify, opts) {
         u.gold,
         CAST(u.games AS INTEGER) AS games,
         CAST(u.win AS INTEGER) AS win,
-        CAST(u.lose AS INTEGER) AS lose,
-        f.is_favorite
+        CAST(u.lose AS INTEGER) AS lose
       FROM friends f
       JOIN users u ON u.id = f.user_id
       WHERE f.friend_id = ? AND f.is_request = 0
@@ -85,9 +97,11 @@ export default async function friendRoutes(fastify, opts) {
       return reply.status(400).send({ error: "Missing userId or friendId" });
 
     db.run(
-      `DELETE FROM friends 
-       WHERE (user_id = ? AND friend_id = ?)
-          OR (user_id = ? AND friend_id = ?)`,
+      `
+      DELETE FROM friends 
+      WHERE (user_id = ? AND friend_id = ?)
+         OR (user_id = ? AND friend_id = ?)
+    `,
       [userId, friendId, friendId, userId],
       function (err) {
         if (err) return reply.status(500).send({ error: "Database error" });
@@ -132,51 +146,6 @@ export default async function friendRoutes(fastify, opts) {
         io.to(`user:${friendId}`).emit("friends:updated");
 
         reply.send({ message: "Friend request accepted!" });
-      }
-    );
-  });
-
-  fastify.post("/friends/setfavorite", async (request, reply) => {
-    const { userId, friendId } = request.body;
-    if (!userId || !friendId)
-      return reply.status(400).send({ error: "Missing userId or friendId" });
-
-    db.run(
-      `
-        UPDATE friends
-        SET is_favorite = 1
-        WHERE user_id = ? AND friend_id = ? AND is_request = 0
-      `,
-      [userId, friendId],
-      function (err) {
-        if (err) return reply.status(500).send({ error: "Database error" });
-        if (this.changes === 0)
-          return reply.status(404).send({ error: "Friend not found" });
-
-        reply.send({ message: "Favorite added" });
-      }
-    );
-  });
-
-
-  fastify.post("/friends/removefavorite", async (request, reply) => {
-    const { userId, friendId } = request.body;
-    if (!userId || !friendId)
-      return reply.status(400).send({ error: "Missing userId or friendId" });
-
-    db.run(
-      `
-        UPDATE friends
-        SET is_favorite = 0
-        WHERE user_id = ? AND friend_id = ? AND is_request = 0
-      `,
-      [userId, friendId],
-      function (err) {
-        if (err) return reply.status(500).send({ error: "Database error" });
-        if (this.changes === 0)
-          return reply.status(404).send({ error: "Friend not found" });
-
-        reply.send({ message: "Favorite removed" });
       }
     );
   });

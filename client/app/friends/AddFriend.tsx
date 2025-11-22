@@ -82,8 +82,7 @@ const AddFriend = ({ onClose }: { onClose: () => void }) => {
           `http://localhost:4000/friends/request?userId=${user.id}`
         );
         const data = await res.json();
-        const ids = data.data.map((r: { friend_id: number }) => r.friend_id);
-        setRequestedIds(ids);
+        setRequestedIds(data.data.map((r) => r.friend_id));
       } catch (err) {
         console.error(err);
       }
@@ -95,8 +94,7 @@ const AddFriend = ({ onClose }: { onClose: () => void }) => {
           `http://localhost:4000/friends/myrequests?userId=${user.id}`
         );
         const data = await res.json();
-        const ids = data.data.map((r: { user_id: number }) => r.user_id);
-        setIncomingRequestIds(ids);
+        setIncomingRequestIds(data.data.map((r) => r.user_id));
       } catch (err) {
         console.error(err);
       }
@@ -108,8 +106,7 @@ const AddFriend = ({ onClose }: { onClose: () => void }) => {
           `http://localhost:4000/friends/accepted?userId=${user.id}`
         );
         const data = await res.json();
-        const ids = data.data.map((f: { id: number }) => f.id);
-        setFriendsIds(ids);
+        setFriendsIds(data.data.map((f) => f.id));
       } catch (err) {
         console.error(err);
       }

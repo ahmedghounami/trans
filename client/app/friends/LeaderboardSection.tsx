@@ -7,9 +7,6 @@ import Loading from "../components/loading";
 import { useUser } from "../Context/UserContext";
 import socket from "@/app/socket";
 
-const sortUsersByFavorite = (users) =>
-  [...users].sort((a, b) => (b.is_favorite ? 1 : 0) - (a.is_favorite ? 1 : 0));
-
 const LeaderboardSection = () => {
   const { user, loading } = useUser();
   const [friends, setFriends] = useState([]);
@@ -23,7 +20,7 @@ const LeaderboardSection = () => {
         `http://localhost:4000/friends/accepted?userId=${user.id}`
       );
       const data = await res.json();
-      setFriends(sortUsersByFavorite(data.data));
+      setFriends(data.data); // 🔥 favorite removed
     } catch (err) {
       console.error("Failed to fetch friends:", err);
     }
@@ -37,11 +34,9 @@ const LeaderboardSection = () => {
     fetchFriends();
 
     socket.on("friends:updated", fetchFriends);
-    socket.on("friends:favorite:changed", fetchFriends);
 
     return () => {
       socket.off("friends:updated", fetchFriends);
-      socket.off("friends:favorite:changed", fetchFriends);
     };
   }, [user, fetchFriends]);
 
@@ -50,7 +45,6 @@ const LeaderboardSection = () => {
   return (
     <div className="w-full max-w-[100rem] p-2 relative flex flex-col h-screen max-h-screen">
       <BottomButtons onRefreshFriends={() => setRefreshToggle((prev) => !prev)} />
-
       <UsersCard friends={friends} setUsers={setFriends} />
     </div>
   );
