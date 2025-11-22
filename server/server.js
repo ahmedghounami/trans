@@ -3,11 +3,9 @@ import cors from '@fastify/cors';
 import sqlite3 from 'sqlite3';
 import { Server } from 'socket.io';
 import { sockethandler } from './socket.js';
+import { rpsHandler } from './rps.js';
 
 import game from './game.js';
-
-// rps
-import rps from './rps.js'
 
 const fastify = Fastify();
 
@@ -148,6 +146,7 @@ const io = new Server(httpServer, {
 });
 
 sockethandler(io, db);
+rpsHandler(io, db);
 
 await fastify.ready();
 const PORT = 4000;
