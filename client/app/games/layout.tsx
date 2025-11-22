@@ -42,7 +42,7 @@ export default function Games({
 	const [selected, setselected] = useState<Selected>({ types: [], type: 0 });
 	const [skins, setSkins] = useState<Skin[]>([]);
 	const { user } = useUser() as { user: MinimalUser; loading: boolean };
-	console.log(user);
+	// console.log(user);
 	useEffect(() => {
 		if (user) {
 			async function fetchOwnedSkins() {

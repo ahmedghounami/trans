@@ -44,6 +44,7 @@ const gameApiRoute = async (fastify, options) => {
 			if (ingame) {
 				return reply.status(409).send({
 					success: false,
+					alreadyInGame: true,
 					error: "player already exists in an active game",
 				});
 			}

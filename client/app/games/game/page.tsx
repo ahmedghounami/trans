@@ -1,15 +1,16 @@
 /** @format */
 
 "use client";
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import Loader from "@/app/components/loading";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Loading from "@/app/components/loading";
 import { Homecontext } from "../layout";
 import { io } from "socket.io-client";
 import Tournament from "@/app/components/Tournament";
+import WinAnimation from "@/app/components/WinAnimation";
+import LoseAnimation from "@/app/components/LoseAnimation";
+import LocalGameWinAnimation from "@/app/components/LocalGameWinAnimation";
 
 type Score = { p1: number; p2: number };
 type PositionsType = {
@@ -30,12 +31,12 @@ type PlayersData = {
 };
 
 type TournamentPlayers = {
-	p1: string;
-	p1_id: number;
-	p2: string;
-	p2_id: number;
-	winer: number;
-	gamestatus: number;
+	p1?: string;
+	p1_id?: string | number;
+	p2?: string;
+	p2_id?: string | number;
+	winer?: number;
+	gamestatus?: number;
 };
 
 export default function Game() {
@@ -59,6 +60,16 @@ export default function Game() {
 		p2_name: "Player 1",
 		p2_img: "",
 	});
+	const [showWinAnimation, setShowWinAnimation] = useState(false);
+	const [winnerData, setWinnerData] = useState<{
+		name: string;
+		img: string;
+	} | null>(null);
+	const [alreadyInGame, setAlreadyInGame] = useState(false);
+	const isInitializing = useRef(false);
+	const tournamentTransitionScheduled = useRef(false);
+	const isTournamentTransitioning = useRef(false);
+
 	const serchParams = useSearchParams();
 	const [gametype, setgametype] = useState<string | null>(
 		serchParams.get("gametype")
@@ -68,16 +79,24 @@ export default function Game() {
 	if (!oppid) oppid = 0;
 
 	useEffect(() => {
-		console.log(gametype, Positions, tournamentplayers);
+		// console.log(gametype, Positions, tournamentplayers);
 
 		if (gametype == "tournament" && tournamentplayers.gamestatus == 1) {
-			console.log("touuurlocal");
+			// console.log("touuurlocal");
 
 			setgametype("local");
 			return;
 		}
 		if (!user || gametype == "tournament") return;
 		async function newgame() {
+			// Prevent duplicate initialization in React Strict Mode (dev mode)
+			if (isInitializing.current) {
+				console.log("Game already initializing, skipping duplicate request");
+				return;
+			}
+
+			isInitializing.current = true;
+
 			try {
 				const sessionid = crypto.randomUUID();
 				const response = await fetch("http://localhost:4000/api/games/start", {
@@ -101,6 +120,18 @@ export default function Game() {
 					}),
 				});
 				const res = await response.json();
+				console.log(res);
+
+				if (res.alreadyInGame == true) {
+					console.log("Player is already in an active game");
+					isInitializing.current = false;
+
+					setAlreadyInGame(true);
+					setTimeout(() => {
+						router.push("/games");
+					}, 5000);
+					return;
+				}
 				if (response.ok) {
 					sessionStorage.setItem("gameSessionId", sessionid);
 
@@ -120,10 +151,36 @@ export default function Game() {
 							Curentplayer: data.Curentplayer,
 						} as PositionsType);
 
-						// Disconnect when game ends
+						// Handle game end with animation
 						if (data.positions.win !== 0) {
-							socket.disconnect();
+							// Determine winner
+							const winner =
+								data.positions.win === 1
+									? {
+											name: data.players_info.p1_name,
+											img: data.players_info.p1_img,
+									  }
+									: {
+											name: data.players_info.p2_name,
+											img: data.players_info.p2_img,
+									  };
+
+							setWinnerData(winner);
+							setShowWinAnimation(true);
+
+							// Clear session and disconnect after animation
+							setTimeout(() => {
+								sessionStorage.removeItem("gameSessionId");
+								socket.disconnect();
+							}, 4000);
 						}
+					});
+
+					// Handle server-initiated disconnect
+					socket.on("disconnect", (reason) => {
+						console.log("Socket disconnected:", reason);
+						sessionStorage.removeItem("gameSessionId");
+						isInitializing.current = false;
 					});
 
 					// Helper function to emit key events
@@ -173,22 +230,45 @@ export default function Game() {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					(window as any).emitKey = emitKey;
 
+					// Handle navigation away from game (back button, route change, etc.)
+					const handleBeforeUnload = () => {
+						sessionStorage.removeItem("gameSessionId");
+						isInitializing.current = false;
+						socket.disconnect();
+					};
+
+					const handleRouteChange = () => {
+						sessionStorage.removeItem("gameSessionId");
+						isInitializing.current = false;
+						socket.disconnect();
+					};
+
+					window.addEventListener("beforeunload", handleBeforeUnload);
+					window.addEventListener("popstate", handleRouteChange);
+
 					document.addEventListener("keydown", handleKeyDown);
 					document.addEventListener("keyup", handleKeyUp);
+
 					return () => {
+						window.removeEventListener("beforeunload", handleBeforeUnload);
+						window.removeEventListener("popstate", handleRouteChange);
 						document.removeEventListener("keydown", handleKeyDown);
 						document.removeEventListener("keyup", handleKeyUp);
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						delete (window as any).gameSocket;
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						delete (window as any).emitKey;
+						sessionStorage.removeItem("gameSessionId");
+						isInitializing.current = false;
 						socket.disconnect();
 					};
 				} else {
 					console.log(res.error);
+					isInitializing.current = false;
 				}
 			} catch (error) {
 				console.log(error);
+				isInitializing.current = false;
 			}
 		}
 		const cleanup = newgame() as unknown as (() => void) | undefined;
@@ -217,8 +297,11 @@ export default function Game() {
 		}
 	}, [user, setselected]);
 	async function tournamentstates() {
-		console.log("tournament win", playersdata, Positions, tournamentplayers);
+		// console.log("tournament win", playersdata, Positions, tournamentplayers);
 
+		// Clear win animation states before transitioning
+		setShowWinAnimation(false);
+		setWinnerData(null);
 		setPositions({});
 		setgametype("tournament");
 		settournamentplayers({
@@ -226,6 +309,25 @@ export default function Game() {
 			gamestatus: 0,
 			winer: (Positions.win as number) || 0,
 		});
+	}
+
+	// Show already in game message
+	if (alreadyInGame) {
+		return (
+			<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50 absolute top-0 bottom-0 left-0 right-0">
+				<div className="bg-gray-800 p-8 rounded-lg text-center max-w-md border-2 border-yellow-500">
+					<div className="text-6xl mb-6">⚠️</div>
+					<h2 className="text-3xl font-bold mb-4 text-yellow-500">
+						Game Already In Progress
+					</h2>
+					<p className="text-lg mb-6 text-gray-300">
+						You already have a game session active. Please finish or exit that
+						game first.
+					</p>
+					<p className="text-sm text-gray-400">Redirecting to games...</p>
+				</div>
+			</div>
+		);
 	}
 
 	if (gametype == "tournament") {
@@ -253,7 +355,7 @@ export default function Game() {
 
 	if (Positions.win != 0) {
 		if (tournamentplayers.p1_id != 0 && tournamentplayers.winer == 0) {
-			console.log("HEERE");
+			// Tournament game ended - no animation for individual matches
 			if (
 				tournamentplayers.p1 != playersdata.p1_name ||
 				tournamentplayers.p2 != playersdata.p2_name
@@ -263,17 +365,98 @@ export default function Game() {
 				return;
 			}
 
-			tournamentstates();
-			return <></>;
-		} else {
-			setTimeout(() => {
-				router.push("/games");
-			}, 0);
+			// Schedule tournament state change immediately (no animation delay)
+			if (!tournamentTransitionScheduled.current) {
+				tournamentTransitionScheduled.current = true;
+				isTournamentTransitioning.current = true;
+				setTimeout(() => {
+					tournamentstates();
+					tournamentTransitionScheduled.current = false;
+					isTournamentTransitioning.current = false;
+				}, 100); // Quick transition back to tournament screen
+			}
+
+			// Don't show animation for individual tournament matches
+			// Animation only shown when entire tournament is won
 			return (
-				<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50  absolute top-0 bottom-0 left-0 right-0   ">
-					{Positions.win == 1 ? <Loader></Loader> : <Loader></Loader>}
+				<div className="bg-gray-400/30 backdrop-blur-sm flex flex-col justify-center items-center z-50 absolute top-0 bottom-0 left-0 right-0">
+					<Loading />
 				</div>
 			);
+		} else if (!showWinAnimation) {
+			setTimeout(() => {
+				router.push("/games");
+			}, 4000);
+
+			const winner =
+				Positions.win === 1
+					? {
+							name: playersdata.p1_name,
+							img: playersdata.p1_img,
+					  }
+					: {
+							name: playersdata.p2_name,
+							img: playersdata.p2_img,
+					  };
+
+			if (gametype === "local") {
+				// Local game - just show the winner
+				return (
+					<LocalGameWinAnimation
+						winnerName={winner.name}
+						winnerImg={winner.img}
+					/>
+				);
+			} else {
+				// Online game - show win or lose based on player 1 result
+				const isPlayer1Lose = Positions.win === 2;
+
+				if (isPlayer1Lose) {
+					// Player 1 lost - show lose animation
+					return <LoseAnimation />;
+				} else {
+					// Player 1 won - show victory animation
+					return (
+						<WinAnimation
+							winnerName={winner.name}
+							winnerImg={winner.img}
+						/>
+					);
+				}
+			}
+		}
+	}
+
+	// Show win animation overlay if active (triggered by socket event)
+	if (showWinAnimation && winnerData) {
+		setTimeout(() => {
+			router.push("/games");
+		}, 4000);
+
+		if (gametype === "local") {
+			// Local game - just show the winner
+			return (
+				<LocalGameWinAnimation
+					winnerName={winnerData.name}
+					winnerImg={winnerData.img}
+				/>
+			);
+		} else {
+			// Online game - check if current player (player 1) is the winner
+			const isPlayer1Winner = winnerData.name === playersdata.p1_name;
+
+			if (!isPlayer1Winner) {
+				// Player 1 lost - show lose animation
+				return <LoseAnimation />;
+			} else {
+				// Player 1 won - show victory animation
+				return (
+					<WinAnimation
+						winnerName={winnerData.name}
+						winnerImg={winnerData.img}
+					/>
+				);
+			}
 		}
 	}
 
@@ -312,11 +495,13 @@ export default function Game() {
 								width={60}
 								height={60}
 								alt="profile"></Image> */}
-							<img src={
-									(Positions.Curentplayer == 1
+							<img
+								src={
+									Positions.Curentplayer == 1
 										? playersdata.p1_img
-										: playersdata.p2_img)}
-									alt="profile"></img>
+										: playersdata.p2_img
+								}
+								alt="profile"></img>
 						</div>
 						<p className="text-sm md:text-base">
 							{Positions.Curentplayer == 1
@@ -351,11 +536,13 @@ export default function Game() {
 								width={60}
 								height={60}
 								alt="profile"></Image> */}
-							<img src={
-									(Positions.Curentplayer == 1
+							<img
+								src={
+									Positions.Curentplayer == 1
 										? playersdata.p2_img
-										: playersdata.p1_img)}
-									alt="profile"></img>
+										: playersdata.p1_img
+								}
+								alt="profile"></img>
 						</div>
 					</div>
 				</div>

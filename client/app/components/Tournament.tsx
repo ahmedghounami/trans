@@ -101,6 +101,9 @@ function Tournamentbracket({
 			newfinals.sort((a, b) => Number(a.id) - Number(b.id));
 			setfinals(newfinals);
 		}
+		return () => {
+			console.log("cleanup");
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [players]);
 	useEffect(() => {
@@ -419,6 +422,8 @@ export default function Tournament({
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [showWinnerAnimation, setShowWinnerAnimation] = useState(false);
 	const [tournamentWinner, setTournamentWinner] = useState<string>("");
+	const [isBlocked, setIsBlocked] = useState(false);
+	const [currentWindowId, setCurrentWindowId] = useState<string>("");
 
 	// Load from sessionStorage after mount to avoid hydration mismatch
 	useEffect(() => {
@@ -429,34 +434,48 @@ export default function Tournament({
 		const savedPlayers = localStorage.getItem(`tournament_players_${userId}`);
 		const savedStarted = localStorage.getItem(`tournament_started_${userId}`);
 		const savedTournamentId = localStorage.getItem(`tournament_id_${userId}`);
-		const currentWindowId = sessionStorage.getItem("currentWindowId");
+		const savedWindowId = sessionStorage.getItem("currentWindowId");
 
 		// Generate unique window ID if not exists
-		if (!currentWindowId) {
+		if (!savedWindowId) {
 			const newWindowId = crypto.randomUUID();
 			sessionStorage.setItem("currentWindowId", newWindowId);
+			setCurrentWindowId(newWindowId);
+		} else {
+			setCurrentWindowId(savedWindowId);
 		}
 
-		const thisWindowId = sessionStorage.getItem("currentWindowId");
+		const thisWindowId = sessionStorage.getItem("currentWindowId") || "";
 
-		// If tournament exists but no owner, claim it
-		if (!savedTournamentId && (savedPlayers || savedFinals)) {
-			localStorage.setItem(`tournament_id_${userId}`, thisWindowId || "");
+		// Check if there's an active tournament in another tab
+		if (savedTournamentId && savedTournamentId !== thisWindowId) {
+			// Another tab has the tournament open, block this one
+			setIsBlocked(true);
+			setTimeout(() => {
+				router.push("/games");
+			}, 3000);
+			return;
 		}
-		// This window already owns it or no tournament exists
-		else if (savedTournamentId === thisWindowId) {
-			// Keep the current tournament ID
-		}
-		// No tournament at all, claim it
-		else {
-			localStorage.setItem(`tournament_id_${userId}`, thisWindowId || "");
-		}
+
+		// Claim tournament ownership for this tab
+		localStorage.setItem(`tournament_id_${userId}`, thisWindowId);
 
 		if (savedFinals) setfinals(JSON.parse(savedFinals));
 		if (savedPlayers) setplayers(JSON.parse(savedPlayers));
 		if (savedStarted) setstarted(JSON.parse(savedStarted));
 
 		setIsLoaded(true);
+
+		// Heartbeat to maintain ownership (update every 2 seconds)
+		const heartbeatInterval = setInterval(() => {
+			const currentOwner = localStorage.getItem(`tournament_id_${userId}`);
+			if (currentOwner === thisWindowId) {
+				localStorage.setItem(
+					`tournament_heartbeat_${userId}`,
+					Date.now().toString()
+				);
+			}
+		}, 2000);
 
 		// Cleanup tournament ownership when navigating away or closing tab
 		const handleBeforeUnload = () => {
@@ -466,16 +485,35 @@ export default function Tournament({
 			// Only remove if this window owns the tournament
 			if (savedTournamentId === currentWindowId) {
 				localStorage.removeItem(`tournament_id_${userId}`);
+				localStorage.removeItem(`tournament_heartbeat_${userId}`);
+			}
+		};
+
+		// Handle visibility change (tab switching)
+		const handleVisibilityChange = () => {
+			if (!document.hidden) {
+				// Tab became visible, check if we still own the tournament
+				const currentOwner = localStorage.getItem(`tournament_id_${userId}`);
+				if (currentOwner && currentOwner !== thisWindowId) {
+					// Someone else took over, redirect this tab
+					setIsBlocked(true);
+					setTimeout(() => {
+						router.push("/games");
+					}, 2000);
+				}
 			}
 		};
 
 		window.addEventListener("beforeunload", handleBeforeUnload);
+		document.addEventListener("visibilitychange", handleVisibilityChange);
 
 		return () => {
+			clearInterval(heartbeatInterval);
 			window.removeEventListener("beforeunload", handleBeforeUnload);
+			document.removeEventListener("visibilitychange", handleVisibilityChange);
 			handleBeforeUnload(); // Also cleanup on component unmount
 		};
-	}, [user]);
+	}, [user, router]);
 
 	useEffect(() => {
 		if (!isLoaded || !user?.id) return;
@@ -498,13 +536,17 @@ export default function Tournament({
 			// Auto-close after 5 seconds
 			setTimeout(() => {
 				setShowWinnerAnimation(false);
+				if (user?.id) {
+					// Clear tournament data on completion
+					localStorage.removeItem(`tournament_id_${user.id}`);
+					localStorage.removeItem(`tournament_heartbeat_${user.id}`);
+					localStorage.removeItem(`tournament_finals_${user.id}`);
+					localStorage.removeItem(`tournament_players_${user.id}`);
+					localStorage.removeItem(`tournament_started_${user.id}`);
+				}
 				router.push("/games");
 				setfinals([]);
 				setplayers([]);
-				localStorage.removeItem(`tournament_id_${user.id}`);
-				localStorage.removeItem(`tournament_finals_${user.id}`);
-				localStorage.removeItem(`tournament_players_${user.id}`);
-				localStorage.removeItem(`tournament_started_${user.id}`);
 			}, 5000);
 		}
 	}, [players, isLoaded, user, finals, router]);
@@ -555,6 +597,23 @@ export default function Tournament({
 	}, [winer, id, isLoaded, finals, settournamentplayers]);
 	return (
 		<div className="bg-gray-400/30 backdrop-blur-sm flex justify-center items-center z-50 absolute top-0 bottom-0 left-0 right-0">
+			{/* Blocked Screen - Tournament open in another tab */}
+			{isBlocked && (
+				<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md">
+					<div className="bg-gray-800 p-8 rounded-lg text-center max-w-md border-2 border-red-500">
+						<div className="text-6xl mb-6">🚫</div>
+						<h2 className="text-3xl font-bold mb-4 text-red-500">
+							Tournament Already Active
+						</h2>
+						<p className="text-lg mb-6 text-gray-300">
+							You have this tournament open in another tab. Please close or
+							complete that tournament first.
+						</p>
+						<p className="text-sm text-gray-400">Redirecting to games...</p>
+					</div>
+				</div>
+			)}
+
 			{/* Winner Animation */}
 			{showWinnerAnimation && (
 				<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md">
@@ -581,6 +640,18 @@ export default function Tournament({
 				<div className="flex gap-4 mb-8">
 					<button
 						onClick={() => {
+							// Release ownership before going back
+							if (user?.id) {
+								const thisWindowId = sessionStorage.getItem("currentWindowId");
+								const savedTournamentId = localStorage.getItem(
+									`tournament_id_${user.id}`
+								);
+
+								if (savedTournamentId === thisWindowId) {
+									localStorage.removeItem(`tournament_id_${user.id}`);
+									localStorage.removeItem(`tournament_heartbeat_${user.id}`);
+								}
+							}
 							router.push("/games");
 						}}
 						className="bg-gray-600 cursor-pointer px-4 py-2 rounded-sm">
@@ -594,6 +665,7 @@ export default function Tournament({
 							setstarted(false);
 							settournamentplayers({});
 							localStorage.removeItem(`tournament_id_${user.id}`);
+							localStorage.removeItem(`tournament_heartbeat_${user.id}`);
 							localStorage.removeItem(`tournament_finals_${user.id}`);
 							localStorage.removeItem(`tournament_players_${user.id}`);
 							localStorage.removeItem(`tournament_started_${user.id}`);
