@@ -35,7 +35,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (!user?.id) return;
 
     try {
-      const res = await fetch(`/api/notifications?userId=${user.id}`);
+      const res = await fetch(`http://localhost:4000/notifications?userId=${user.id}`);
       const data = await res.json();
       setNotifications(data);
       setUnreadCount(data.filter((n: Notification) => !n.is_read).length);
@@ -48,7 +48,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (!user?.id) return;
 
     try {
-      await fetch(`/api/notifications/${notificationId}/read?userId=${user.id}`, {
+      await fetch(`http://localhost:4000/notifications/${notificationId}/read?userId=${user.id}`, {
         method: "PUT",
       });
 
@@ -65,7 +65,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (!user?.id) return;
 
     try {
-      await fetch(`/api/notifications/${notificationId}?userId=${user.id}`, {
+      await fetch(`http://localhost:4000/notifications/${notificationId}?userId=${user.id}`, {
         method: "DELETE",
       });
 
@@ -80,7 +80,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (!user?.id || !socket) return;
+    if (!user?.id) return;
 
     // Fetch initial notifications
     fetchNotifications();
@@ -100,24 +100,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    // Listen for expired game invitations
-    const handleGameInviteExpired = (data: { senderId: number }) => {
-      console.log("⏰ Game invite expired from sender:", data.senderId);
-      // Remove all game invites from that sender and update unread count
-      setNotifications((prev) => {
-        const expiredUnread = prev.filter(
-          (n: Notification) => n.type === 'game_invite' && n.sender_id === data.senderId && !n.is_read
-        ).length;
-        
-        setUnreadCount((current: number) => Math.max(0, current - expiredUnread));
-        
-        return prev.filter((n: Notification) => !(n.type === 'game_invite' && n.sender_id === data.senderId));
-      });
-    };
-
     console.log("🎧 Setting up notification listener for user:", user.id);
     socket.on("new_notification", handleNewNotification);
-    socket.on("game_invite_expired", handleGameInviteExpired);
 
     // Request notification permission if not granted
     if ('Notification' in window && Notification.permission === 'default') {
@@ -126,12 +110,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     return () => {
       console.log("🔇 Cleaning up notification listener");
-      if (socket) {
-        socket.off("new_notification", handleNewNotification);
-        socket.off("game_invite_expired", handleGameInviteExpired);
-      }
+      socket.off("new_notification", handleNewNotification);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   return (

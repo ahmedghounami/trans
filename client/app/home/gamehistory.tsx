@@ -1,9 +1,7 @@
 import { Gamepad2 } from "lucide-react";
 import HistoryItem from "./historyitem";
-import { Game, User } from "../types/game";
 
-export default function GameHistory({ user, games }: { user: User | null; games: Game[] }) {
-    if (!user) return null;
+export default function GameHistory({ user, games }) {
     return (
         <div className="flex-1/2 h-[400px] bg-[#2b24423d] rounded-xl flex flex-col gap-2 border border-[#7b5ddf3d] shadow-[0_0_10px_#7b5ddf22] backdrop-blur-sm ">
             <h1 className="flex items-center gap-2 text-lg font-extrabold text-white p-4 w-full border-b border-[#7b5ddf44] tracking-wide bg-[#ffffff08] rounded-t-xl">
@@ -22,18 +20,19 @@ export default function GameHistory({ user, games }: { user: User | null; games:
             {/* Scrollable table body takes all remaining space */}
             <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-2 space-y-2 h-100 ">
                 {games.length > 0 ? (
-                    games.map((game: Game) => {
+                    games.map((game) => {
                         const isPlayer1 = user.id === game.player1_id;
-                        const myScore = isPlayer1 ? (game.player1_score ?? 0) : (game.player2_score ?? 0);
-                        const opponentScore = isPlayer1 ? (game.player2_score ?? 0) : (game.player1_score ?? 0);
-                        const myGold = isPlayer1 ? (game.player1_gold_earned ?? 0) : (game.player2_gold_earned ?? 0);
-                        const opponentId = isPlayer1 ? (game.player2_id ?? 0) : (game.player1_id ?? 0);
+                        const myScore = isPlayer1 ? game.player1_score : game.player2_score;
+                        const opponentScore = isPlayer1 ? game.player2_score : game.player1_score;
+                        const myGold = isPlayer1 ? game.player1_gold_earned : game.player2_gold_earned;
+                        const opponentId = isPlayer1 ? game.player2_id : game.player1_id;
                         const didWin = game.winner_id === user.id;
                         const isDraw = game.winner_id === 0;
 
                         return (
                             <HistoryItem
-                                date={game.date || game.created_at || ''}
+                                isPlayer1={isPlayer1}
+                                date={game.date}
                                 opponentId={opponentId}
                                 opponentScore={opponentScore}
                                 myScore={myScore}

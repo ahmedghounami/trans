@@ -21,12 +21,14 @@ export default async function userRoutes(fastify, opts) {
     return new Promise((resolve, reject) => {
       db.get(`SELECT * FROM users WHERE id = ?`, [userId], (err, row) => {
         if (err) {
-          return reject({ statusCode: 500, error: "Database error" });
+          reply.status(500).send({ error: "Database error" });
+          return reject(err);
         }
         if (!row) {
-          return reject({ statusCode: 404, error: "User not found" });
+          reply.status(404).send({ error: "User not found" });
+          return resolve(null);
         }
-        resolve({
+        reply.send({
           id: row.id,
           name: row.name,
           email: row.email,
@@ -34,17 +36,10 @@ export default async function userRoutes(fastify, opts) {
           gold: row.gold,
           games: row.games,
           win: row.win,
-          lose: row.lose,
-          rps_wins: row.rps_wins || 0,
-          rps_losses: row.rps_losses || 0,
-          rps_draws: row.rps_draws || 0
+          lose: row.lose
         });
+        resolve(row);
       });
-    }).catch(err => {
-      if (err.statusCode) {
-        return reply.status(err.statusCode).send({ error: err.error });
-      }
-      throw err;
     });
   });
 }

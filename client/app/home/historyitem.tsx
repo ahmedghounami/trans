@@ -1,14 +1,16 @@
 import OpponentInfo from "./opponent";
 
-export default function HistoryItem({ date, opponentId, opponentScore, myScore, myGold, didWin, isDraw }:
+export default function HistoryItem({ iisPlayer1, date, opponentId, opponentScore, myScore, myGold, didWin, isDraw, game }:
     {
+        iisPlayer1: boolean,
         date: string,
-        opponentId: number,
+        opponentId: string,
         opponentScore: number,
         myScore: number,
         myGold: number,
         didWin: boolean,
-        isDraw: boolean
+        isDraw: boolean,
+        game: any
     }
 ) {
     return (

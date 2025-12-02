@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Game } from "../types/game";
+
+type Game = { winner_id: number };
 
 const StatusCard = ({ icon, label, count, delay }: { icon: string; label: string; count: number; delay: number; }) => {
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 18 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay, duration: 0.45, type: "spring" as const }}
+            transition={{ delay, duration: 0.45, type: "spring" }}
             whileHover={{ scale: 1.03, boxShadow: "0 10px 30px rgba(0,0,0,0.35)" }}
-            className="w-full sm:w-36 md:w-40 lg:w-36 p-4 rounded-2xl shadow-lg border border-[#7b5ddf44] text-white flex flex-col items-start overflow-hidden backdrop-blur-md bg-gradient-to-b from-[#2a2340aa] to-[#1a142ccc] group transition-all duration-300"
+            className="w-full sm:w-36 md:w-40 lg:w-46 p-4 rounded-2xl shadow-lg border border-[#7b5ddf44] text-white flex flex-col items-start overflow-hidden backdrop-blur-md bg-gradient-to-b from-[#2a2340aa] to-[#1a142ccc] group transition-all duration-300"
         >
             <div className="flex items-center w-full">
                 <div className="flex-shrink-0">
@@ -30,15 +31,16 @@ const StatusCard = ({ icon, label, count, delay }: { icon: string; label: string
     );
 };
 
-export default function Games_status({ userId }: { userId: string | number }) {
+export default function Games_status({ userId }: { userId: string }) {
     const [games, setGames] = useState(0);
     const [win, setWin] = useState(0);
     const [lost, setLost] = useState(0);
+    const [draw, setDraw] = useState(0);
 
     useEffect(() => {
         const fetchGamesStatus = async () => {
             try {
-                const response = await fetch(`/api/games/${userId}`);
+                const response = await fetch(`http://localhost:4000/games/${userId}`);
                 if (!response.ok) throw new Error("Failed to fetch");
                 const data: Game[] = await response.json();
 
@@ -49,6 +51,7 @@ export default function Games_status({ userId }: { userId: string | number }) {
                         (game) => game.winner_id !== Number(userId) && game.winner_id !== 0
                     ).length
                 );
+                setDraw(games - win - lost);
             } catch (err) {
                 console.error("Error:", err);
             }
@@ -59,7 +62,7 @@ export default function Games_status({ userId }: { userId: string | number }) {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full flex items-center">
             <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3 justify-items-stretch">
-                <StatusCard icon="/total.png" label="Games" count={games} delay={0.05} />
+                <StatusCard icon="/total.png" label="Total Games" count={games} delay={0.05} />
                 <StatusCard icon="/win.png" label="Wins" count={win} delay={0.12} />
                 <StatusCard icon="/loss.png" label="Losses" count={lost} delay={0.18} />
             </div>

@@ -1,69 +1,70 @@
+// ========================================
+// User Context - Global Authentication State
+// ========================================
+// This provides user data to all components in the app
+
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
+import Cookies from "js-cookie";
 import socket from "../socket";
 
-// User interface with proper typing
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  picture?: string;
-  [key: string]: unknown;
-}
-
-// Context type definition
-interface UserContextType {
-  user: User | null;
-  loading: boolean;
-  setUser: (u: User | null) => void;
-}
-
 // Create context for sharing user data across components
-export const UserContext = createContext<UserContextType>({
+export const UserContext = createContext({
   user: null,
   loading: true,
   // expose a setter so components can update user immediately after mutations
-  setUser: () => {},
+  setUser: (u: any) => {},
 });
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);      // Store user data (name, email, picture, etc)
+  const [user, setUser] = useState(null);      // Store user data (name, email, picture, etc)
   const [loading, setLoading] = useState(true); // Track if we're still fetching user data
 
+  // ========================================
   // Fetch User Data on App Load
-  // Runs once when app starts to verify token and get user info
+  // ========================================
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        console.log('🔍 UserContext: Fetching user data from /api/me');
-        
-        // Verify token with backend /me endpoint (token is in httpOnly cookie)
-        const res = await fetch("/api/me", {
-          credentials: 'include',  // Automatically sends httpOnly cookie
+        // Get JWT token from cookie (set during login)
+        const token = Cookies.get("token");
+        console.log("Fetched token from usecontext:", token);
+        // If no token exists, user is not logged in
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        // Ask server to verify token and get user data
+        const res = await fetch("http://localhost:4000/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,  // Send token to server
+          },
+          credentials: 'include',              // Include cookies in request
         });
         
-        console.log('📡 UserContext: Response status:', res.status);
-        
         if (!res.ok) {
-          console.warn('⚠️ UserContext: Failed to fetch user, status:', res.status);
-          setUser(null);
+          // If token is invalid or expired, remove it
+          if (res.status === 401) {
+            Cookies.remove("token");
+          }
           setLoading(false);
           return;
         }
         
-        // Token valid - save user data
+        // Save user data to state (now available to all components)
         const data = await res.json();
-        console.log('✅ UserContext: User data fetched successfully:', data);
+        console.log("User data fetched:", data);
         setUser(data);
         
-        // Join socket room for real-time chat/notifications
-        if (data?.id && socket) {
-          console.log('🔌 UserContext: Joining socket room for user:', data.id);
+        // Join socket room for this user
+        if (data?.id) {
           socket.emit("join", data.id);
+          console.log("🔗 Joined socket room for user:", data.id);
         }
       } catch (error) {
-        console.error("❌ UserContext: Error fetching user:", error);
-        setUser(null);
+        console.error("Error fetching me:", error);
+        // Don't show error to user, just log it
       } finally {
         setLoading(false);
       }
@@ -71,16 +72,12 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     fetchMe();
   }, []);
 
-  // Real-time Profile Updates
-  // Listen for profile updates from other clients and sync user data
+  // Listen for profile updates from other clients and update global user
   useEffect(() => {
-    if (!socket) return;
-
-    const handler = (payload: Partial<User> & { userId?: number }) => {
+    const handler = (payload: any) => {
       try {
         if (!payload || !payload.userId) return;
-        // Only update if the update is for current user
-        setUser((prev: User | null) => {
+        setUser((prev: any) => {
           if (!prev) return prev;
           if (prev.id === payload.userId) {
             return { ...prev, ...(payload || {}) };
@@ -93,11 +90,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     socket.on('user_profile_updated', handler);
-    return () => {
-      if (socket) {
-        socket.off('user_profile_updated', handler);
-      }
-    };
+    return () => { socket.off('user_profile_updated', handler); };
   }, []);
 
   // Make user data available to all child components

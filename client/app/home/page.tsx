@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react";
@@ -7,9 +8,8 @@ import PingPongAchievements from "./cards";
 import GameHistory from "./gamehistory";
 import PingPongPerformanceChart from "./chart";
 import { Coins, Crown, Flame, Trophy, LucideIcon } from "lucide-react";
+import Cookies from 'js-cookie';
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from "react";
-import { Game } from "../types/game";
 
 // Type definition for tier levels
 type TierType = "gold" | "silver" | "bronze";
@@ -27,8 +27,8 @@ interface AchievementCardProps {
 const AchievementCard = ({ icon: Icon, name, progress, total, completed = false, tier = "bronze" }: AchievementCardProps) => {
     const progressPercentage = total ? (progress / total) * 100 : 100;
     let displayTier: TierType = tier;
-    console.log("AchievementCard - completed:",name, completed, "tier:", tier);
     if (completed) displayTier = "gold";
+
     const tierStyles: Record<TierType, string> = {
         gold: "border-yellow-400/50 shadow-lg shadow-yellow-400/30 bg-gradient-to-br from-yellow-600/20 to-purple-600/20",
         silver: "border-blue-400/40 shadow-lg shadow-blue-400/20 bg-gradient-to-br from-purple-500/20 to-blue-500/20",
@@ -77,22 +77,28 @@ const AchievementCard = ({ icon: Icon, name, progress, total, completed = false,
                     </div>
                 </div>
             ) : (
-                <p className="text-green-400 font-bold text-xs uppercase">{completed ? "Achievement Unlocked!" : "No progress required"}</p>
+                <p className="text-green-400 font-bold text-xs uppercase">Mastered!</p>
             )}
         </div>
     );
 };
-
-function HomeContent() {
+export default function HomePage() {
     const { user, loading } = useUser();
-    const [games, setGames] = useState<Game[]>([]);
-    const searchParams = useSearchParams();    // Type assertion for user to access properties safely
+    const [games, setGames] = useState([]);
+    const searchParams = useSearchParams();
+    
+    // Type assertion for user to access properties safely
     const typedUser = user as { id: number; username?: string; email?: string } | null;
 
-    // Handle Google OAuth Errors (if any)
+    // ========================================
+    // Handle Google OAuth Redirect
+    // ========================================
+    // After Google authentication, user gets redirected here with token or error in URL
     useEffect(() => {
-        const error = searchParams.get('error');
+        const token = searchParams.get('token');  // JWT token from server
+        const error = searchParams.get('error');  // Error code if something went wrong
         
+        // If authentication failed, show error message
         if (error) {
             // Map error codes to user-friendly messages
             const errorMessages: { [key: string]: string } = {
@@ -105,15 +111,25 @@ function HomeContent() {
             alert(errorMessages[error] || 'Authentication failed. Please try again.');
             // Clean up URL (remove error parameter)
             window.history.replaceState({}, '', '/home');
+            return;
+        }
+        
+        // If we got a token, save it and authenticate user
+        if (token) {
+            // Save JWT token to browser cookie (valid for 7 days)
+            Cookies.set("token", token, {
+                expires: 7,                    // Token expires in 7 days
+                secure: false,                 // Set to false for localhost (use true in production with HTTPS)
+                sameSite: "lax",              // Protect against CSRF attacks
+            });
+            
+            // Clean up URL (remove token from address bar)
+            window.history.replaceState({}, '', '/home');
+            
+            // Reload page to fetch user data with new token
+            window.location.reload();
         }
     }, [searchParams]);
-
-    // Redirect to login if no user after loading completes
-    useEffect(() => {
-        if (!loading && !user) {
-            window.location.href = '/login';
-        }
-    }, [loading, user]);
 
     useEffect(() => {
         const fetch_user = async () => {
@@ -121,7 +137,7 @@ function HomeContent() {
             if (!typedUser || !typedUser.id) return;
             
             try {
-                const response = await fetch(`/api/games/${typedUser.id}`, {
+                const response = await fetch(`http://localhost:4000/games/${typedUser.id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -150,22 +166,14 @@ function HomeContent() {
         );
     }
 
-    const totalGold = (user as { gold?: number })?.gold ?? 0;
-    
-    // Calculate wins for First Victory achievement
-    const winCount = (() => {
-        if (!(user as { id?: number })?.id) return 0;
-        const wins = games.filter(game => game?.winner_id === (user as { id?: number })?.id).length;
-        // Cap at 1 for First Victory achievement (don't exceed 1/1)
-        return Math.min(wins, 1);
-    })();
-    
+    const gameCount = games.length;
+    const totalGold = (user as any)?.gold ?? 0;
     const streak = (() => {
         // If we don't have a user yet, there's no streak to compute
-        if (!(user as { id?: number })?.id) return 0;
+        if (!(user as any)?.id) return 0;
         let maxStreak = 0, current = 0;
         for (let i = 0; i < games.length; i++) {
-            if (games[i]?.winner_id === (user as { id?: number })?.id) current++;
+            if ((games[i] as any)?.winner_id === (user as any).id) current++;
             else {
                 maxStreak = Math.max(maxStreak, current);
                 current = 0;
@@ -190,28 +198,16 @@ function HomeContent() {
                         <h2 className="text-lg font-bold text-white">Achievements</h2>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <AchievementCard icon={Trophy} name="First Victory" progress={winCount} total={1} completed={winCount >= 1} />
+                        <AchievementCard icon={Trophy} name="First Victory" progress={gameCount} total={1} completed={gameCount > 0} />
                         <AchievementCard icon={Flame} name="Streak Master" progress={streak} total={10} completed={streak >= 10} />
                         <AchievementCard icon={Coins} name="Gold Master" progress={totalGold} total={1000} completed={totalGold >= 1000} />
-                        <AchievementCard icon={Crown} name="Champion" progress={0} total={0} completed={(user as { tounaments_won?: number })?.tounaments_won == 1} tier={`${(user as { tounaments_won?: number })?.tounaments_won == 1 ? "gold" : "bronze"}` as TierType} />
+                        <AchievementCard icon={Crown} name="Champion" progress={0} total={0} completed />
                     </div>
                 </div>
                 <GameHistory user={user} games={games} />
             </div>
         </div>
 
-    );
-}
-
-export default function HomePage() {
-    return (
-        <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center">
-                <Loading />
-            </div>
-        }>
-            <HomeContent />
-        </Suspense>
     );
 }
 

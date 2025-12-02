@@ -2,7 +2,6 @@
 
 // Import the GameAPI and gameResults from your existing game module
 // import { log } from "console";
-import fastify from "fastify";
 import { sessionsmap } from "../game.js";
 import { randomUUID } from "crypto";
 
@@ -12,7 +11,7 @@ const gameApiRoute = async (fastify, options) => {
 	// === GAME INITIALIZATION ===
 
 	// Start a new game session
-	fastify.post("/games/start", async (request, reply) => {
+	fastify.post("/api/games/start", async (request, reply) => {
 		try {
 			const {
 				player_id,
@@ -37,7 +36,6 @@ const gameApiRoute = async (fastify, options) => {
 					error: "missing data",
 				});
 			}
-
 			const ingame = Array.from(sessionsmap.values()).some(
 				(player) =>
 					(player.players_info.p1_id == player_id && player.p1_ready) ||
@@ -46,7 +44,6 @@ const gameApiRoute = async (fastify, options) => {
 			if (ingame) {
 				return reply.status(409).send({
 					success: false,
-					alreadyInGame: true,
 					error: "player already exists in an active game",
 				});
 			}
@@ -56,14 +53,6 @@ const gameApiRoute = async (fastify, options) => {
 						session.gametype == "online" &&
 						session.players_info.p1_id == player2_id
 				);
-				if (!invitedSession) {
-					// Session not found - host may have disconnected
-					return reply.status(404).send({
-						success: false,
-						sessionNotFound: true,
-						error: "Game session no longer exists. Host may have disconnected.",
-					});
-				}
 				if (invitedSession) {
 					const [sessionId, session] = invitedSession;
 					session.players_info.p2_id = player_id;
@@ -128,7 +117,7 @@ const gameApiRoute = async (fastify, options) => {
 			});
 		}
 	});
-	fastify.get("/games/active", async (request, reply) => {
+	fastify.get("/api/games/active", async (request, reply) => {
 		try {
 			const activeSessions = Array.from(sessionsmap.entries()).map(
 				([sessionId, session]) => ({
@@ -168,7 +157,7 @@ const gameApiRoute = async (fastify, options) => {
 	});
 
 	// Get specific game session details
-	fastify.get("/games/session/:sessionId", async (request, reply) => {
+	fastify.get("/api/games/:sessionId", async (request, reply) => {
 		try {
 			const { sessionId } = request.params;
 			const session = sessionsmap.get(sessionId);
@@ -201,53 +190,9 @@ const gameApiRoute = async (fastify, options) => {
 			});
 		}
 	});
-	fastify.post("/tournament_win/:userId", async (request, reply) => {
-		const { userId } = request.params;
 
-		if (!userId) {
-			return reply.status(400).send({ success: false, error: "User ID is required" });
-		}
-
-		// Verify user exists
-		const userExists = await new Promise((resolve) => {
-			db.get('SELECT id FROM users WHERE id = ?', [userId], (err, row) => {
-				resolve(!!row && !err);
-			});
-		});
-
-		if (!userExists) {
-			return reply.status(404).send({ success: false, error: "User not found" });
-		}
-
-		try {
-			
-			db.run(
-				`UPDATE users SET tounaments_won =  ? WHERE id = ?`,
-				[1, userId],
-				function (err) {
-					if (err) {
-						console.error("Error updating tournaments won:", err);
-						return reply.status(500).send({
-							success: false,
-							error: "Failed to update tournaments won",
-						});
-					}
-					return reply.send({
-						success: true,
-						message: "Tournaments won updated successfully",
-					});
-				}
-			);
-		} catch (error) {
-			console.error("Error updating tournaments won:", error);
-			return reply.status(500).send({
-				success: false,
-				error: "Failed to update tournaments won",
-			});
-		}
-	});
 	// End a game session
-	fastify.post("/games/session/:sessionId/end", async (request, reply) => {
+	fastify.post("/api/games/:sessionId/end", async (request, reply) => {
 		try {
 			const { sessionId } = request.params;
 			const session = sessionsmap.get(sessionId);

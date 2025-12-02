@@ -19,39 +19,9 @@ export default async function gameRoutes(fastify, opts) {
 	fastify.post("/games/:player1_id/:player2_id", async (req, reply) => {
 		const player1_id = req.params.player1_id;
 		const player2_id = req.params.player2_id;
-		console.log("Received game result for players:", player1_id, player2_id);
 
 		if (!player1_id || !player2_id) {
 			reply.status(400).send({ error: "Player IDs are required" });
-			return;
-		}
-
-		// Prevent playing against yourself
-		if (player1_id === player2_id) {
-			reply.status(400).send({ error: "Cannot play against yourself" });
-			return;
-		}
-
-		// Verify both players exist
-		const player1Exists = await new Promise((resolve) => {
-			db.get('SELECT id FROM users WHERE id = ?', [player1_id], (err, row) => {
-				resolve(!!row && !err);
-			});
-		});
-
-		if (!player1Exists) {
-			reply.status(404).send({ error: "Player 1 not found" });
-			return;
-		}
-
-		const player2Exists = await new Promise((resolve) => {
-			db.get('SELECT id FROM users WHERE id = ?', [player2_id], (err, row) => {
-				resolve(!!row && !err);
-			});
-		});
-
-		if (!player2Exists) {
-			reply.status(404).send({ error: "Player 2 not found" });
 			return;
 		}
 
@@ -98,6 +68,25 @@ export default async function gameRoutes(fastify, opts) {
 					winner_id == player1_id,
 					winner_id == player2_id,
 					player1_id,
+				],
+				(err) => {
+					if (err) {
+						reply.status(500).send({ error: "Database error" });
+						return reject(err);
+					}
+				}
+			),
+			db.run(
+				`UPDATE users SET gold = gold + ?,
+                          games = games + 1,
+                          win = win + ?,
+                          lose = lose + ? 
+                      WHERE id = ?`,
+				[
+					player2_gold_earned,
+					winner_id == player2_id,
+					winner_id == player1_id,
+					player2_id,
 				],
 				(err) => {
 					if (err) {

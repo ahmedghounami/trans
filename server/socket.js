@@ -1,5 +1,3 @@
-import { checkFriendship, checkBlock } from './utils/friendshipHelper.js';
-
 const sockethandler = (io, db) => {
   io.on("connection", (socket) => {
     console.log("⚡ Socket.IO client connected:", socket.id);
@@ -17,7 +15,7 @@ const sockethandler = (io, db) => {
       }
     });
 
-    socket.on("chat message", async (msg) => {
+    socket.on("chat message", (msg) => {
       const { content, sender_id, receiver_id, status } = msg;
 
       if (!status) {
@@ -26,60 +24,28 @@ const sockethandler = (io, db) => {
       }
 
       console.log("📩 Received message:", msg);
-
-      try {
-        // Check if sender is blocked by receiver OR receiver is blocked by sender
-        const block = await checkBlock(db, sender_id, receiver_id);
-        if (block) {
-          console.log("🚫 Message blocked between users", sender_id, receiver_id);
-          socket.emit("message_blocked", {
-            sender_id,
-            receiver_id,
-            message: block.blocker_id === sender_id 
-              ? "You have blocked this user. Unblock to send messages." 
-              : "This user has blocked you. You cannot send messages."
-          });
-          return;
-        }
-
-        // Check if users are friends
-        const areFriends = await checkFriendship(db, sender_id, receiver_id);
-        if (!areFriends) {
-          console.log("🚫 Users are not friends", sender_id, receiver_id);
-          socket.emit("message_blocked", {
-            sender_id,
-            receiver_id,
-            message: "You can only send messages to friends"
-          });
-          return;
-        }
-
-        // Users are friends and not blocked, insert message
-        db.run(
-          `INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)`,
-          [sender_id, receiver_id, content],
-          function (err) {
-            if (err) {
-              console.error("❌ Error inserting message:", err.message);
-              return;
-            }
-
-            const messageData = {
-              id: this.lastID,
-              content,
-              sender_id,
-              receiver_id,
-              status: true,
-              created_at: new Date().toISOString(),
-            };
-           
-            io.to(`user:${sender_id}`).emit("new message", messageData);
-            io.to(`user:${receiver_id}`).emit("new message", messageData);
+      db.run(
+        `INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)`,
+        [sender_id, receiver_id, content],
+        function (err) {
+          if (err) {
+            console.error("❌ Error inserting message:", err.message);
+            return;
           }
-        );
-      } catch (error) {
-        console.error("❌ Error in chat message handler:", error);
-      }
+
+          const messageData = {
+            id: this.lastID,
+            content,
+            sender_id,
+            receiver_id,
+            status: true,
+            created_at: new Date().toISOString(),
+          };
+         
+          io.to(`user:${sender_id}`).emit("new message", messageData);
+          io.to(`user:${receiver_id}`).emit("new message", messageData);
+        }
+      );
     });
 
     // Respond with list of currently connected user IDs
@@ -175,41 +141,6 @@ const sockethandler = (io, db) => {
         console.error('Error handling profile_updated', err);
       }
     });
-
-    // Send friend request
-    socket.on("friends:request:send", ({ fromUserId, toUserId }) => {
-      console.log(`📨 Friend request sent from ${fromUserId} → ${toUserId}`);
-
-      io.to(`user:${toUserId}`).emit("friends:request:incoming", {
-        fromUserId
-      });
-    });
-
-    // When friend request accepted or removed
-    socket.on("friends:update", ({ userA, userB }) => {
-      console.log(`🔄 Friends updated between ${userA} & ${userB}`);
-      io.to(`user:${userA}`).emit("friends:updated");
-      io.to(`user:${userB}`).emit("friends:updated");
-    });
-
-    // Handle block event and broadcast to both users
-    socket.on('user_blocked', (data) => {
-      const { blocker_id, blocked_id } = data;
-      console.log(`🚫 User ${blocker_id} blocked user ${blocked_id}`);
-      // Notify both users
-      io.to(`user:${blocker_id}`).emit('user_blocked', data);
-      io.to(`user:${blocked_id}`).emit('user_blocked', data);
-    });
-
-    // Handle unblock event and broadcast to both users
-    socket.on('user_unblocked', (data) => {
-      const { blocker_id, blocked_id } = data;
-      console.log(`✅ User ${blocker_id} unblocked user ${blocked_id}`);
-      // Notify both users
-      io.to(`user:${blocker_id}`).emit('user_unblocked', data);
-      io.to(`user:${blocked_id}`).emit('user_unblocked', data);
-    });
-
   });
 };
 

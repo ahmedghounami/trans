@@ -4,7 +4,7 @@ import Loading from "../components/loading";
 import AvatarWithPresence from "../components/AvatarWithPresence";
 
 export default function OpponentInfo({ id }:
-  { id: number | string }
+  { id: string }
 
 ) {
   const [opponent, setOpponent] = useState(null);
@@ -12,7 +12,7 @@ export default function OpponentInfo({ id }:
   useEffect(() => {
     const fetchOpponent = async () => {
       try {
-        const res = await fetch(`/api/users/${id}`);
+        const res = await fetch(`http://localhost:4000/users/${id}`);
         const data = await res.json();
         setOpponent(data);
       } catch (err) {

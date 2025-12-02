@@ -1,7 +1,10 @@
 const schemaGetNotifications = {
   querystring: {
     type: "object",
-    properties: {},
+    properties: {
+      userId: { type: "integer" },
+    },
+    required: ["userId"],
   },
 };
 
@@ -13,6 +16,13 @@ const schemaMarkAsRead = {
     },
     required: ["id"],
   },
+  querystring: {
+    type: "object",
+    properties: {
+      userId: { type: "integer" },
+    },
+    required: ["userId"],
+  },
 };
 
 export default async function notificationRoutes(fastify, options) {
@@ -20,11 +30,7 @@ export default async function notificationRoutes(fastify, options) {
 
   // GET /notifications - Fetch all notifications for a user
   fastify.get("/notifications", { schema: schemaGetNotifications }, async (request, reply) => {
-    const userId = request.user?.id; // Get userId from authenticated user
-
-    if (!userId) {
-      return reply.status(401).send({ error: "Unauthorized" });
-    }
+    const { userId } = request.query;
 
     return new Promise((resolve, reject) => {
       db.all(
@@ -50,11 +56,7 @@ export default async function notificationRoutes(fastify, options) {
   // PUT /notifications/:id/read - Mark notification as read
   fastify.put("/notifications/:id/read", { schema: schemaMarkAsRead }, async (request, reply) => {
     const { id } = request.params;
-    const userId = request.user?.id; // Get userId from authenticated user
-
-    if (!userId) {
-      return reply.status(401).send({ error: "Unauthorized" });
-    }
+    const { userId } = request.query;
 
     return new Promise((resolve, reject) => {
       db.run(
@@ -75,11 +77,7 @@ export default async function notificationRoutes(fastify, options) {
   // DELETE /notifications/:id - Delete a notification
   fastify.delete("/notifications/:id", { schema: schemaMarkAsRead }, async (request, reply) => {
     const { id } = request.params;
-    const userId = request.user?.id; // Get userId from authenticated user
-
-    if (!userId) {
-      return reply.status(401).send({ error: "Unauthorized" });
-    }
+    const { userId } = request.query;
 
     return new Promise((resolve, reject) => {
       db.run(

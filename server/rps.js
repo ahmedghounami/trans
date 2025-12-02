@@ -1,10 +1,16 @@
+import { WebSocketServer } from "ws"
+import sqlite3 from 'sqlite3';
+
+// Connect to the same database
+const db = new sqlite3.Database('sqlite.db');
+
 /*
 what the room object looks like: 
     {
 
         room_id,
         half_choice,
-        half_socketId,
+        half_soc,
         half_userId
 
     }
@@ -41,82 +47,53 @@ const NO_CHOICE = -1
 let rooms = []
 let room_exists
 
-// Socket.IO RPS handler
-const rpsHandler = (io, db) => {
-    io.on('connection', (socket) => {
-        console.log("⚡ RPS player connected:", socket.id)
-        let userId = null // store user id for this connection
-        let currentRoomId = null // track which room this socket is in
+// create new socket on port 8090
+const ws = new WebSocketServer ( {port: 8090} )
+
+ws.on('connection' , ( ws , req ) => {
+    console.log (" rps player connected ")
+    let userId = null // store user id for this connection
+
+    ws.on('message', ( data ) => {
+        const msg = JSON.parse(data)
+
+        console.log (`rps message received ${msg.roomId} , ${msg.type}`)
 
         // store userId when provided
-        socket.on('set_user', (data) => {
-            userId = data.userId
-            console.log(`👤 User ${userId} connected for RPS`)
-        })
+        if (msg.userId) {
+            userId = msg.userId
+        }
 
         // when the Join button is clicked
-        socket.on('create_or_join_room', (msg) => {
-            console.log(`🎮 create_or_join_room received ${msg.roomId}`)
-            
-            if (msg.userId) {
-                userId = msg.userId
-            }
-
+        if ( msg.type === "create_or_join_room" )
+        {
             room_exists = false
-            let room = null
             for ( let i = 0 ; i < rooms.length ; i++ )
                 if ( rooms[i].room_id === msg.roomId )
                 {
                     room_exists = true
-                    room = rooms[i]
-                    console.log("🔄 room already exists")
+                    console.log("room already exists")
                     break
+
                 }
 
             if ( !room_exists )
-            {
                 rooms.push({
                     room_id: msg.roomId,
                     half_choice: NO_CHOICE,
-                    half_socketId: null,
-                    half_userId: userId
+                    half_soc: null,
+                    half_userId: null
                 })
-            }
-            else if (room && room.half_userId === userId)
-            {
-                // Cannot join own room
-                socket.emit('rps_error', 'Cannot play with yourself!')
-                return
-            }
-            else if (room)
-            {
-                // Check how many sockets are already in the room
-                const roomSockets = io.sockets.adapter.rooms.get(msg.roomId)
-                if (roomSockets && roomSockets.size >= 2)
-                {
-                    socket.emit('rps_error', 'Room is full!')
-                    return
-                }
-            }
-
-            // Join the Socket.IO room
-            socket.join(msg.roomId)
-            currentRoomId = msg.roomId
-            
-            // Notify all players in the room
-            io.to(msg.roomId).emit('player_joined', { roomId: msg.roomId })
 
             console.log(rooms)
-        })
+            
+
+        }
+
 
         // when a choice is clicked
-        socket.on('rps', (msg) => {
-            console.log(`✊✋✌️ rps message received ${msg.roomId} , choice: ${msg.choice}`)
-            
-            if (msg.userId) {
-                userId = msg.userId
-            }
-
+        if ( msg.type == "rps" )
+        {
             let room = null
             let result
             let half_turn = 0
@@ -125,11 +102,11 @@ const rpsHandler = (io, db) => {
                 if ( rooms[i].room_id === msg.roomId )
                 {
 
-                    if ( rooms[i].half_choice == NO_CHOICE && rooms[i].half_socketId == null )
+                    if ( rooms[i].half_choice == NO_CHOICE && rooms[i].half_soc == null )
                     {
                         half_turn = 1
                         rooms[i].half_choice = msg.choice
-                        rooms[i].half_socketId = socket.id
+                        rooms[i].half_soc = ws
                         rooms[i].half_userId = userId
                     }
                     room = rooms[i]
@@ -138,68 +115,43 @@ const rpsHandler = (io, db) => {
 
             if ( !room )
             {
-                socket.disconnect()
+                ws.close()
                 // remove room from array
                 return
             }
 
-            if ( !half_turn && socket.id == room.half_socketId )
+            if ( !half_turn && ws == room.half_soc )
             {
-                socket.disconnect()
+                ws.close()
                 // remove room from array
                 return
             }
-
-            // Prevent player from playing with themselves
-            if ( !half_turn && userId === room.half_userId )
-            {
-                socket.emit('rps_error', 'Cannot play with yourself!')
-                return
-            }
-
             if ( room && !half_turn )
             {
                 result = rps_winner( msg.choice , room.half_choice )
                 
                 // Update database for both players
-                updateRPSStats(db, userId, result)
-                updateRPSStats(db, room.half_userId, -result)
+                updateRPSStats(userId, result)
+                updateRPSStats(room.half_userId, -result)
                 
-                // Send results to both players
-                socket.emit('rps_result', result)
-                io.to(room.half_socketId).emit('rps_result', -result)
-                
-                // Reset room for next game
-                room.half_socketId = null
+                ws.send( result )
+                room.half_soc.send( -result )
+                room.half_soc = null
                 room.half_choice = NO_CHOICE
                 room.half_userId = null
                 // remove room from array
             }
-        })
+            
 
-        socket.on('disconnect', () => {
-            console.log("❌ RPS player disconnected:", socket.id)
-            
-            // Notify other players in the room
-            if (currentRoomId) {
-                socket.to(currentRoomId).emit('player_left')
-            }
-            
-            // Find and clean up any room this player was in
-            for (let i = 0; i < rooms.length; i++) {
-                if (rooms[i].half_socketId === socket.id) {
-                    rooms[i].half_socketId = null
-                    rooms[i].half_choice = NO_CHOICE
-                    rooms[i].half_userId = null
-                    break
-                }
-            }
-        })
-    })
-}
+        }
+
+
+    } )
+
+})
 
 // Function to update RPS stats in database
-function updateRPSStats(db, userId, result) {
+function updateRPSStats(userId, result) {
     if (!userId) return
     
     let column = ''
@@ -218,4 +170,5 @@ function updateRPSStats(db, userId, result) {
     }
 }
 
-export { rpsHandler }
+
+export default {}

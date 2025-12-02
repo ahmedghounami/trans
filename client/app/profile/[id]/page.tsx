@@ -1,31 +1,20 @@
 
 "use client";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useUser } from "../../Context/UserContext";
 import ProfileHeader from "../profileheader";
 import { useParams, useRouter } from "next/navigation";
 import Loading from "@/app/components/loading";
 import EditProfile from "../editProfile";
 import PingPongPerformanceChart from "../../home/chart";
+import PingPongAchievements from "../../home/cards";
+import GameHistory from "../../home/gamehistory";
 import RPSSummary from "../RPSSummary";
 
-type User = {
-    id: number;
-    name: string;
-    picture?: string;
-    gold?: number;
-};
-
-type Game = {
-    id: number;
-    winner_id?: number;
-    player1_id?: number;
-    player2_id?: number;
-};
-
 export default function Profile() {
-    const [games, setGames] = useState<Game[]>([]);
-    const [user, setUser] = useState<User | null>(null); // Changed from array to null
+    const [games, setGames] = useState<any[]>([]);
+    const [user, setUser] = useState<any | null>(null); // Changed from array to null
     const [loading, setLoading] = useState(true);
     const { id } = useParams();
     const router = useRouter();
@@ -37,11 +26,11 @@ export default function Profile() {
             if (!currentUser) return;
             // If the fetched profile matches the currently logged in user, update the displayed user
             try {
-                const currId = (currentUser as { id?: number }).id;
+                const currId = (currentUser as any).id;
                 if (String(currId) === String(id)) {
                     setUser(currentUser);
                 }
-            } catch {
+            } catch (e) {
                 // ignore
             }
         }, [currentUser, id]);
@@ -55,7 +44,7 @@ export default function Profile() {
     useEffect(() => {
         const fetch_user = async () => {
             try {
-                const response = await fetch(`/api/users/${id}`, {
+                const response = await fetch(`http://localhost:4000/users/${id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -83,7 +72,7 @@ export default function Profile() {
     useEffect(() => {
         const fetch_games = async () => {
             try {
-                const response = await fetch(`/api/games/${id}`, {
+                const response = await fetch(`http://localhost:4000/games/${id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -125,13 +114,14 @@ export default function Profile() {
             {editMode && (
                 <EditProfile
                     setEditMode={setEditMode}
+                    editMode={editMode}
                     user={user}
                 />
             )}
             <ProfileHeader user={user} games={games} setEditMode={setEditMode} />
             {/* ////////////////////////////////////////////////////////// */}
             <div className="flex flex-col gap-4 max-h-[40%] p-4">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <PingPongPerformanceChart user={user} games={games} />
                     <RPSSummary
                     user={user}

@@ -1,34 +1,12 @@
-'use client';
+import { io } from "socket.io-client";
 
-import { io, Socket } from "socket.io-client";
-
-let socket: Socket | null = null;
-
-if (typeof window !== 'undefined') {
-  socket = io(window.location.origin, {
-    path: '/socket.io',
-    transports: ['websocket', 'polling'],
-    autoConnect: true,
-    withCredentials: true,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-    reconnection: true,
-    reconnectionAttempts: 5
-  });
-
-  // Add connection logging
-  socket.on("connect", () => {
-    console.log("✅ Socket connected:", socket!.id);
-  });
-
-  socket.on("disconnect", (reason) => {
-    console.log("❌ Socket disconnected:", reason);
-  });
-
-  socket.on("connect_error", (error) => {
-    console.error("🔴 Socket connection error:", error);
-  });
-}
+const socket = io("http://localhost:4000", {
+  transports: ["websocket"], // optional, but can prevent polling bugs
+  autoConnect: true,
+  withCredentials: true,
+  reconnectionDelay: 10000, // defaults to 1000
+  reconnectionDelayMax: 10000 // defaults to 5000
+});
 
 // Add connection logging
 socket.on("connect", () => {

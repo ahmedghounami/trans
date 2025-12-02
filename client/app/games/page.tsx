@@ -3,11 +3,11 @@
 "use client";
 import { useState } from "react";
 import SkinContainer from "../components/SkinContainer";
-import { useHomeContext } from "./context";
+import { Homecontext } from "./layout";
 import GamesCard from "../components/gamescard";
 
 export default function Games() {
-	const { skins, selected, setselected } = useHomeContext();
+	const { skins, selected, setselected } = Homecontext();
 	const [GameType, setGameType] = useState<string>("localvsbot");
 	const [skinType, setSkinType] = useState<"table" | "ball" | "paddle">(
 		"table"
@@ -19,12 +19,12 @@ export default function Games() {
                w-full
                 p-4  gap-4  ">
 			<div
-				className="flex-1 min-h-80 py-2 px-4 md:w-[calc(100vw-125px)] max-md:w-[calc(100vw-40px)] overflow-x-scroll  
+				className=" flex-1 min-h-80 py-2 px-4  md:w-[calc(100vw-125px)] max-md:w-[clac(100vw-40px)]  overflow-x-scroll  
             flex 
            [&::-webkit-scrollbar-thumb]:bg-blue-400
            [&::-webkit-scrollbar-thumb]:rounded-full
            [&::-webkit-scrollbar]:h-2">
-				<div className="flex flex-row gap-[2%] px-[2%] mx-auto">
+				<div className=" flex gap-[2%] px-[2%] mx-auto ">
 					<GamesCard
 						type={"localvsbot"}
 						title={"Play vs Bot"}
@@ -47,12 +47,6 @@ export default function Games() {
 						type={"tournament"}
 						title={"tournament"}
 						description={"Battle players in knockout challenges"}
-						setGameType={setGameType}
-						GameType={GameType}></GamesCard>
-					<GamesCard
-						type={"rps"}
-						title={"Rock Paper Scissors"}
-						description={"Play the classic game of Rock Paper Scissors against others"}
 						setGameType={setGameType}
 						GameType={GameType}></GamesCard>
 				</div>
@@ -111,7 +105,7 @@ export default function Games() {
 							} bottom-0 rounded-full bg-blue-500`}></div>
 					</div>
 				</div>
-				<div className="flex-1  flex min-h-56 ">
+				<div className="flex-1 flex min-h-56 ">
 					<SkinContainer
 						skinType={skinType}
 						skins={skins}

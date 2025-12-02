@@ -1,9 +1,8 @@
 /** @format */
 
 "use client";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useUser } from "../Context/UserContext";
-import { HomeContext } from "./context";
 
 type SkinType = "table" | "paddle" | "ball";
 type Skin = {
@@ -26,6 +25,15 @@ type MinimalUser = {
 	picture?: string;
 } | null;
 
+type HomeContextType = {
+	skins: Skin[];
+	user: MinimalUser;
+	selected: Selected;
+	setSkins: React.Dispatch<React.SetStateAction<Skin[]>>;
+	setselected: React.Dispatch<React.SetStateAction<Selected>>;
+};
+
+const HomeContext = createContext<HomeContextType | undefined>(undefined);
 export default function Games({
 	children,
 }: Readonly<{
@@ -34,13 +42,13 @@ export default function Games({
 	const [selected, setselected] = useState<Selected>({ types: [], type: 0 });
 	const [skins, setSkins] = useState<Skin[]>([]);
 	const { user } = useUser() as { user: MinimalUser; loading: boolean };
-	// console.log(user);
+	console.log(user);
 	useEffect(() => {
 		if (user) {
 			async function fetchOwnedSkins() {
 				try {
 					const res = await fetch(
-						"/api/player_skins?player_id=" + user!.id
+						"http://localhost:4000/player_skins?player_id=" + user!.id
 					);
 					if (!res.ok) {
 						throw new Error("Failed to fetch player skins");
@@ -61,4 +69,11 @@ export default function Games({
 			{children}
 		</HomeContext.Provider>
 	);
+}
+export function Homecontext(): HomeContextType {
+	const context = useContext(HomeContext);
+	if (!context) {
+		throw new Error("Homecontext must be used within Games layout");
+	}
+	return context;
 }

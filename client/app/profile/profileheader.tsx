@@ -1,27 +1,15 @@
 
 
-import { Pencil } from "lucide-react";
+import { Edit, Pencil } from "lucide-react";
 import Games_status from "../home/games_status";
 import { useUser } from "../Context/UserContext";
+import { useState } from "react";
+import EditProfile from "./editProfile";
 import { usePresence } from "../Context/PresenceContext";
 
-type Game = {
-    id: number;
-    winner_id?: number;
-    player1_id?: number;
-    player2_id?: number;
-};
-
-type User = {
-    id: number;
-    name: string;
-    picture?: string;
-    gold?: number;
-};
-
-export default function ProfileHeader({ user, games, setEditMode }: { user: User; games: Game[]; setEditMode: (editMode: boolean) => void }) {
-    const wins = games.filter((game: Game) => game.winner_id === user.id).length;
-    const draw = games.filter((game: Game) => game.winner_id === 0).length;
+export default function ProfileHeader({ user, games, setEditMode }: { user: any, games: any[], setEditMode: (editMode: boolean) => void }) {
+    const wins = games.filter(game => game.winner_id === user.id).length;
+    const draw = games.filter(game => game.winner_id === 0).length;
     const progress = (wins + (draw / 2)) % 10;
     const xp = (wins * 100) + draw * 50;
     const level = Math.floor((wins + (draw / 2)) / 10);
@@ -42,10 +30,10 @@ export default function ProfileHeader({ user, games, setEditMode }: { user: User
             />
 
             {/* Main container */}
-            <div className="relative z-10 w-[90%] flex flex-col lg:flex-row justify-between items-center rounded-2xl p-2  bg-gradient-to-br from-gray-900 via-purple-900/20 to-blue-900/20  border border-purple-500/30 shadow-2xl backdrop-blur-md gap-6">
+            <div className="relative z-10 w-[90%] flex flex-col md:flex-row justify-between items-center rounded-2xl p-2  bg-gradient-to-br from-gray-900 via-purple-900/20 to-blue-900/20  border border-purple-500/30 shadow-2xl backdrop-blur-md gap-6">
 
                 {/* LEFT SIDE : Profile Info */}
-                <div className="flex items-center gap-4 w-full lg:w-1/2">
+                <div className="flex items-center gap-4 w-full md:w-1/2">
                     <div className={`relative inline-block overflow-visible `}>
                         <img
                             src={user.picture || '/profile.png'}
@@ -88,7 +76,7 @@ export default function ProfileHeader({ user, games, setEditMode }: { user: User
                         </div>
                     </div>
                 </div>
-                <div className="w-full lg:w-1/2 flex justify-end">
+                <div className="w-full md:w-1/2 flex justify-end">
                     <Games_status userId={user.id} />
                 </div>
             </div>

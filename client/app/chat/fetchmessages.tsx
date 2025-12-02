@@ -1,14 +1,4 @@
 import { useEffect, useRef } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
-
-type Message = {
-    id?: number;
-    content: string;
-    sender_id: number;
-    receiver_id: number;
-    status: boolean;
-    created_at?: string;
-};
 
 export default function FetchMessages({
     selected,
@@ -19,13 +9,13 @@ export default function FetchMessages({
 }: {
     selected: number;
     me: number;
-    setMessages: Dispatch<SetStateAction<Message[]>>;
-    messages: Message[];
+    setMessages: (messages: any[]) => void;
+    messages: any[];
 }) {
     const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for the end of the messages container
     const fetchMessages = async () => {
         try {
-            const res = await fetch(`/api/messages/${selected}/${me}`);
+            const res = await fetch(`http://localhost:4000/messages/${selected}/${me}`);
             if (!res.ok) throw new Error('Failed to fetch messages');
             const data = await res.json();
             setMessages(data);
@@ -53,7 +43,7 @@ export default function FetchMessages({
                 <p className="text-gray-500 text-sm">{messages.length} messages</p>
             </div>
             <div className="flex flex-col overflow-y-auto px-4 py-2 space-y-3 custom-scrollbar">
-                {messages.map((m: Message) => {
+                {messages.map((m: any) => {
                     const isMe = m.sender_id === me;
                     return (
                         <div

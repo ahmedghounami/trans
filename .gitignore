@@ -1,12 +1,9 @@
 server/node_modules
 server/package-lock.json
+server/*.db
+client/node_modules
+server/sqlite.db
+server/.env
+
 client/package-lock.json
 client/node_modules
-server/*.db
-server/.envserver
-server/.env
-sqlite.db
-.env
-.env.elk
-client/.next
-client/.envlocal

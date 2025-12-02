@@ -1,65 +1,20 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import cookie from '@fastify/cookie';
-import rateLimit from '@fastify/rate-limit';
 import sqlite3 from 'sqlite3';
 import { Server } from 'socket.io';
 import { sockethandler } from './socket.js';
-import { rpsHandler } from './rps.js';
+
 import game, { setupGameSocketIO } from './game.js';
 
-
-///////////////////////////////////////////// devops /////////////////////////////////////////////
-import pino from "pino";
-
-const logStream = pino.destination({
-  dest: "/var/log/transcendence/server.log",
-  mkdir: true,
-});
-
-const logger = pino(
-  {
-    level: "info",
-    base: null,
-  },
-  logStream
-);
-
-const fastify = Fastify({
-  logger: {
-    instance: logger
-  },
-  bodyLimit: 1048576 // 1MB
-});
-
-fastify.addHook("onResponse", (req, reply, done) => {
-  logger.info({
-    event: "api_request",
-    service: "transcendence",
-    method: req.method,
-    path: req.url,
-    status: reply.statusCode,
-  });
-  done();
-});
-//////////////////////////////////////////////////////////////////////////////////////////////////
+const fastify = Fastify();
 
 await fastify.register(cors, {
-  origin: true,
+  origin: 'http://localhost:3000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
 
-await fastify.register(rateLimit, {
-  max: 100,              // 100 requests per IP
-  timeWindow: '1 minute', // per minute
-  ban: 2,                // ban for 2 minutes if limit exceeded
-  cache: 1000,          // cache 1000 IPs // is this necessary?
-  skipOnError: true      // don't block on error
-});
-
-await fastify.register(cookie);
 
 // Connect SQLite DB
 const db = new sqlite3.Database('sqlite.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
@@ -79,16 +34,10 @@ db.serialize(() => {
 		email TEXT UNIQUE,
 		password TEXT,
 		picture TEXT,
-		email_verified BOOLEAN DEFAULT 0,
-		verification_token TEXT,
 		games Integer DEFAULT 0,
         win INTEGER DEFAULT 0,
         lose INTEGER DEFAULT 0,
 		gold INTEGER DEFAULT 0,
-		rps_wins INTEGER DEFAULT 0,
-		rps_losses INTEGER DEFAULT 0,
-		rps_draws INTEGER DEFAULT 0,
-		tounaments_won INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	  );
 	`);
@@ -131,7 +80,6 @@ db.serialize(() => {
 		price INTEGER,
 		img TEXT NOT NULL,
 		color TEXT NOT NULL,
-		description TEXT,
 		UNIQUE(name, type, img)
 	  );
 	`);
@@ -162,14 +110,6 @@ db.serialize(() => {
 	  );
 	`);
 
-	db.run(`
-	  CREATE TABLE IF NOT EXISTS blacklist_tokens (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		token TEXT NOT NULL UNIQUE,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	  );
-	`);
-
 	// db.run(`
 	// 	CREATE TABLE IF NOT EXISTS rps (
 	// 		player1_id INTEGER,
@@ -178,37 +118,9 @@ db.serialize(() => {
 	// 	);
 	// `)
 
-	db.run(`
-	  CREATE TABLE IF NOT EXISTS friends (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user_id INTEGER NOT NULL,
-		friend_id INTEGER NOT NULL,
-		is_request BOOLEAN DEFAULT 0
-		);
-		`);
-
-	db.run(`
-	  CREATE TABLE IF NOT EXISTS blocks (
-	    id INTEGER PRIMARY KEY AUTOINCREMENT,
-	    blocker_id INTEGER NOT NULL,
-	    blocked_id INTEGER NOT NULL,
-	    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	    UNIQUE(blocker_id, blocked_id),
-	    FOREIGN KEY (blocker_id) REFERENCES users(id),
-	    FOREIGN KEY (blocked_id) REFERENCES users(id)
-	  )
-	`);
-		
-	});
-
-// Register authentication middleware  
-// Note: Runs at preValidation, before body parsing
-// Middleware only checks headers/cookies, NOT req.body
-const authMiddleware = (await import('./middleware/auth.js')).default;
-fastify.addHook('preValidation', async (request, reply) => {
-  await authMiddleware(request, reply, db);
-});
 	
+});
+
 // Register routes on fastify
 const devRoute = (await import('./routes/devroute.js')).default;
 fastify.register(devRoute, { db });
@@ -233,6 +145,7 @@ fastify.register(shopRoute, { db });
 
 const gameApiRoute = (await import('./routes/gameapiroute.js')).default;
 fastify.register(gameApiRoute, { db });
+// Profile routes will be registered after Socket.IO is created so routes can access `io`.
 
 const notificationRoute = (await import('./routes/notificationroute.js')).default;
 fastify.register(notificationRoute, { db });
@@ -246,9 +159,8 @@ const httpServer = fastify.server;
 // Setup Socket.IO server on top of the HTTP server
 const io = new Server(httpServer, {
   cors: {
-    origin: true,
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
-    credentials: true,
   },
   connectionStateRecovery: {
     // the backup duration of the sessions and the packets
@@ -259,54 +171,12 @@ const io = new Server(httpServer, {
 });
 
 sockethandler(io, db);
-setupGameSocketIO(io, db);
-rpsHandler(io, db);
+setupGameSocketIO(io);
 
-// Register profile routes after Socket.IO is created so routes can access `io`
-const profileRoute = (await import('./routes/profileroute.js')).default;
-await fastify.register(profileRoute, { db, io });
+// Register Profile routes with access to Socket.IO so they can broadcast updates
+const ProfileRoutesWithIo = (await import('./routes/profileroute.js')).default;
+fastify.register(ProfileRoutesWithIo, { db, io });
 
-const friendsRoute = (await import('./routes/friendsroute.js')).default;
-fastify.register(friendsRoute, { db, io });
-
-const blockRoute = (await import('./routes/blockroute.js')).default;
-fastify.register(blockRoute, { db });
-
-const uploadRoute = (await import('./routes/uploadroute.js')).default;
-fastify.register(uploadRoute, { db, io });
-
-
-///////////////////////////////////////////// devops /////////////////////////////////////////////
-// --- Prometheus Metrics Setup ---
-import client from "prom-client";
-
-// Create a Registry to register metrics
-const register = new client.Registry();
-
-// Collect default Node.js metrics (CPU, memory, event loop, etc.)
-client.collectDefaultMetrics({ register });
-
-// Optional: Add a custom metric for HTTP requests count
-const httpRequestsTotal = new client.Counter({
-  name: "http_requests_total",
-  help: "Total number of HTTP requests handled",
-  labelNames: ["method", "route", "status"],
-});
-register.registerMetric(httpRequestsTotal);
-
-// Middleware to track request counts
-fastify.addHook("onResponse", (request, reply, done) => {
-  const route = request.routerPath || request.url;
-  httpRequestsTotal.inc({ method: request.method, route, status: reply.statusCode });
-  done();
-});
-
-// Metrics endpoint for Prometheus
-fastify.get("/metrics", async (req, reply) => {
-  reply.header("Content-Type", register.contentType);
-  return register.metrics();
-});
-//////////////////////////////////////////////////////////////////////////////////////////////////
 await fastify.ready();
 const PORT = 4000;
 httpServer.listen(PORT, (err) => {
@@ -314,5 +184,5 @@ httpServer.listen(PORT, (err) => {
     console.error('Error starting server:', err);
     process.exit(1);
   }
-  console.log(`🚀 Server running at https://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

@@ -3,34 +3,29 @@ import { IoChatboxEllipses } from "react-icons/io5";
 import Search from "./serach";
 import UserInfo from "./userinfo";
 import { useEffect, useState } from "react";
-import type { ChangeEvent } from "react";
-
-type User = {
-    id: number;
-    name: string;
-    picture?: string;
-};
 
 export default function Sidebar({
     users,
     selected,
     setSelected,
     isMobile,
-    me
+    me,
+    messages
 }: {
-    users: User[];
+    users: any[];
     selected: number;
     setSelected: (id: number) => void;
     isMobile: boolean;
     me: number;
+    messages: any[];
 }) {
     const [value, setValue] = useState("");
-    const [searchResults, setSearchResults] = useState<User[]>([]);
+    const [searchResults, setSearchResults] = useState([]);
 
     useEffect(() => {
         const fectusers = async () => {
             try {
-                const res = await fetch('/api/search?search=' + value);
+                const res = await fetch('http://localhost:4000/search?search=' + value);
                 const data = await res.json();
                 setSearchResults(data);
             } catch (error) {
@@ -55,7 +50,7 @@ export default function Sidebar({
                 />
                 <input
                     value={value}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    onChange={(e) => {
                         setValue(e.target.value);
                     }}
                     type="text"
@@ -73,12 +68,14 @@ export default function Sidebar({
 
             </div>
             <div className="flex-1 overflow-y-auto px-2 pb-4">
-                {users.filter((user: User) => user.id !== me).map((user: User) => (
+                {users.filter(user => user.id !== me).map(user => (
                     <UserInfo
                         key={user.id}
                         user={user}
                         selected={selected}
                         setSelected={setSelected}
+                        me={me}
+                        messages={messages}
                     />
                 ))}
             </div>

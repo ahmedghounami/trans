@@ -3,35 +3,24 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-//fix type script error
+
 export default function GamesCard({
 	setGameType,
 	title,
 	description,
 	GameType,
 	type,
-}: {
-	setGameType: React.Dispatch<React.SetStateAction<string>>;
-	title: string;
-	description: string;
-	GameType: string;
-	type: string;
 }) {
 	console.log(GameType);
 	const router = useRouter();
 
 	return (
-		<div className="h-full w-fit group flex-shrink-0">
+		<div className="h-full group ">
 			<div
 				onClick={() => {
 					// if (type == "tournament") router.push("/games/tournament");
-					if (type == "rps") router.push("/rps");
-					else {
-						// Map "bot" to "localvsbot" for game type
-						const gameType = type === "bot" ? "localvsbot" : type;
-						router.push("/games/game?gametype=" + gameType);
-						setGameType(gameType);
-					}
+					router.push("/games/game?gametype=" + type);
+					setGameType(type);
 				}}
 				className={`relative   overflow-hidden  cursor-pointer flex  h-full
                                     aspect-[3/4] bg-white border 

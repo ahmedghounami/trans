@@ -1,15 +1,15 @@
+import { FaUserPlus } from 'react-icons/fa';
 import AvatarWithPresence from './AvatarWithPresence';
 
-export default function NavSearch({ searchResults, me, value, setValue, isMobile = false }: {
+export default function NavSearch({ searchResults, me, value, setValue }: {
     searchResults: { id: number; name: string; picture?: string }[];
     me: number;
     value: string;
     setValue: (value: string) => void;
-    isMobile?: boolean;
 }
 ) {
     return (
-        <div className={`${isMobile ? 'w-full relative' : 'absolute left-[5%] top-12 w-[90%]'} z-[9999] max-h-[300px] overflow-y-auto bg-[#020007c5] border border-[#3d008d] shadow-xl rounded-xl px-2 py-3 space-y-2 custom-scroll`}>
+        <div className="absolute left-[5%] top-12 w-[90%] z-20 max-h-[300px] overflow-y-auto bg-[#020007c5] border border-[#3d008d] shadow-xl rounded-xl px-2 py-3 space-y-2 custom-scroll">
             {searchResults
                 .filter((user) => user.id !== me)
                 .map((user) => (

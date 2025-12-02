@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { Mail, Lock } from "lucide-react";
 import Link from "next/link";
+import Cookies from 'js-cookie';
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from "react";
 
-function LoginContent() {
+export default function LoginForm() {
     // Store email and password from form
     const [formData, setFormData] = useState({
         email: "",
@@ -14,24 +14,13 @@ function LoginContent() {
     const searchParams = useSearchParams();
     
     // ========================================
-    // Handle Google OAuth Errors and Email Verification Success
+    // Handle Google OAuth Errors
     // ========================================
     // If Google authentication fails, user gets redirected here with error parameter
     useEffect(() => {
         const error = searchParams.get('error');
-        const verified = searchParams.get('verified');
-        
-        if (verified === 'true') {
-            alert('✅ Email verified successfully! You can now login.');
-            window.history.replaceState({}, '', '/login');
-        } else if (error === 'invalid_token') {
-            alert('❌ Invalid verification link. Please request a new verification email.');
-            window.history.replaceState({}, '', '/login');
-        } else if (error === 'verification_failed') {
-            alert('❌ Email verification failed. Please try again or contact support.');
-            window.history.replaceState({}, '', '/login');
-        } else if (error) {
-            // Show user-friendly error messages for OAuth errors
+        if (error) {
+            // Show user-friendly error messages
             const errorMessages: { [key: string]: string } = {
                 'no_code': 'Authorization code not received from Google',
                 'no_access_token': 'Failed to get access token from Google',
@@ -48,9 +37,8 @@ function LoginContent() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         try {
-            const response = await fetch("/api/login", {
+            const response = await fetch("http://localhost:4000/login", {
                 method: "POST",
-                credentials: 'include', // Include httpOnly cookies
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -58,7 +46,16 @@ function LoginContent() {
             });
 
             if (response.ok) {
+                const data = await response.json();
+                Cookies.set("token", data.token, {
+                    expires: 7,
+                    secure: false, // Set to false for localhost (use true in production with HTTPS)
+                    sameSite: "lax",
+                });
+
+                // router.push("/chat");
                 window.location.href = "/home"; // Redirect to chat page
+
 
             } else {
                 const error = await response.json();
@@ -96,7 +93,6 @@ function LoginContent() {
                             placeholder="Email"
                             value={formData.email}
                             onChange={handleChange}
-                            maxLength={100}
                             className="w-full bg-transparent border-b border-gray-500 text-white placeholder-gray-400 py-2.5 sm:py-3 pl-7 sm:pl-8 pr-2 focus:outline-none focus:border-blue-400 transition-colors text-sm sm:text-base"
                             required
                         />
@@ -113,7 +109,6 @@ function LoginContent() {
                             placeholder="Password"
                             value={formData.password}
                             onChange={handleChange}
-                            maxLength={128}
                             className="w-full bg-transparent border-b border-gray-500 text-white placeholder-gray-400 py-2.5 sm:py-3 pl-7 sm:pl-8 pr-2 focus:outline-none focus:border-blue-400 transition-colors text-sm sm:text-base"
                             required
                         />
@@ -129,7 +124,7 @@ function LoginContent() {
                     {/* Google Sign-In Button - Redirects to server to start OAuth flow */}
                     <button
                         type="button"
-                        onClick={() => window.location.href = '/auth/google'}
+                        onClick={() => window.location.href = 'http://localhost:4000/auth/google'}
                         className="w-full bg-white hover:bg-gray-100 text-gray-800 font-medium py-3 sm:py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base"
                     >
                         <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24">
@@ -153,8 +148,15 @@ function LoginContent() {
                         Sign in with Google
                     </button>
 
+                    <button
+                        type="button"
+                        className="w-full bg-black hover:bg-gray-900 text-white font-medium py-3 sm:py-3.5 rounded-xl transition-all duration-300 text-sm sm:text-base"
+                    >
+                        Sign in with 42
+                    </button>
+
                     <p className="text-center text-gray-300 text-xs sm:text-sm mt-4 sm:mt-6">
-                        Don&apos;t have an account?{" "}
+                        Don't have an account?{" "}
                         <Link
                             href="/register"
                             className="text-[#4c7cf3] hover:text-[#3d6ae0] font-medium transition-colors"
@@ -165,17 +167,5 @@ function LoginContent() {
                 </form>
             </div>
         </div>
-    );
-}
-
-export default function LoginForm() {
-    return (
-        <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-white">Loading...</div>
-            </div>
-        }>
-            <LoginContent />
-        </Suspense>
     );
 }

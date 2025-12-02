@@ -1,5 +1,3 @@
-import { checkFriendship, checkBlock } from '../utils/friendshipHelper.js';
-
 const schemasearch = {
   querystring: {
     type: "object",
@@ -14,10 +12,11 @@ const schemasendmessage = {
   body: {
     type: "object",
     properties: {
+      sender_id: { type: "integer" },
       receiver_id: { type: "integer" },
-      content: { type: "string", minLength: 1, maxLength: 400 },  // Max 400 characters
+      content: { type: "string" },
     },
-    required: ["receiver_id", "content"],
+    required: ["sender_id", "receiver_id", "content"],
   },
 };
 
@@ -49,7 +48,7 @@ export default async function chatRoutes(fastify, opts) {
     const { search } = req.query;
     return new Promise((resolve, reject) => {
       db.all(
-        `SELECT * FROM friends WHERE name LIKE ?`,
+        `SELECT * FROM users WHERE name LIKE ?`,
         [`%${search || ""}%`],
         (err, rows) => {
           if (err) {
@@ -67,83 +66,20 @@ export default async function chatRoutes(fastify, opts) {
 
   // Insert message
   fastify.post("/messages",schemasendmessage, async (req, reply) => {
-    const { receiver_id, content } = req.body;
-    const sender_id = req.user?.id; // Get sender from authenticated user
-
-    if (!sender_id) {
-      return reply.status(401).send({ error: "Unauthorized" });
-    }
-
-    // Check if user is trying to send message to themselves
-    if (sender_id === receiver_id) {
-      return reply.status(400).send({ error: "Cannot send messages to yourself" });
-    }
-
-    try {
-      // Check if either user has blocked the other
-      const block = await checkBlock(db, sender_id, receiver_id);
-      if (block) {
-        const message = block.blocker_id === sender_id 
-          ? "You have blocked this user. Unblock to send messages." 
-          : "This user has blocked you. You cannot send messages.";
-        return reply.status(403).send({ error: message });
-      }
-
-      // Check if users are friends
-      const areFriends = await checkFriendship(db, sender_id, receiver_id);
-      if (!areFriends) {
-        return reply.status(403).send({ error: "You can only send messages to friends" });
-      }
-
-      // Verify both users exist and insert message
-      return new Promise((resolve, reject) => {
-        db.get(
-          `SELECT id FROM users WHERE id = ?`,
-          [sender_id],
-          (err, senderRow) => {
-            if (err) {
-              reply.status(500).send({ error: "Database error" });
-              return reject(err);
-            }
-            if (!senderRow) {
-              reply.status(404).send({ error: "Sender not found" });
-              return resolve();
-            }
-
-            db.get(
-              `SELECT id FROM users WHERE id = ?`,
-              [receiver_id],
-              (err, receiverRow) => {
-                if (err) {
-                  reply.status(500).send({ error: "Database error" });
-                  return reject(err);
-                }
-                if (!receiverRow) {
-                  reply.status(404).send({ error: "Receiver not found" });
-                  return resolve();
-                }
-
-                // Both users exist, are friends, and no blocks - insert message
-                db.run(
-                  `INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)`,
-                  [sender_id, receiver_id, content],
-                  function (err) {
-                    if (err) {
-                      reply.status(500).send({ error: "Database error" });
-                      return reject(err);
-                    }
-                    resolve({ id: this.lastID, sender_id, receiver_id, content });
-                  }
-                );
-              }
-            );
+    const { sender_id, receiver_id, content } = req.body;
+    return new Promise((resolve, reject) => {
+      db.run(
+        `INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)`,
+        [sender_id, receiver_id, content],
+        function (err) {
+          if (err) {
+            reply.status(500).send({ error: "Database error" });
+            return reject(err);
           }
-        );
-      });
-    } catch (error) {
-      console.error("Error in message endpoint:", error);
-      return reply.status(500).send({ error: "Database error" });
-    }
+          resolve({ id: this.lastID, sender_id, receiver_id, content });
+        }
+      );
+    });
   });
 
   // Get all messages

@@ -1,8 +1,0 @@
-duplicate username, check it on the edit also
-do not return 500
-check block status before insert messages
-check friendship before insert messages, block
-checki wash khona howa l user li ghadi yblocki. : good practice: req.user must be  the sender.
-display friends in chat search
-z index for not found chat search
-fix responsive on notification and search lauyout
